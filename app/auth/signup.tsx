@@ -24,10 +24,15 @@ export default function SignupScreen() {
     if (form.pass !== form.pass2) { setError("Passwords don't match!"); return; }
     if (form.pass.length < 6) { setError('Password needs 6+ characters'); return; }
     setLoading(true); setError('');
-    const { user, err } = await localAuth.create({ name: form.name, email: form.email.toLowerCase().trim(), pass: form.pass, avatar });
-    setLoading(false);
-    if (err) { setError(err); return; }
-    if (user) { dispatch(setUser(user)); router.replace('/(tabs)'); }
+    try {
+      const { user, err } = await localAuth.create({ name: form.name, email: form.email.toLowerCase().trim(), pass: form.pass, avatar });
+      if (err) { setError(err); return; }
+      if (user) { dispatch(setUser(user)); router.replace('/(tabs)'); }
+    } catch (e: any) {
+      setError('Something went wrong: ' + (e?.message || 'please try again'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

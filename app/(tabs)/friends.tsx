@@ -2,16 +2,24 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import FriendCard from '../../components/friends/FriendCard';
 import ChallengeCard from '../../components/features/ChallengeCard';
 import { useChallenges } from '../../hooks/useChallenges';
+import { Friend } from '../../store/slices/friendsSlice';
+import { ensureConversation } from '../../store/slices/messagesSlice';
 
 export default function FriendsTab() {
+  const dispatch = useDispatch();
   const friends = useSelector((s: RootState) => s.friends.list);
   const { challenges, pending, accept } = useChallenges();
+
+  const openConversation = (f: Friend) => {
+    dispatch(ensureConversation({ id: f.id, friendName: f.name, friendAvatar: f.avatar }));
+    router.push({ pathname: '/messages/conversation', params: { id: f.id } });
+  };
   const [tab, setTab] = useState<'friends' | 'challenges' | 'leaderboard'>('friends');
   const [search, setSearch] = useState('');
   const leaderboard = [...friends].sort((a, b) => b.xp - a.xp);
@@ -45,13 +53,13 @@ export default function FriendsTab() {
             <Text style={styles.sectionLabel}>ONLINE NOW ({friends.filter(f => f.status !== 'offline').length})</Text>
             {friends.filter(f => f.status !== 'offline' && f.name.toLowerCase().includes(search.toLowerCase())).map(f => (
               <FriendCard key={f.id} friend={f}
-                onMessage={() => router.push('/messages/index')}
+                onMessage={() => openConversation(f)}
                 onChallenge={() => {}}
               />
             ))}
             <Text style={[styles.sectionLabel, { marginTop: 12 }]}>OFFLINE ({friends.filter(f => f.status === 'offline').length})</Text>
             {friends.filter(f => f.status === 'offline' && f.name.toLowerCase().includes(search.toLowerCase())).map(f => (
-              <FriendCard key={f.id} friend={f} onMessage={() => router.push('/messages/index')} onChallenge={() => {}}/>
+              <FriendCard key={f.id} friend={f} onMessage={() => openConversation(f)} onChallenge={() => {}}/>
             ))}
             <TouchableOpacity style={styles.addFriendBtn} onPress={() => router.push('/friends/add')}>
               <Text style={styles.addFriendText}>+ Add Friends</Text>

@@ -38,7 +38,7 @@ export default function LearnTab() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <StreakBanner onPress={() => router.push('/streak/index')}/>
+        <StreakBanner onPress={() => router.push('/streak')}/>
 
         {/* Daily Quest */}
         <View style={styles.questCard}>
@@ -60,7 +60,7 @@ export default function LearnTab() {
               key={unit.id}
               unit={unit}
               progress={getUnitProgress(unit.id)}
-              onPress={() => router.push({ pathname: '/lessons/index', params: { unitId: unit.id } })}
+              onPress={() => router.push({ pathname: '/lessons', params: { unitId: unit.id } })}
             />
           ))}
         </View>

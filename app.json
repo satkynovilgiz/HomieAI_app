@@ -48,7 +48,15 @@
           "color": "#7c3aed"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "HOMIE needs your mic to hear you in Voice Mode.",
+          "speechRecognitionPermission": "HOMIE needs speech recognition to understand you in Voice Mode.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

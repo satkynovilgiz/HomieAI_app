@@ -1,5 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+// btoa isn't available in React Native's Hermes engine (browser-only API), so signup/login
+// would throw on-device even though it works fine when tested in a web browser.
+function encodePass(pass: string): string {
+  const bytes = unescape(encodeURIComponent(pass));
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const b1 = bytes.charCodeAt(i);
+    const b2 = bytes.charCodeAt(i + 1);
+    const b3 = bytes.charCodeAt(i + 2);
+    out += B64_CHARS[b1 >> 2];
+    out += B64_CHARS[((b1 & 3) << 4) | (isNaN(b2) ? 0 : b2 >> 4)];
+    out += isNaN(b2) ? '=' : B64_CHARS[((b2 & 15) << 2) | (isNaN(b3) ? 0 : b3 >> 6)];
+    out += isNaN(b3) ? '=' : B64_CHARS[b3 & 63];
+  }
+  return out;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -9,6 +28,8 @@ export interface User {
   xp: number;
   level: number;
   streak: number;
+  longestStreak: number;
+  studiedDates: string[];
   lastStudy: string | null;
   correct: number;
   sessions: number;
@@ -46,8 +67,8 @@ export const localAuth = {
     if (users.find(u => u.email === email)) return { err: 'Email already taken!' };
     const user: User = {
       id: Date.now().toString(), name, email,
-      pass: btoa(unescape(encodeURIComponent(pass))),
-      avatar, xp: 0, level: 1, streak: 0, lastStudy: null,
+      pass: encodePass(pass),
+      avatar, xp: 0, level: 1, streak: 0, longestStreak: 0, studiedDates: [], lastStudy: null,
       correct: 0, sessions: 0, msgsSent: 0, studyHours: 0,
       joined: new Date().toLocaleDateString(),
       history: [], flashcards: [], goals: [], notifications: true,
@@ -61,7 +82,7 @@ export const localAuth = {
   async login(email: string, pass: string): Promise<{ user?: User; err?: string }> {
     const u = await this.getUser(email);
     if (!u) return { err: 'No account found!' };
-    const encoded = btoa(unescape(encodeURIComponent(pass)));
+    const encoded = encodePass(pass);
     if (u.pass !== encoded) return { err: 'Wrong password!' };
     const today = new Date().toDateString();
     if (u.lastStudy !== today) {

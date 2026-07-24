@@ -93,7 +93,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/settings/index')} style={styles.iconBtn}>
+          <TouchableOpacity onPress={() => router.push('/settings')} style={styles.iconBtn}>
             <SettingsIcon />
           </TouchableOpacity>
           <TouchableOpacity onPress={logout} style={styles.iconBtn}>

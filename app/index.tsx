@@ -24,7 +24,7 @@ export default function SplashScreen() {
         const seen = await AsyncStorage.getItem('hm_onboarded');
         if (!seen) {
           await AsyncStorage.setItem('hm_onboarded', 'true');
-          router.replace('/onboarding/index');
+          router.replace('/onboarding');
         } else {
           router.replace('/auth/login');
         }

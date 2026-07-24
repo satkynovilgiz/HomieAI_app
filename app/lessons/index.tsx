@@ -96,7 +96,7 @@ export default function LessonsScreen() {
             key={unit.id}
             unit={unit}
             progress={getUnitProgress(unit.id)}
-            onPress={() => router.push({ pathname: '/lessons/index', params: { unitId: unit.id } })}
+            onPress={() => router.push({ pathname: '/lessons', params: { unitId: unit.id } })}
           />
         ))}
         <View style={{ height: 24 }}/>

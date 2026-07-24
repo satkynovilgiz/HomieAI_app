@@ -3,11 +3,18 @@ import { Provider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import store from '../store';
+import { useStreakSync } from '../hooks/useStreakSync';
+
+function StreakSync() {
+  useStreakSync();
+  return null;
+}
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
+        <StreakSync />
         <StatusBar style="light" backgroundColor="#07070f" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#07070f' } }}>
           <Stack.Screen name="index" />
@@ -15,7 +22,6 @@ export default function RootLayout() {
           <Stack.Screen name="auth/login" />
           <Stack.Screen name="auth/signup" />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="chat/index" />
           <Stack.Screen name="voice/index" />
           <Stack.Screen name="games/index" />
           <Stack.Screen name="pomodoro/index" />
@@ -26,7 +32,6 @@ export default function RootLayout() {
           <Stack.Screen name="scanner/index" />
           <Stack.Screen name="videos/index" />
           <Stack.Screen name="history/index" />
-          <Stack.Screen name="profile/index" />
           <Stack.Screen name="about/index" />
           <Stack.Screen name="messages/index" />
           <Stack.Screen name="messages/conversation" />

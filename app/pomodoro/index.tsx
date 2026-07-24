@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Haptics from 'expo-haptics';
+import Svg, { Circle } from 'react-native-svg';
 import { RootState } from '../../store';
 import { addXP } from '../../store/slices/userSlice';
 import { Colors, Radius } from '../../constants/theme';
@@ -12,20 +13,24 @@ import { formatTime } from '../../lib/utils';
 import HomieBot from '../../components/mascot/HomieBot';
 
 const MODES = [
-  { label: 'Focus 🎯', time: 25 * 60, color: Colors.purple },
-  { label: 'Short Break ☕', time: 5 * 60, color: Colors.green },
-  { label: 'Long Break 😴', time: 15 * 60, color: Colors.blue },
+  { label: 'Focus', emoji: '🎯', time: 25 * 60, color: Colors.purple },
+  { label: 'Short Break', emoji: '☕', time: 5 * 60, color: Colors.green },
+  { label: 'Long Break', emoji: '😴', time: 15 * 60, color: Colors.blue },
 ];
+
+const SIZE = 240;
+const STROKE = 16;
+const RADIUS = (SIZE - STROKE) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function PomodoroScreen() {
   const dispatch = useDispatch();
-  const user = useSelector((s: RootState) => s.user.current);
   const [modeIdx, setModeIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(MODES[0].time);
   const [running, setRunning] = useState(false);
   const [sessions, setSessions] = useState(0);
   const [task, setTask] = useState('');
-  const ref = useRef<NodeJS.Timeout | null>(null);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
   const mode = MODES[modeIdx];
   const pct = timeLeft / mode.time;
 
@@ -53,10 +58,7 @@ export default function PomodoroScreen() {
     setModeIdx(i); setTimeLeft(MODES[i].time); setRunning(false);
   };
 
-  const size = 240;
-  const r = 104;
-  const circumference = 2 * Math.PI * r;
-  const strokeDash = circumference * pct;
+  const strokeDashoffset = CIRCUMFERENCE * (1 - pct);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -72,19 +74,33 @@ export default function PomodoroScreen() {
         <View style={styles.tabs}>
           {MODES.map((m, i) => (
             <TouchableOpacity key={i} onPress={() => switchMode(i)}
-              style={[styles.tab, modeIdx === i && { backgroundColor: m.color + '33', borderColor: m.color }]}>
+              style={[styles.tab, modeIdx === i && { backgroundColor: m.color + '2a', borderColor: m.color }]}>
+              <Text style={styles.tabEmoji}>{m.emoji}</Text>
               <Text style={[styles.tabText, modeIdx === i && { color: m.color }]}>{m.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Timer circle */}
+        {/* Timer ring */}
         <View style={styles.timerContainer}>
-          <View style={[styles.timerOuter, { borderColor: mode.color + '33' }]}>
-            <View style={[styles.timerInner, { borderColor: mode.color }]}>
-              <Text style={[styles.timerText, { color: mode.color }]}>{formatTime(timeLeft)}</Text>
-              <Text style={styles.timerMode}>{mode.label}</Text>
-            </View>
+          <Svg width={SIZE} height={SIZE} style={styles.ring}>
+            <Circle
+              cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
+              stroke={Colors.bg3} strokeWidth={STROKE} fill="none"
+            />
+            <Circle
+              cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
+              stroke={mode.color} strokeWidth={STROKE} fill="none"
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={strokeDashoffset}
+              rotation={-90}
+              origin={`${SIZE / 2}, ${SIZE / 2}`}
+            />
+          </Svg>
+          <View style={styles.timerCenter}>
+            <Text style={[styles.timerText, { color: mode.color }]}>{formatTime(timeLeft)}</Text>
+            <Text style={styles.timerMode}>{mode.emoji} {mode.label}</Text>
           </View>
         </View>
 
@@ -112,7 +128,7 @@ export default function PomodoroScreen() {
         {/* Session dots */}
         <View style={styles.dots}>
           {[...Array(Math.max(4, sessions + 1))].map((_, i) => (
-            <View key={i} style={[styles.dot, i < sessions && { backgroundColor: mode.color }]}/>
+            <View key={i} style={[styles.dot, i < sessions && { backgroundColor: mode.color, borderColor: mode.color }]}/>
           ))}
           <Text style={styles.sessionCount}>{sessions} session{sessions !== 1 ? 's' : ''} today</Text>
         </View>
@@ -141,15 +157,16 @@ const styles = StyleSheet.create({
   backArrow: { fontSize: 24, color: Colors.text },
   title: { fontSize: 22, fontWeight: '900', color: Colors.text },
   tabs: { flexDirection: 'row', gap: 8, width: '100%', marginBottom: 32 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: Radius.full, backgroundColor: Colors.bg3, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center' },
+  tab: { flex: 1, paddingVertical: 12, borderRadius: Radius.lg, backgroundColor: Colors.bg3, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center', gap: 3 },
+  tabEmoji: { fontSize: 16 },
   tabText: { fontSize: 11, fontWeight: '700', color: Colors.muted },
-  timerContainer: { marginBottom: 28 },
-  timerOuter: { width: 240, height: 240, borderRadius: 120, borderWidth: 14, alignItems: 'center', justifyContent: 'center' },
-  timerInner: { width: 200, height: 200, borderRadius: 100, borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
-  timerText: { fontSize: 52, fontWeight: '900' },
-  timerMode: { fontSize: 14, color: Colors.muted, marginTop: 4 },
+  timerContainer: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center', marginBottom: 28 },
+  ring: { position: 'absolute' },
+  timerCenter: { alignItems: 'center' },
+  timerText: { fontSize: 52, fontWeight: '900', fontVariant: ['tabular-nums'] },
+  timerMode: { fontSize: 14, color: Colors.muted, marginTop: 6 },
   taskInput: { width: '100%', backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, color: Colors.text, padding: 13, fontSize: 14, textAlign: 'center', marginBottom: 20 },
-  controls: { flexDirection: 'row', gap: 12, marginBottom: 24 },
+  controls: { flexDirection: 'row', gap: 12, marginBottom: 24, width: '100%' },
   resetBtn: { paddingHorizontal: 24, paddingVertical: 13, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md },
   resetText: { fontSize: 15, fontWeight: '700', color: Colors.text },
   startBtn: { flex: 1, paddingVertical: 14, borderRadius: Radius.md, alignItems: 'center' },

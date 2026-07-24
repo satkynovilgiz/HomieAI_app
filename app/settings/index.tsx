@@ -50,7 +50,7 @@ export default function SettingsScreen() {
               <Text style={styles.accountEmail}>{user?.email}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.row} onPress={() => router.push('/profile/index')}>
+          <TouchableOpacity style={styles.row} onPress={() => router.push('/profile')}>
             <Text style={styles.rowLabel}>Edit Profile</Text>
             <Text style={styles.rowArrow}>→</Text>
           </TouchableOpacity>
@@ -82,7 +82,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionLabel}>ABOUT</Text>
         <View style={styles.section}>
-          <TouchableOpacity style={styles.row} onPress={() => router.push('/about/index')}>
+          <TouchableOpacity style={styles.row} onPress={() => router.push('/about')}>
             <Text style={styles.rowLabel}>About HOMIE AI</Text>
             <Text style={styles.rowArrow}>→</Text>
           </TouchableOpacity>

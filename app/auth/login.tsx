@@ -21,13 +21,19 @@ export default function LoginScreen() {
   const login = async () => {
     if (!email || !pass) { setError('Fill in all fields!'); return; }
     setLoading(true); setError('');
-    const { user, err } = await localAuth.login(email.toLowerCase().trim(), pass);
-    setLoading(false);
-    if (err) { setError(err); setMood('sad'); return; }
-    if (user) {
-      dispatch(setUser(user));
-      setMood('celebrating');
-      setTimeout(() => router.replace('/(tabs)'), 300);
+    try {
+      const { user, err } = await localAuth.login(email.toLowerCase().trim(), pass);
+      if (err) { setError(err); setMood('sad'); return; }
+      if (user) {
+        dispatch(setUser(user));
+        setMood('celebrating');
+        setTimeout(() => router.replace('/(tabs)'), 300);
+      }
+    } catch (e: any) {
+      setError('Something went wrong: ' + (e?.message || 'please try again'));
+      setMood('sad');
+    } finally {
+      setLoading(false);
     }
   };
 

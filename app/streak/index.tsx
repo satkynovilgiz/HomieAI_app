@@ -60,9 +60,10 @@ export default function StreakScreen() {
             {[...Array(daysInMonth)].map((_,i) => {
               const day = i+1;
               const isToday = day === today.getDate();
-              const isPast = day < today.getDate();
+              const cellDate = new Date(today.getFullYear(), today.getMonth(), day);
+              const studied = streak.studiedDates.includes(cellDate.toDateString());
               return (
-                <View key={day} style={[styles.calCell, isToday && styles.calCellToday, isPast && Math.random()>0.3 && styles.calCellStudied]}>
+                <View key={day} style={[styles.calCell, isToday && styles.calCellToday, !isToday && studied && styles.calCellStudied]}>
                   <Text style={[styles.calCellText, isToday && styles.calCellTextToday]}>{day}</Text>
                 </View>
               );

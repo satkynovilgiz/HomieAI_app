@@ -35,18 +35,22 @@ Always use `--clear` to avoid stale cache issues.
 ```
 homie/
 ├── app/
+│   ├── _layout.tsx           # Root stack (registers every route below)
+│   ├── index.tsx              # Splash screen, session check + redirect
 │   ├── (tabs)/               # Bottom tab screens
 │   │   ├── _layout.tsx       # Tab bar config (SVG icons)
 │   │   ├── index.tsx         # Home dashboard
 │   │   ├── chat.tsx          # AI chat
 │   │   ├── learn.tsx         # Lessons tab
 │   │   ├── friends.tsx       # Friends + challenges
+│   │   ├── games.tsx         # Redirects to /games/index
 │   │   ├── more.tsx          # All other features menu
 │   │   └── profile.tsx       # User profile
 │   ├── auth/
 │   │   ├── login.tsx         # Login + Google sign-in
 │   │   └── signup.tsx        # Create account + avatar
 │   ├── onboarding/index.tsx  # 5-slide intro (shows once)
+│   ├── chat/index.tsx        # Full-screen AI chat (pushed from More)
 │   ├── voice/index.tsx       # Voice mode
 │   ├── games/index.tsx       # Wordle + Quiz games
 │   ├── lessons/
@@ -217,7 +221,7 @@ Moods: `happy` `sad` `thinking` `shocked` `celebrating` `wink` `angry` `love` `c
 | Streak | Daily check-in, freeze protection, weekly calendar, milestones |
 | Hearts | Lose hearts on wrong answers, refill with gems |
 | Gems | Earn gems, spend in shop on powerups and cosmetics |
-| Achievements | 16 unlockable badges with XP rewards |
+| Achievements | 17 unlockable badges with XP rewards |
 | Messages | Friend-to-friend chat with streak/XP sharing |
 | Challenges | XP race and quiz battles between friends |
 | Pomodoro | 25 min focus / 5 min break timer |

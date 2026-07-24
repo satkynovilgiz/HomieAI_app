@@ -38,7 +38,7 @@ export default function HistoryScreen() {
               <HomieBot mood="sad" size={100}/>
               <Text style={styles.emptyTitle}>No sessions yet 😢</Text>
               <Text style={styles.emptySub}>Start chatting with HOMIE!</Text>
-              <TouchableOpacity onPress={() => router.push('/chat/index')} style={styles.startBtn}>
+              <TouchableOpacity onPress={() => router.push('/chat')} style={styles.startBtn}>
                 <Text style={styles.startBtnText}>Start Studying 🚀</Text>
               </TouchableOpacity>
             </View>

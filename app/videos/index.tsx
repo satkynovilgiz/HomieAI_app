@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Linking, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 
 const YOUTUBE_API_KEY = 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
 
 const STUDY_SEARCHES = [
-  { label: 'Math', query: 'math tutorial for students', color: '#7c3aed' },
-  { label: 'Coding', query: 'learn programming beginners', color: '#10b981' },
-  { label: 'Science', query: 'science explained simply', color: '#f97316' },
-  { label: 'History', query: 'world history explained', color: '#3b82f6' },
-  { label: 'Physics', query: 'physics concepts explained', color: '#8b5cf6' },
-  { label: 'Chemistry', query: 'chemistry basics tutorial', color: '#fbbf24' },
-  { label: 'Biology', query: 'biology explained easy', color: '#34d399' },
-  { label: 'Study Tips', query: 'how to study effectively', color: '#ec4899' },
+  { label: 'Math', query: 'math tutorial for students', color: '#7c3aed', emoji: '📐' },
+  { label: 'Coding', query: 'learn programming beginners', color: '#10b981', emoji: '💻' },
+  { label: 'Science', query: 'science explained simply', color: '#f97316', emoji: '🔭' },
+  { label: 'History', query: 'world history explained', color: '#3b82f6', emoji: '🏛️' },
+  { label: 'Physics', query: 'physics concepts explained', color: '#8b5cf6', emoji: '⚛️' },
+  { label: 'Chemistry', query: 'chemistry basics tutorial', color: '#fbbf24', emoji: '🧪' },
+  { label: 'Biology', query: 'biology explained easy', color: '#34d399', emoji: '🧬' },
+  { label: 'Study Tips', query: 'how to study effectively', color: '#ec4899', emoji: '💡' },
 ];
 
 interface Video {
@@ -30,15 +31,14 @@ export default function VideosScreen() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [modal, setModal] = useState<Video | null>(null);
 
-  const fetchVideos = async (query: string) => {
+  const fetchVideos = async (query: string, categoryLabel?: string) => {
     setLoading(true);
     try {
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&videoCategoryId=27&key=${YOUTUBE_API_KEY}`;
       const res = await fetch(url);
       const data = await res.json();
-      if (data.items) {
+      if (data.items && data.items.length > 0) {
         setVideos(data.items.map((item: any) => ({
           id: item.id.videoId,
           title: item.snippet.title,
@@ -46,17 +46,17 @@ export default function VideosScreen() {
           thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
         })));
       } else {
-        // Fallback to hardcoded if API fails
-        setVideos(FALLBACK_VIDEOS.filter(v => v.tags?.includes(query.split(' ')[0].toLowerCase())));
+        // Live API unavailable or returned nothing — fall back to hardcoded videos for this category
+        setVideos((categoryLabel && FALLBACK_BY_CATEGORY[categoryLabel]) || ALL_FALLBACK_VIDEOS);
       }
     } catch (e) {
-      setVideos(FALLBACK_VIDEOS);
+      setVideos((categoryLabel && FALLBACK_BY_CATEGORY[categoryLabel]) || ALL_FALLBACK_VIDEOS);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchVideos(cat.query); }, [cat]);
+  useEffect(() => { fetchVideos(cat.query, cat.label); }, [cat]);
 
   const handleSearch = () => {
     if (search.trim()) fetchVideos(search.trim() + ' tutorial explanation');
@@ -68,19 +68,22 @@ export default function VideosScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Video Library</Text>
+        <Text style={styles.title}>Video Library 🎬</Text>
       </View>
 
       {/* Search */}
       <View style={styles.searchRow}>
-        <TextInput
-          value={search} onChangeText={setSearch}
-          placeholder="Search any topic..."
-          placeholderTextColor={Colors.muted}
-          style={styles.searchInput}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-        />
+        <View style={styles.searchInputWrap}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            value={search} onChangeText={setSearch}
+            placeholder="Search any topic..."
+            placeholderTextColor={Colors.muted}
+            style={styles.searchInput}
+            onSubmitEditing={handleSearch}
+            returnKeyType="search"
+          />
+        </View>
         <TouchableOpacity onPress={handleSearch} style={styles.searchBtn}>
           <Text style={styles.searchBtnText}>Search</Text>
         </TouchableOpacity>
@@ -97,6 +100,7 @@ export default function VideosScreen() {
           <TouchableOpacity
             onPress={() => { setCat(item); setSearch(''); }}
             style={[styles.catChip, cat.label === item.label && { backgroundColor: item.color + '22', borderColor: item.color }]}>
+            <Text style={styles.catEmoji}>{item.emoji}</Text>
             <Text style={[styles.catText, cat.label === item.label && { color: item.color, fontWeight: '700' }]}>{item.label}</Text>
           </TouchableOpacity>
         )}
@@ -107,6 +111,10 @@ export default function VideosScreen() {
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={Colors.purple}/>
           <Text style={styles.loadingText}>Loading videos...</Text>
+        </View>
+      ) : videos.length === 0 ? (
+        <View style={styles.loading}>
+          <Text style={styles.loadingText}>No videos found — try another search</Text>
         </View>
       ) : (
         <FlatList
@@ -122,15 +130,19 @@ export default function VideosScreen() {
               activeOpacity={0.85}>
               <View style={styles.thumbContainer}>
                 <Image source={{ uri: item.thumbnail }} style={styles.thumb} resizeMode="cover"/>
+                <LinearGradient
+                  colors={['transparent', 'rgba(7,7,15,0.85)']}
+                  style={styles.thumbScrim}
+                />
                 <View style={styles.playOverlay}>
                   <View style={styles.playBtn}>
                     <Text style={styles.playIcon}>▶</Text>
                   </View>
                 </View>
+                <Text style={styles.thumbChannel} numberOfLines={1}>{item.channel}</Text>
               </View>
               <View style={styles.videoInfo}>
                 <Text style={styles.videoTitle} numberOfLines={2}>{item.title}</Text>
-                <Text style={styles.videoChannel}>{item.channel}</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -140,12 +152,19 @@ export default function VideosScreen() {
   );
 }
 
-const FALLBACK_VIDEOS = [
-  { id: 'NybHckSEQBI', title: "Math isn't hard, it's a language", channel: 'TEDx', thumbnail: 'https://img.youtube.com/vi/NybHckSEQBI/mqdefault.jpg', tags: ['math'] },
-  { id: 'rfscVS0vtbw', title: 'Learn Python Full Course', channel: 'freeCodeCamp', thumbnail: 'https://img.youtube.com/vi/rfscVS0vtbw/mqdefault.jpg', tags: ['coding'] },
-  { id: 'zR3Igc3Rhfg', title: 'What Is Quantum Mechanics?', channel: 'Kurzgesagt', thumbnail: 'https://img.youtube.com/vi/zR3Igc3Rhfg/mqdefault.jpg', tags: ['physics', 'science'] },
-  { id: 'vSskbQ_ETEY', title: 'How to Study Effectively', channel: 'Thomas Frank', thumbnail: 'https://img.youtube.com/vi/vSskbQ_ETEY/mqdefault.jpg', tags: ['study'] },
-];
+const thumb = (id: string) => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+
+const FALLBACK_BY_CATEGORY: Record<string, Video[]> = {
+  Math: [{ id: 'NybHckSEQBI', title: "Math isn't hard, it's a language", channel: 'TEDx', thumbnail: thumb('NybHckSEQBI') }],
+  Coding: [{ id: 'rfscVS0vtbw', title: 'Learn Python Full Course', channel: 'freeCodeCamp', thumbnail: thumb('rfscVS0vtbw') }],
+  Science: [{ id: 'zR3Igc3Rhfg', title: 'What Is Quantum Mechanics?', channel: 'Kurzgesagt', thumbnail: thumb('zR3Igc3Rhfg') }],
+  History: [{ id: 'Yocja_N5s1I', title: 'The Agricultural Revolution: Crash Course World History #1', channel: 'CrashCourse', thumbnail: thumb('Yocja_N5s1I') }],
+  Physics: [{ id: 'zR3Igc3Rhfg', title: 'What Is Quantum Mechanics?', channel: 'Kurzgesagt', thumbnail: thumb('zR3Igc3Rhfg') }],
+  Chemistry: [{ id: 'FSyAehMdpyI', title: 'The Nucleus: Crash Course Chemistry #1', channel: 'CrashCourse', thumbnail: thumb('FSyAehMdpyI') }],
+  Biology: [{ id: 'tZE_fQFK8EY', title: 'Introduction to Biology: Crash Course Biology #1', channel: 'CrashCourse', thumbnail: thumb('tZE_fQFK8EY') }],
+  'Study Tips': [{ id: 'AL08YZCYShc', title: 'Study LESS Study SMART', channel: 'Motivation2Study', thumbnail: thumb('AL08YZCYShc') }],
+};
+const ALL_FALLBACK_VIDEOS: Video[] = Object.values(FALLBACK_BY_CATEGORY).flat();
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
@@ -154,21 +173,25 @@ const styles = StyleSheet.create({
   backArrow: { fontSize: 24, color: Colors.text },
   title: { fontSize: 22, fontWeight: '900', color: Colors.text },
   searchRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 12 },
-  searchInput: { flex: 1, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, color: Colors.text, padding: 11, fontSize: 14 },
+  searchInputWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, paddingHorizontal: 12 },
+  searchIcon: { fontSize: 14 },
+  searchInput: { flex: 1, color: Colors.text, paddingVertical: 11, fontSize: 14 },
   searchBtn: { paddingHorizontal: 16, backgroundColor: Colors.purple, borderRadius: Radius.md, justifyContent: 'center' },
   searchBtnText: { color: 'white', fontWeight: '700', fontSize: 13 },
-  catScroll: { marginBottom: 8 },
-  catChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 50, backgroundColor: Colors.bg3, borderWidth: 1.5, borderColor: Colors.border },
+  catScroll: { flexGrow: 0, height: 44, marginBottom: 12 },
+  catChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 50, backgroundColor: Colors.bg3, borderWidth: 1.5, borderColor: Colors.border },
+  catEmoji: { fontSize: 13 },
   catText: { fontSize: 13, color: Colors.muted },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
   loadingText: { fontSize: 14, color: Colors.muted },
-  videoCard: { backgroundColor: Colors.bg3, borderRadius: Radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: Colors.border },
+  videoCard: { backgroundColor: Colors.bg3, borderRadius: Radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: Colors.border },
   thumbContainer: { position: 'relative' },
-  thumb: { width: '100%', height: 200 },
+  thumb: { width: '100%', height: 190 },
+  thumbScrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 70 },
   playOverlay: { position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' },
-  playBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(124,58,237,0.9)', alignItems: 'center', justifyContent: 'center' },
-  playIcon: { color: 'white', fontSize: 22 },
+  playBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(124,58,237,0.9)', alignItems: 'center', justifyContent: 'center' },
+  playIcon: { color: 'white', fontSize: 20 },
+  thumbChannel: { position: 'absolute', left: 12, bottom: 10, fontSize: 12, fontWeight: '700', color: 'white' },
   videoInfo: { padding: 14 },
-  videoTitle: { fontSize: 14, fontWeight: '700', color: Colors.text, marginBottom: 5, lineHeight: 20 },
-  videoChannel: { fontSize: 12, color: Colors.muted },
+  videoTitle: { fontSize: 14, fontWeight: '700', color: Colors.text, lineHeight: 20 },
 });

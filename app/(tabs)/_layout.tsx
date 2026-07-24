@@ -49,6 +49,16 @@ function FriendsIcon({ color }: { color: string }) {
   );
 }
 
+function VoiceIcon({ color }: { color: string }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <Rect x="9" y="2" width="6" height="12" rx="3" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Path d="M5 11C5 15 8.1 18 12 18C15.9 18 19 15 19 11" stroke={color} strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <Line x1="12" y1="18" x2="12" y2="22" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
 function MoreIcon({ color }: { color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -87,6 +97,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index"   options={{ title: 'Home',    tabBarIcon: ({ color }) => <HomeIcon    color={color} /> }} />
       <Tabs.Screen name="chat"    options={{ title: 'Chat',    tabBarIcon: ({ color }) => <ChatIcon    color={color} /> }} />
+      <Tabs.Screen name="voice"   options={{ title: 'Voice',   tabBarIcon: ({ color }) => <VoiceIcon   color={color} /> }} />
       <Tabs.Screen name="learn"   options={{ title: 'Learn',   tabBarIcon: ({ color }) => <LearnIcon   color={color} /> }} />
       <Tabs.Screen name="friends" options={{ title: 'Friends', tabBarIcon: ({ color }) => <FriendsIcon color={color} /> }} />
       <Tabs.Screen name="more"    options={{ title: 'More',    tabBarIcon: ({ color }) => <MoreIcon    color={color} /> }} />

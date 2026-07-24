@@ -14,13 +14,13 @@ export interface Conversation {
 }
 
 const demoConvos: Conversation[] = [
-  { id:'1', friendId:'u2', friendName:'Sarah K.', friendAvatar:'👩', lastMessage:'bro I got a 7 day streak!', lastTimestamp: Date.now()-300000, unread:2, messages:[
+  { id:'u2', friendId:'u2', friendName:'Sarah K.', friendAvatar:'👩', lastMessage:'bro I got a 7 day streak!', lastTimestamp: Date.now()-300000, unread:2, messages:[
     { id:'m1', senderId:'u2', text:'yo did u do the math quiz?', timestamp:Date.now()-600000, read:true, type:'text' },
     { id:'m2', senderId:'me', text:'yeah it was hard ngl 😅', timestamp:Date.now()-500000, read:true, type:'text' },
     { id:'m3', senderId:'u2', text:'bro I got a 7 day streak!', timestamp:Date.now()-300000, read:false, type:'text' },
     { id:'m4', senderId:'u2', text:'🔥🔥🔥', timestamp:Date.now()-280000, read:false, type:'streak_share', payload:{ streak:7 } },
   ]},
-  { id:'2', friendId:'u3', friendName:'Marcus T.', friendAvatar:'🧑', lastMessage:'+50 XP challenge!', lastTimestamp: Date.now()-3600000, unread:1, messages:[
+  { id:'u3', friendId:'u3', friendName:'Marcus T.', friendAvatar:'🧑', lastMessage:'+50 XP challenge!', lastTimestamp: Date.now()-3600000, unread:1, messages:[
     { id:'m5', senderId:'u3', text:'study battle? first to 500 XP wins', timestamp:Date.now()-7200000, read:true, type:'text' },
     { id:'m6', senderId:'me', text:'LETS GO', timestamp:Date.now()-7000000, read:true, type:'text' },
     { id:'m7', senderId:'u3', text:'+50 XP challenge!', timestamp:Date.now()-3600000, read:false, type:'xp_share', payload:{ xp:50 } },
@@ -46,6 +46,13 @@ const messagesSlice = createSlice({
       state.totalUnread = Math.max(0, state.totalUnread - conv.unread);
       conv.unread = 0;
     },
+    ensureConversation(state, { payload }: PayloadAction<{ id: string; friendName: string; friendAvatar: string }>) {
+      if (state.conversations.find(c => c.id === payload.id)) return;
+      state.conversations.push({
+        id: payload.id, friendId: payload.id, friendName: payload.friendName, friendAvatar: payload.friendAvatar,
+        messages: [], lastMessage: '', lastTimestamp: Date.now(), unread: 0,
+      });
+    },
     receiveMessage(state, { payload }: PayloadAction<{ convId: string; msg: ChatMessage }>) {
       const conv = state.conversations.find(c => c.id === payload.convId);
       if (!conv) return;
@@ -58,5 +65,5 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { sendMessage, markRead, receiveMessage } = messagesSlice.actions;
+export const { sendMessage, markRead, receiveMessage, ensureConversation } = messagesSlice.actions;
 export default messagesSlice.reducer;
