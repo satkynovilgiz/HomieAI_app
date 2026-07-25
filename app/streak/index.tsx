@@ -53,7 +53,7 @@ export default function StreakScreen() {
         <View style={styles.calCard}>
           <Text style={styles.calTitle}>{MONTHS[today.getMonth()]} {today.getFullYear()}</Text>
           <View style={styles.calDays}>
-            {DAYS.map(d => <Text key={d} style={styles.calDayLabel}>{d}</Text>)}
+            {DAYS.map((d, i) => <Text key={i} style={styles.calDayLabel}>{d}</Text>)}
           </View>
           <View style={styles.calGrid}>
             {[...Array(firstDay)].map((_,i) => <View key={`e${i}`} style={styles.calCell}/>)}
