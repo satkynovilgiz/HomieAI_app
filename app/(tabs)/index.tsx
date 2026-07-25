@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
@@ -17,7 +17,7 @@ import AchievementPopup from '../../components/achievements/AchievementPopup';
 import { useAchievements } from '../../hooks/useAchievements';
 import {
   ChatBubbleIcon, BookIcon, VideoIcon, GameIcon, TimerIcon,
-  DetectorIcon, ShopIcon, TrophyIcon, CalendarIcon, PenIcon, CameraIcon,
+  DetectorIcon, ShopIcon, TrophyIcon, CalendarIcon, PenIcon, CameraIcon, HistoryIcon,
 } from '../../components/icons';
 import Svg, { Path, Circle } from 'react-native-svg';
 
@@ -40,18 +40,37 @@ function SettingsIcon({ color }: { color: string }) {
 }
 
 const QUICK_ACTIONS = [
-  { label: 'AI Chat',   route: '/chat',         color: '#7c3aed', Icon: ChatBubbleIcon },
-  { label: 'Lessons',   route: '/lessons',      color: '#3b82f6', Icon: BookIcon },
-  { label: 'Videos',    route: '/videos',       color: '#f97316', Icon: VideoIcon },
-  { label: 'Games',     route: '/games',        color: '#10b981', Icon: GameIcon },
-  { label: 'Pomodoro',  route: '/pomodoro',     color: '#ef4444', Icon: TimerIcon },
-  { label: 'AI Check',  route: '/detector',     color: '#fbbf24', Icon: DetectorIcon },
-  { label: 'Shop',      route: '/shop',         color: '#3b82f6', Icon: ShopIcon },
-  { label: 'Badges',    route: '/achievements', color: '#fbbf24', Icon: TrophyIcon },
-  { label: 'Planner',   route: '/planner',      color: '#8b5cf6', Icon: CalendarIcon },
-  { label: 'Essay',     route: '/essay',        color: '#84cc16', Icon: PenIcon },
-  { label: 'Scan',      route: '/scanner',      color: '#f43f5e', Icon: CameraIcon },
+  { label: 'AI Chat',    route: '/chat/index',          color: '#7c3aed' },
+  { label: 'Lessons',    route: '/lessons/index',       color: '#3b82f6' },
+  { label: 'Videos',     route: '/videos/index',        color: '#f97316' },
+  { label: 'Games',      route: '/games/index',         color: '#10b981' },
+  { label: 'Pomodoro',   route: '/pomodoro/index',      color: '#ef4444' },
+  { label: 'AI Check',   route: '/detector/index',      color: '#fbbf24' },
+  { label: 'Shop',       route: '/shop/index',          color: '#3b82f6' },
+  { label: 'Badges',     route: '/achievements/index',  color: '#f59e0b' },
+  { label: 'Planner',    route: '/planner/index',       color: '#8b5cf6' },
+  { label: 'Essay',      route: '/essay/index',         color: '#84cc16' },
+  { label: 'Scan',       route: '/scanner/index',       color: '#f43f5e' },
+  { label: 'History',    route: '/history/index',       color: '#a855f7' },
 ];
+
+const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; size: number }>> = {
+  'AI Chat': ChatBubbleIcon,
+  'Lessons': BookIcon,
+  'Videos': VideoIcon,
+  'Games': GameIcon,
+  'Pomodoro': TimerIcon,
+  'AI Check': DetectorIcon,
+  'Shop': ShopIcon,
+  'Badges': TrophyIcon,
+  'Planner': CalendarIcon,
+  'Essay': PenIcon,
+  'Scan': CameraIcon,
+  'History': HistoryIcon,
+};
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_SIZE = (SCREEN_WIDTH - 16 * 2 - 8 * 2) / 3;
 
 export default function HomeTab() {
   const dispatch = useDispatch();
@@ -146,19 +165,22 @@ export default function HomeTab() {
         {/* Quick actions */}
         <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
         <View style={styles.grid}>
-          {QUICK_ACTIONS.map(({ label, route, color, Icon }) => (
-            <TouchableOpacity
-              key={label}
-              style={styles.actionCard}
-              onPress={() => router.push(route as any)}
-              activeOpacity={0.75}
-            >
-              <View style={[styles.actionIconWrap, { backgroundColor: color + '1f' }]}>
-                <Icon color={color} size={20} />
-              </View>
-              <Text style={styles.actionLabel}>{label}</Text>
-            </TouchableOpacity>
-          ))}
+          {QUICK_ACTIONS.map(({ label, route, color }) => {
+            const Icon = QUICK_ACTION_ICONS[label];
+            return (
+              <TouchableOpacity
+                key={label}
+                style={styles.actionCard}
+                onPress={() => router.push(route as any)}
+                activeOpacity={0.75}
+              >
+                <View style={[styles.actionIconWrap, { backgroundColor: color + '1f' }]}>
+                  <Icon color={color} size={20} />
+                </View>
+                <Text style={styles.actionLabel}>{label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* CTA */}
@@ -201,10 +223,10 @@ const styles = StyleSheet.create({
   tipLabel: { fontSize: 10, fontWeight: '700', color: Colors.purpleL, marginBottom: 4, letterSpacing: 2 },
   tipText: { fontSize: 13, color: Colors.text2, lineHeight: 19 },
   sectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.muted, paddingHorizontal: 16, marginBottom: 10, letterSpacing: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 8 },
-  actionCard: { width: '30%', backgroundColor: Colors.bg3, borderRadius: Radius.md, padding: 14, alignItems: 'flex-start', borderWidth: 1, borderColor: Colors.border, gap: 10 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 8 },
+  actionCard: { width: CARD_SIZE, height: CARD_SIZE, backgroundColor: Colors.bg3, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', gap: 8 },
   actionIconWrap: { width: 36, height: 36, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { fontSize: 11, fontWeight: '800', color: Colors.text },
+  actionLabel: { fontSize: 13, fontWeight: '700', color: Colors.white },
   ctaBanner: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, gap: 12 },
   ctaTitle: { fontSize: 17, fontWeight: '900', color: Colors.text },
   ctaSub: { fontSize: 13, color: Colors.muted, marginTop: 2 },
