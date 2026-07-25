@@ -56,13 +56,13 @@ export default function StreakBanner({ onPress }: { onPress?: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  banner: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginHorizontal:16, marginVertical:16, paddingVertical:16, paddingHorizontal:14, borderRadius:Radius.xl, borderWidth:1, borderColor:'rgba(249,115,22,0.25)' },
+  banner: { marginHorizontal:16, marginVertical:16, paddingVertical:16, paddingHorizontal:14, borderRadius:Radius.xl, borderWidth:1, borderColor:'rgba(249,115,22,0.25)' },
   left: { flexDirection:'row', alignItems:'center', gap:12 },
   fireWrap: { width:44, height:44, borderRadius:22, backgroundColor:'rgba(249,115,22,0.15)', alignItems:'center', justifyContent:'center' },
   count: { fontSize:16, fontWeight:'900', color:Colors.orange },
   sub: { fontSize:11, color:Colors.muted, marginTop:2 },
-  week: { flexDirection:'row', flex:1, justifyContent:'space-between' },
-  dayCol: { flex:1, alignItems:'center', gap:4 },
+  week: { flexDirection:'row', justifyContent:'space-between', marginTop:16 },
+  dayCol: { alignItems:'center', gap:4 },
   dot: { width:28, height:28, borderRadius:14, backgroundColor:Colors.bg3, borderWidth:1.5, borderColor:Colors.border, alignItems:'center', justifyContent:'center' },
   dotActive: { backgroundColor:Colors.orange, borderColor:Colors.orange },
   dotToday: { borderColor:Colors.orange, borderWidth:2 },
