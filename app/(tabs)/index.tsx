@@ -40,18 +40,18 @@ function SettingsIcon({ color }: { color: string }) {
 }
 
 const QUICK_ACTIONS = [
-  { label: 'AI Chat',    route: '/chat/index',          color: '#7c3aed' },
-  { label: 'Lessons',    route: '/lessons/index',       color: '#3b82f6' },
-  { label: 'Videos',     route: '/videos/index',        color: '#f97316' },
-  { label: 'Games',      route: '/games/index',         color: '#10b981' },
-  { label: 'Pomodoro',   route: '/pomodoro/index',      color: '#ef4444' },
-  { label: 'AI Check',   route: '/detector/index',      color: '#fbbf24' },
-  { label: 'Shop',       route: '/shop/index',          color: '#3b82f6' },
-  { label: 'Badges',     route: '/achievements/index',  color: '#f59e0b' },
-  { label: 'Planner',    route: '/planner/index',       color: '#8b5cf6' },
-  { label: 'Essay',      route: '/essay/index',         color: '#84cc16' },
-  { label: 'Scan',       route: '/scanner/index',       color: '#f43f5e' },
-  { label: 'History',    route: '/history/index',       color: '#a855f7' },
+  { label: 'AI Chat',    route: '/chat',          color: '#7c3aed' },
+  { label: 'Lessons',    route: '/lessons',       color: '#3b82f6' },
+  { label: 'Videos',     route: '/videos',        color: '#f97316' },
+  { label: 'Games',      route: '/games',         color: '#10b981' },
+  { label: 'Pomodoro',   route: '/pomodoro',      color: '#ef4444' },
+  { label: 'AI Check',   route: '/detector',      color: '#fbbf24' },
+  { label: 'Shop',       route: '/shop',          color: '#3b82f6' },
+  { label: 'Badges',     route: '/achievements',  color: '#f59e0b' },
+  { label: 'Planner',    route: '/planner',       color: '#8b5cf6' },
+  { label: 'Essay',      route: '/essay',         color: '#84cc16' },
+  { label: 'Scan',       route: '/scanner',       color: '#f43f5e' },
+  { label: 'History',    route: '/history',       color: '#a855f7' },
 ];
 
 const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; size: number }>> = {
