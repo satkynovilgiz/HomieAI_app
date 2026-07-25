@@ -7,7 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as Haptics from 'expo-haptics';
 import { RootState } from '../../store';
 import { startLesson, completeLesson, loseSessionHeart } from '../../store/slices/lessonsSlice';
-import { addXP } from '../../store/slices/userSlice';
+import { addXP, addHistory } from '../../store/slices/userSlice';
+import { addToHistory } from '../../lib/firestoreService';
 import { earnGems } from '../../store/slices/gemsSlice';
 import { checkInToday } from '../../store/slices/streakSlice';
 import { Colors, Radius } from '../../constants/theme';
@@ -23,6 +24,7 @@ export default function LessonPlayScreen() {
   const { lessonId, unitId } = useLocalSearchParams<{ lessonId: string; unitId: string }>();
   const dispatch = useDispatch();
   const hearts = useSelector((s: RootState) => s.hearts.count);
+  const user = useSelector((s: RootState) => s.user.current);
 
   const unit = ALL_UNITS.find(u => u.id === unitId);
   const lesson = unit?.lessons.find(l => l.id === lessonId);
@@ -80,6 +82,11 @@ export default function LessonPlayScreen() {
       dispatch(addXP(lesson.xp));
       dispatch(earnGems(Math.floor(lesson.xp / 10)));
       dispatch(checkInToday());
+      if (user) {
+        const entry = { subject: unit.title, preview: lesson.title, xp_earned: lesson.xp, duration_mins: Math.max(1, totalQ) };
+        dispatch(addHistory(entry));
+        addToHistory(user.uid, entry);
+      }
       setDone(true);
       animateProgress(1);
     } else {

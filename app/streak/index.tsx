@@ -1,5 +1,6 @@
 
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useSelector } from 'react-redux';
@@ -8,14 +9,35 @@ import { Colors, Radius } from '../../constants/theme';
 import StreakFreeze from '../../components/streak/StreakFreeze';
 import HomieBot from '../../components/mascot/HomieBot';
 
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['S','M','T','W','T','F','S'];
+
+interface DayInfo {
+  date: Date;
+  studied: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
 
 export default function StreakScreen() {
   const streak = useSelector((s: RootState) => s.streak);
+  const user = useSelector((s: RootState) => s.user.current);
+  const [selected, setSelected] = useState<DayInfo | null>(null);
   const today = new Date();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+  const year = today.getFullYear();
+
+  const openDay = (date: Date) => {
+    setSelected({
+      date,
+      studied: streak.studiedDates.includes(date.toDateString()),
+      isToday: date.toDateString() === today.toDateString(),
+      isFuture: date > today,
+    });
+  };
+
+  const dayHistory = selected
+    ? (user?.history || []).filter(h => new Date(h.date).toDateString() === selected.date.toDateString())
+    : [];
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -49,27 +71,36 @@ export default function StreakScreen() {
           </View>
         </View>
 
-        {/* Calendar */}
-        <View style={styles.calCard}>
-          <Text style={styles.calTitle}>{MONTHS[today.getMonth()]} {today.getFullYear()}</Text>
-          <View style={styles.calDays}>
-            {DAYS.map((d, i) => <Text key={i} style={styles.calDayLabel}>{d}</Text>)}
-          </View>
-          <View style={styles.calGrid}>
-            {[...Array(firstDay)].map((_,i) => <View key={`e${i}`} style={styles.calCell}/>)}
-            {[...Array(daysInMonth)].map((_,i) => {
-              const day = i+1;
-              const isToday = day === today.getDate();
-              const cellDate = new Date(today.getFullYear(), today.getMonth(), day);
-              const studied = streak.studiedDates.includes(cellDate.toDateString());
-              return (
-                <View key={day} style={[styles.calCell, isToday && styles.calCellToday, !isToday && studied && styles.calCellStudied]}>
-                  <Text style={[styles.calCellText, isToday && styles.calCellTextToday]}>{day}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
+        {/* Full year calendar */}
+        <Text style={styles.yearLabel}>{year} — tap any day to see what you did</Text>
+        {MONTHS.map((monthName, monthIdx) => {
+          const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+          const firstDay = new Date(year, monthIdx, 1).getDay();
+          const isCurrentMonth = monthIdx === today.getMonth();
+          return (
+            <View key={monthIdx} style={[styles.calCard, isCurrentMonth && styles.calCardCurrent]}>
+              <Text style={styles.calTitle}>{monthName}</Text>
+              <View style={styles.calDays}>
+                {DAYS.map((d, i) => <Text key={i} style={styles.calDayLabel}>{d}</Text>)}
+              </View>
+              <View style={styles.calGrid}>
+                {[...Array(firstDay)].map((_, i) => <View key={`e${i}`} style={styles.calCell}/>)}
+                {[...Array(daysInMonth)].map((_, i) => {
+                  const day = i + 1;
+                  const cellDate = new Date(year, monthIdx, day);
+                  const isToday = cellDate.toDateString() === today.toDateString();
+                  const studied = streak.studiedDates.includes(cellDate.toDateString());
+                  return (
+                    <TouchableOpacity key={day} onPress={() => openDay(cellDate)}
+                      style={[styles.calCell, isToday && styles.calCellToday, !isToday && studied && styles.calCellStudied]}>
+                      <Text style={[styles.calCellText, isToday && styles.calCellTextToday]}>{day}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
 
         {/* Freeze */}
         <View style={{ padding:16 }}>
@@ -93,6 +124,43 @@ export default function StreakScreen() {
         </View>
         <View style={{ height:30 }}/>
       </ScrollView>
+
+      {/* Day detail modal */}
+      <Modal visible={!!selected} transparent animationType="fade" onRequestClose={() => setSelected(null)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelected(null)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalCard} onPress={() => {}}>
+            {selected && (
+              <>
+                <Text style={styles.modalDate}>
+                  {selected.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                </Text>
+                {selected.isFuture ? (
+                  <Text style={styles.modalEmpty}>hasn't happened yet</Text>
+                ) : dayHistory.length > 0 ? (
+                  <View style={{ gap: 10, marginTop: 12 }}>
+                    {dayHistory.map((h, i) => (
+                      <View key={i} style={styles.historyRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.historySubject}>{h.subject || 'Study session'}</Text>
+                          <Text style={styles.historyPreview} numberOfLines={2}>{h.preview || ''}</Text>
+                        </View>
+                        <Text style={styles.historyXP}>+{h.xp_earned || 0} XP</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : selected.studied ? (
+                  <Text style={styles.modalEmpty}>you studied this day, but no detailed activity was logged</Text>
+                ) : (
+                  <Text style={styles.modalEmpty}>nothing here yet</Text>
+                )}
+                <TouchableOpacity style={styles.modalClose} onPress={() => setSelected(null)}>
+                  <Text style={styles.modalCloseText}>close</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -115,7 +183,9 @@ const styles = StyleSheet.create({
   weekDotActive: { backgroundColor:Colors.orange, borderColor:Colors.orange },
   weekCheck: { fontSize:14, color:'white', fontWeight:'900' },
   weekDayLabel: { fontSize:11, color:Colors.muted, fontWeight:'700' },
-  calCard: { margin:16, padding:18, backgroundColor:Colors.bg2, borderRadius:Radius.lg, borderWidth:1, borderColor:Colors.border },
+  yearLabel: { fontSize:11, fontWeight:'700', color:Colors.muted, letterSpacing:1.5, marginHorizontal:16, marginBottom:10, marginTop:8, textTransform:'uppercase' },
+  calCard: { marginHorizontal:16, marginBottom:12, padding:18, backgroundColor:Colors.bg2, borderRadius:Radius.lg, borderWidth:1, borderColor:Colors.border },
+  calCardCurrent: { borderColor:'rgba(249,115,22,0.4)' },
   calTitle: { fontSize:16, fontWeight:'800', color:Colors.text, marginBottom:14, textAlign:'center' },
   calDays: { flexDirection:'row', justifyContent:'space-around', marginBottom:8 },
   calDayLabel: { fontSize:11, color:Colors.muted, fontWeight:'700', width:36, textAlign:'center' },
@@ -132,4 +202,14 @@ const styles = StyleSheet.create({
   milestoneLabel: { fontSize:14, fontWeight:'700', color:Colors.text },
   milestoneDays: { fontSize:12, color:Colors.muted, marginTop:2 },
   milestoneXP: { fontSize:13, fontWeight:'700', color:Colors.muted },
+  modalOverlay: { flex:1, backgroundColor:'rgba(0,0,0,0.7)', alignItems:'center', justifyContent:'center', padding:24 },
+  modalCard: { width:'100%', maxWidth:380, backgroundColor:Colors.bg2, borderRadius:Radius.xl, padding:22, borderWidth:1, borderColor:Colors.border },
+  modalDate: { fontSize:16, fontWeight:'800', color:Colors.text, textAlign:'center' },
+  modalEmpty: { fontSize:14, color:Colors.muted, textAlign:'center', marginTop:16 },
+  historyRow: { flexDirection:'row', alignItems:'center', gap:10, padding:12, backgroundColor:Colors.bg3, borderRadius:Radius.md, borderWidth:1, borderColor:Colors.border },
+  historySubject: { fontSize:14, fontWeight:'700', color:Colors.text },
+  historyPreview: { fontSize:12, color:Colors.muted, marginTop:3 },
+  historyXP: { fontSize:13, fontWeight:'800', color:Colors.green },
+  modalClose: { marginTop:18, paddingVertical:12, backgroundColor:Colors.bg3, borderRadius:Radius.md, alignItems:'center', borderWidth:1, borderColor:Colors.border },
+  modalCloseText: { color:Colors.muted, fontWeight:'700', fontSize:13 },
 });

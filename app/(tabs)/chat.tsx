@@ -8,7 +8,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { RootState } from '../../store';
 import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg } from '../../store/slices/chatSlice';
-import { addXP, addCorrect } from '../../store/slices/userSlice';
+import { addXP, addCorrect, addHistory } from '../../store/slices/userSlice';
+import { addToHistory } from '../../lib/firestoreService';
 import { callGemini, getSystemPrompt } from '../../lib/gemini';
 import { parseQuiz } from '../../lib/utils';
 import { Colors, Radius } from '../../constants/theme';
@@ -29,8 +30,25 @@ export default function ChatScreen() {
   const [imgPreview, setImgPreview] = useState<string | null>(null);
   const [showSubjects, setShowSubjects] = useState(false);
   const listRef = useRef<FlatList>(null);
+  const sessionStartRef = useRef(Date.now());
+  const latestRef = useRef({ sessionXP, subject, messages, user });
 
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
+  useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
+
+  // Record this chat session into history when leaving the screen, not per-message —
+  // one meaningful entry per visit instead of spamming a row for every reply.
+  useEffect(() => {
+    return () => {
+      const { sessionXP: xp, subject: subj, messages: msgs, user: u } = latestRef.current;
+      if (xp <= 0 || !u) return;
+      const lastAiMsg = [...msgs].reverse().find(m => m.role === 'assistant');
+      const preview = typeof lastAiMsg?.content === 'string' ? lastAiMsg.content.slice(0, 100) : 'AI chat session';
+      const duration_mins = Math.max(1, Math.round((Date.now() - sessionStartRef.current) / 60000));
+      dispatch(addHistory({ subject: subj, preview, xp_earned: xp, duration_mins }));
+      addToHistory(u.uid, { subject: subj, preview, xp_earned: xp, duration_mins });
+    };
+  }, []);
 
   const send = useCallback(async (overText?: string, overImg?: string | null) => {
     const text = overText ?? input.trim();
