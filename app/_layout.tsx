@@ -22,7 +22,6 @@ export default function RootLayout() {
           <Stack.Screen name="auth/login" />
           <Stack.Screen name="auth/signup" />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="voice/index" />
           <Stack.Screen name="games/index" />
           <Stack.Screen name="pomodoro/index" />
           <Stack.Screen name="detector/index" />

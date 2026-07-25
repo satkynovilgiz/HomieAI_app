@@ -19,14 +19,14 @@ export default function StreakCelebration({ streak, visible, onClose }: Props) {
         <Animated.View style={[styles.card, { transform:[{ scale }] }]}>
           <HomieBot mood="celebrating" size={120}/>
           <Text style={styles.emoji}>🔥</Text>
-          <Text style={styles.title}>{streak} Day Streak!</Text>
-          <Text style={styles.sub}>You're on fire bro! Keep it going!</Text>
+          <Text style={styles.title}>{streak} day streak!</Text>
+          <Text style={styles.sub}>you're on fire bro, keep it going</Text>
           <View style={styles.rewards}>
             <View style={styles.reward}><Text style={styles.rewardIcon}>⭐</Text><Text style={styles.rewardText}>+{streak * 10} XP</Text></View>
             <View style={styles.reward}><Text style={styles.rewardIcon}>💎</Text><Text style={styles.rewardText}>+{streak * 5} Gems</Text></View>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.btn}>
-            <Text style={styles.btnText}>Let's keep going! 🚀</Text>
+            <Text style={styles.btnText}>let's go 🚀</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>

@@ -13,12 +13,12 @@ export default function ShopItemCard({ item, canAfford, onBuy, onUse }: Props) {
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.desc}>{item.desc}</Text>
-        {item.owned > 0 && <Text style={styles.owned}>Owned: {item.owned}</Text>}
+        {item.owned > 0 && <Text style={styles.owned}>owned: {item.owned}</Text>}
       </View>
       <View style={styles.actions}>
         {item.owned > 0 && onUse ? (
           <TouchableOpacity onPress={onUse} style={styles.useBtn}>
-            <Text style={styles.useBtnText}>Use</Text>
+            <Text style={styles.useBtnText}>use</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={onBuy} disabled={!canAfford}

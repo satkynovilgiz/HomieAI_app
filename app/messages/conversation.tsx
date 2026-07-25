@@ -47,10 +47,10 @@ export default function ConversationScreen() {
         <Text style={styles.avatar}>{conv.friendAvatar}</Text>
         <View style={styles.headerInfo}>
           <Text style={styles.name}>{conv.friendName}</Text>
-          <Text style={styles.status}>🟢 Online</Text>
+          <Text style={styles.status}>🟢 online</Text>
         </View>
         <TouchableOpacity onPress={shareStreak} style={styles.shareBtn}>
-          <Text style={styles.shareBtnText}>🔥 Share</Text>
+          <Text style={styles.shareBtnText}>🔥 share</Text>
         </TouchableOpacity>
       </View>
 
@@ -88,7 +88,7 @@ export default function ConversationScreen() {
         <View style={styles.inputBar}>
           <TextInput
             value={input} onChangeText={setInput}
-            placeholder="Type a message..."
+            placeholder="type a message..."
             placeholderTextColor={Colors.muted}
             style={styles.input}
             onSubmitEditing={() => handleSend()}

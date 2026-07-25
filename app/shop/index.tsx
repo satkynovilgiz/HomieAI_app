@@ -23,14 +23,13 @@ export default function ShopScreen() {
 
   const handleBuy = (id: string, price: number, name: string) => {
     if (gems < price) {
-      Alert.alert('Not enough gems! 💎', `You need ${price - gems} more gems to buy ${name}.`);
+      Alert.alert('not enough gems 💎', `you need ${price - gems} more gems for ${name}`);
       setMood('sad');
       return;
     }
-    Alert.alert(`Buy ${name}?`, `Cost: ${price} 💎
-You have: ${gems} 💎`, [
-      { text:'Cancel', style:'cancel' },
-      { text:'Buy!', onPress:() => { buy(id); setMood('celebrating'); setTimeout(()=>setMood('happy'),2000); }},
+    Alert.alert(`buy ${name}?`, `${price} 💎 · you've got ${gems} 💎`, [
+      { text:'nvm', style:'cancel' },
+      { text:'buy', onPress:() => { buy(id); setMood('celebrating'); setTimeout(()=>setMood('happy'),2000); }},
     ]);
   };
 
@@ -48,7 +47,7 @@ You have: ${gems} 💎`, [
         <HomieBot mood={mood} size={80}/>
         <View style={styles.heroText}>
           <Text style={styles.heroTitle}>Shop</Text>
-          <Text style={styles.heroSub}>Spend gems on powerups!</Text>
+          <Text style={styles.heroSub}>spend gems on powerups</Text>
         </View>
       </View>
 

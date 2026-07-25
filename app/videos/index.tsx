@@ -77,7 +77,7 @@ export default function VideosScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             value={search} onChangeText={setSearch}
-            placeholder="Search any topic..."
+            placeholder="search any topic..."
             placeholderTextColor={Colors.muted}
             style={styles.searchInput}
             onSubmitEditing={handleSearch}
@@ -85,7 +85,7 @@ export default function VideosScreen() {
           />
         </View>
         <TouchableOpacity onPress={handleSearch} style={styles.searchBtn}>
-          <Text style={styles.searchBtnText}>Search</Text>
+          <Text style={styles.searchBtnText}>search</Text>
         </TouchableOpacity>
       </View>
 
@@ -110,11 +110,11 @@ export default function VideosScreen() {
       {loading ? (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={Colors.purple}/>
-          <Text style={styles.loadingText}>Loading videos...</Text>
+          <Text style={styles.loadingText}>hold on...</Text>
         </View>
       ) : videos.length === 0 ? (
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>No videos found — try another search</Text>
+          <Text style={styles.loadingText}>nothing found — try another search</Text>
         </View>
       ) : (
         <FlatList

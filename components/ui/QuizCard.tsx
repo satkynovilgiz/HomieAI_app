@@ -21,7 +21,7 @@ export default function QuizCard({ quiz, onAnswer }: Props) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.badge}>🎯 QUIZ — +20 XP if correct!</Text>
+      <Text style={styles.badge}>🎯 quiz — +20 XP if you get it</Text>
       <Text style={styles.question}>{quiz.q}</Text>
       <View style={styles.opts}>
         {quiz.opts.map((opt, i) => {
@@ -42,7 +42,7 @@ export default function QuizCard({ quiz, onAnswer }: Props) {
       {selected !== null && (
         <View style={styles.expBox}>
           <Text style={styles.expText}>
-            {selected === quiz.ans ? '🎉 Correct! +20 XP ' : '❌ Not quite — '}
+            {selected === quiz.ans ? '🎉 yeah exactly — +20 XP ' : '❌ not quite — '}
             {quiz.exp}
           </Text>
         </View>

@@ -15,11 +15,11 @@ export default function StreakFreeze() {
       <Text style={styles.icon}>🧊</Text>
       <View style={styles.info}>
         <Text style={styles.title}>Streak Freeze</Text>
-        <Text style={styles.sub}>You have {freezesLeft} freeze{freezesLeft !== 1 ? 's' : ''} left</Text>
+        <Text style={styles.sub}>you've got {freezesLeft} freeze{freezesLeft !== 1 ? 's' : ''} left</Text>
       </View>
       <TouchableOpacity onPress={() => dispatch(useFreeze())} disabled={freezesLeft === 0}
         style={[styles.btn, freezesLeft === 0 && styles.btnDisabled]}>
-        <Text style={styles.btnText}>Use</Text>
+        <Text style={styles.btnText}>use</Text>
       </TouchableOpacity>
     </View>
   );

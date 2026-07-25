@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { localAuth } from '../../lib/auth';
+import { getLeaderboard } from '../../lib/firestoreService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 
@@ -13,7 +13,7 @@ export default function LeaderboardScreen() {
   const user = useSelector((s: RootState) => s.user.current);
   const [board, setBoard] = useState<any[]>([]);
 
-  useEffect(() => { localAuth.leaderboard().then(setBoard); }, []);
+  useEffect(() => { getLeaderboard().then(setBoard); }, []);
 
   const medals = ['🥇','🥈','🥉'];
   const myRank = board.findIndex(u => u.name === user?.name) + 1;
@@ -32,7 +32,7 @@ export default function LeaderboardScreen() {
           <Text style={styles.sub}>Top students by XP. Study more, climb higher!</Text>
           {myRank > 0 && (
             <View style={styles.rankBadge}>
-              <Text style={styles.rankText}>You are #{myRank} 🔥</Text>
+              <Text style={styles.rankText}>you're #{myRank} 🔥</Text>
             </View>
           )}
         </View>
@@ -41,8 +41,8 @@ export default function LeaderboardScreen() {
           {board.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 30 }}>
               <HomieBot mood="sad" size={80}/>
-              <Text style={{ color: Colors.text, fontWeight: '700', fontSize: 16, marginTop: 12 }}>No students yet!</Text>
-              <Text style={{ color: Colors.muted, marginTop: 6 }}>Be the first to earn XP 🎯</Text>
+              <Text style={{ color: Colors.text, fontWeight: '700', fontSize: 16, marginTop: 12 }}>no students yet</Text>
+              <Text style={{ color: Colors.muted, marginTop: 6 }}>be the first to earn XP 🎯</Text>
             </View>
           ) : board.map((u, i) => (
             <View key={i} style={[styles.row, u.name === user?.name && styles.rowMe]}>

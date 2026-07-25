@@ -39,7 +39,7 @@ export default function PlannerScreen() {
       const prompt = `Create a practical weekly study plan for a student. Goal: "${goal}". Available: ${hours} hours/day. Give day-by-day plan with subjects and time. Keep it motivating. Max 150 words.`;
       const out = await callGemini([{ role: 'user', content: prompt }], 'You are a study coach. Create practical, motivating study plans.');
       setAiPlan(out);
-    } catch(err: any) { setAiPlan('Error: ' + err.message); }
+    } catch(err: any) { setAiPlan('something broke — try again'); }
     finally { setLoading(false); }
   };
 
@@ -61,7 +61,7 @@ export default function PlannerScreen() {
             <HomieBot mood="thinking" size={48}/>
             <View style={{ flex: 1 }}>
               <Text style={styles.aiCardTitle}>AI Plan Generator</Text>
-              <Text style={styles.aiCardSub}>Tell HOMIE your goal!</Text>
+              <Text style={styles.aiCardSub}>tell homie your goal</Text>
             </View>
           </View>
           <TextInput value={goal} onChangeText={setGoal} placeholder="My goal: ace my Math final in 2 weeks..." placeholderTextColor={Colors.muted} style={styles.goalInput}/>
@@ -75,7 +75,7 @@ export default function PlannerScreen() {
           </View>
           <TouchableOpacity onPress={generateAIPlan} disabled={loading || !goal}
             style={[styles.generateBtn, (loading || !goal) && { opacity: 0.5 }]}>
-            <Text style={styles.generateBtnText}>{loading ? '⏳ Generating...' : '✨ Generate Plan'}</Text>
+            <Text style={styles.generateBtnText}>{loading ? 'hold on...' : '✨ generate plan'}</Text>
           </TouchableOpacity>
 
           {aiPlan !== '' && (
@@ -118,7 +118,7 @@ export default function PlannerScreen() {
           </ScrollView>
 
           <TouchableOpacity onPress={() => savePlan({})} style={styles.clearBtn}>
-            <Text style={styles.clearBtnText}>Clear Schedule</Text>
+            <Text style={styles.clearBtnText}>clear schedule</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

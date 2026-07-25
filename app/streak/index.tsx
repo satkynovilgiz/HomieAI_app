@@ -30,8 +30,8 @@ export default function StreakScreen() {
         <View style={styles.hero}>
           <HomieBot mood={streak.current >= 7 ? 'celebrating' : streak.current === 0 ? 'sad' : 'happy'} size={110}/>
           <Text style={styles.streakNum}>{streak.current}</Text>
-          <Text style={styles.streakLabel}>Day Streak</Text>
-          <Text style={styles.streakSub}>Longest: {streak.longest} days 🏆</Text>
+          <Text style={styles.streakLabel}>day streak</Text>
+          <Text style={styles.streakSub}>longest: {streak.longest} days 🏆</Text>
         </View>
 
         {/* Week view */}

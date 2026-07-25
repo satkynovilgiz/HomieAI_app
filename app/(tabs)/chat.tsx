@@ -16,8 +16,9 @@ import { SUBJECTS, VIDEO_DB } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import QuizCard from '../../components/ui/QuizCard';
 import VideoCard from '../../components/ui/VideoCard';
+import { TrashIcon, CameraIcon } from '../../components/icons';
 
-const QUICK_PROMPTS = ['Quiz me!', 'Explain simply', 'Give an example', 'Challenge me', 'Real world use?'];
+const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challenge me', 'real world use?'];
 
 export default function ChatScreen() {
   const dispatch = useDispatch();
@@ -61,7 +62,7 @@ export default function ChatScreen() {
       dispatch(addXP(5));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
-      dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: 'my bad bro 😅 — ' + err.message, timestamp: Date.now() }));
+      dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: 'my bad bro 😅 — try again', timestamp: Date.now() }));
       dispatch(setMood('sad'));
     } finally {
       dispatch(setLoading(false));
@@ -128,7 +129,7 @@ export default function ChatScreen() {
           <Text style={styles.subjBtnText}>{SUBJECTS.find(s => s.s === subject)?.e} {subject} ▾</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => dispatch(clearMsgs())} style={styles.clearBtn}>
-          <Text style={styles.clearBtnText}>🗑️</Text>
+          <TrashIcon color={Colors.muted} size={18} />
         </TouchableOpacity>
       </View>
 
@@ -150,7 +151,7 @@ export default function ChatScreen() {
           <View style={styles.welcome}>
             <HomieBot mood="happy" size={100}/>
             <Text style={styles.welcomeTitle}>yo {user?.name?.split(' ')[0]}! what are we studying? 📚</Text>
-            <Text style={styles.welcomeSub}>Ask anything, upload homework, or use voice!</Text>
+            <Text style={styles.welcomeSub}>ask anything, upload homework, or just talk</Text>
             <View style={styles.prompts}>
               {QUICK_PROMPTS.map(p => (
                 <TouchableOpacity key={p} onPress={() => send(p)} style={styles.promptBtn}>
@@ -178,7 +179,7 @@ export default function ChatScreen() {
         {imgPreview && (
           <View style={styles.imgPreview}>
             <Image source={{ uri: imgPreview }} style={styles.imgPreviewImg}/>
-            <Text style={styles.imgPreviewText}>📸 Photo ready — ask or just send!</Text>
+            <Text style={styles.imgPreviewText}>📸 photo's in — ask something or just send</Text>
             <TouchableOpacity onPress={() => { setImgPreview(null); setImgB64(null); }}>
               <Text style={styles.imgPreviewClose}>✕</Text>
             </TouchableOpacity>
@@ -188,7 +189,7 @@ export default function ChatScreen() {
         {/* Input bar */}
         <View style={styles.inputBar}>
           <TouchableOpacity onPress={pickImage} style={[styles.iconBtn, imgPreview && styles.iconBtnActive]}>
-            <Text style={styles.iconBtnText}>📷</Text>
+            <CameraIcon color={imgPreview ? Colors.purpleL : Colors.muted} size={20} />
           </TouchableOpacity>
           <TextInput
             style={styles.textInput}

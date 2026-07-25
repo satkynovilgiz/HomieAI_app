@@ -34,7 +34,7 @@ export default function ScannerScreen() {
       ]}];
       const out = await callGemini(messages, getSystemPrompt('General'));
       setResult(out);
-    } catch(err: any) { setResult('Error: ' + err.message); }
+    } catch(err: any) { setResult('something broke — try again'); }
     finally { setLoading(false); }
   };
 
@@ -56,10 +56,10 @@ export default function ScannerScreen() {
               <Text style={styles.uploadSub}>Take a photo or upload from your gallery</Text>
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
                 <TouchableOpacity onPress={() => pickImg(true)} style={styles.uploadBtn}>
-                  <Text style={styles.uploadBtnText}>📷 Take Photo</Text>
+                  <Text style={styles.uploadBtnText}>📷 take photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => pickImg(false)} style={[styles.uploadBtn, styles.uploadBtnSecondary]}>
-                  <Text style={[styles.uploadBtnText, { color: Colors.text }]}>⬆ Upload</Text>
+                  <Text style={[styles.uploadBtnText, { color: Colors.text }]}>⬆ upload</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -68,16 +68,16 @@ export default function ScannerScreen() {
               <Image source={{ uri: img }} style={styles.preview} resizeMode="contain"/>
               <TextInput
                 value={question} onChangeText={setQuestion}
-                placeholder="Ask a specific question (optional)..."
+                placeholder="ask a specific question (optional)..."
                 placeholderTextColor={Colors.muted} style={styles.questionInput}
               />
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <TouchableOpacity onPress={() => { setImg(null); setImgB64(null); setResult(''); setQuestion(''); }}
                   style={styles.newPhotoBtn}>
-                  <Text style={styles.newPhotoBtnText}>← New Photo</Text>
+                  <Text style={styles.newPhotoBtnText}>← new photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={solve} disabled={loading} style={[styles.solveBtn, loading && { opacity: 0.6 }]}>
-                  <Text style={styles.solveBtnText}>{loading ? '⏳ HOMIE thinking...' : '🔍 Solve This'}</Text>
+                  <Text style={styles.solveBtnText}>{loading ? 'hold on...' : '🔍 solve this'}</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -94,7 +94,7 @@ export default function ScannerScreen() {
               </View>
               <Text style={styles.resultText}>{result}</Text>
               <View style={styles.warningBox}>
-                <Text style={styles.warningText}>⚠️ Always verify solutions and understand each step!</Text>
+                <Text style={styles.warningText}>⚠️ always verify solutions and understand each step</Text>
               </View>
             </View>
           )}

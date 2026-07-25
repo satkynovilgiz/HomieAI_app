@@ -8,7 +8,7 @@ interface Props { friend: Friend; onMessage?: () => void; onChallenge?: () => vo
 
 export default function FriendCard({ friend: f, onMessage, onChallenge }: Props) {
   const statusColor = f.status === 'online' ? Colors.green : f.status === 'studying' ? Colors.purple : Colors.muted;
-  const statusLabel = f.status === 'online' ? '🟢 Online' : f.status === 'studying' ? '📚 Studying' : '⚫ Offline';
+  const statusLabel = f.status === 'online' ? '🟢 online' : f.status === 'studying' ? '📚 studying' : '⚫ offline';
 
   return (
     <View style={styles.card}>
@@ -31,7 +31,7 @@ export default function FriendCard({ friend: f, onMessage, onChallenge }: Props)
           </TouchableOpacity>
           {f.isChallengeable && (
             <TouchableOpacity onPress={onChallenge} style={styles.challengeBtn}>
-              <Text style={styles.challengeBtnText}>⚔️ Challenge</Text>
+              <Text style={styles.challengeBtnText}>⚔️ challenge</Text>
             </TouchableOpacity>
           )}
         </View>

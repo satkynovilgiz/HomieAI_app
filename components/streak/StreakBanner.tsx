@@ -23,7 +23,7 @@ export default function StreakBanner({ onPress }: { onPress?: () => void }) {
             <Text style={styles.fire}>🔥</Text>
           </View>
           <View>
-            <Text style={styles.count}>{streak.current} day streak!</Text>
+            <Text style={styles.count}>{streak.current} day streak</Text>
             <Text style={styles.sub}>Keep it going bro 💪</Text>
           </View>
         </View>

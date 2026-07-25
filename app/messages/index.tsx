@@ -24,8 +24,8 @@ export default function MessagesScreen() {
         {conversations.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>💬</Text>
-            <Text style={styles.emptyTitle}>No messages yet</Text>
-            <Text style={styles.emptySub}>Add friends to start chatting!</Text>
+            <Text style={styles.emptyTitle}>nothing here yet</Text>
+            <Text style={styles.emptySub}>add friends and say hi</Text>
           </View>
         ) : conversations.map(conv => (
           <ConversationRow

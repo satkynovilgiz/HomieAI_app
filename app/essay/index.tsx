@@ -25,7 +25,7 @@ export default function EssayScreen() {
       const prompt = `Write a ${type} about: "${topic}". Target length: approximately ${words} words. Make it well-structured, engaging, and academically sound with introduction, body paragraphs, and conclusion.`;
       const out = await callGemini([{ role: 'user', content: prompt }], 'You are an expert essay writer. Write clear, well-structured academic essays.');
       setResult(out);
-    } catch(err: any) { setResult('Error: ' + err.message); }
+    } catch(err: any) { setResult('something broke — try again'); }
     finally { setLoading(false); }
   };
 
@@ -41,7 +41,7 @@ export default function EssayScreen() {
 
         <View style={{ alignItems: 'center', paddingVertical: 16 }}>
           <HomieBot mood="thinking" size={80}/>
-          <Text style={styles.sub}>Get a full essay draft in seconds. Edit it and make it yours!</Text>
+          <Text style={styles.sub}>get a full essay draft in seconds — edit it and make it yours</Text>
         </View>
 
         <View style={{ padding: 16, gap: 14 }}>
@@ -83,17 +83,17 @@ export default function EssayScreen() {
 
           <TouchableOpacity onPress={generate} disabled={loading || !topic.trim()}
             style={[styles.generateBtn, (loading || !topic.trim()) && styles.generateBtnDisabled]}>
-            <Text style={styles.generateBtnText}>{loading ? '⏳ Writing your essay...' : '✍️ Generate Essay'}</Text>
+            <Text style={styles.generateBtnText}>{loading ? 'hold on...' : '✍️ generate essay'}</Text>
           </TouchableOpacity>
 
           {result !== '' && (
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>✅ Your Essay</Text>
+                <Text style={styles.resultTitle}>✅ your essay</Text>
               </View>
               <Text style={styles.resultText}>{result}</Text>
               <View style={styles.warningBox}>
-                <Text style={styles.warningText}>💡 Always edit AI essays — add your own voice bro!</Text>
+                <Text style={styles.warningText}>💡 always edit AI essays — add your own voice bro</Text>
               </View>
             </View>
           )}

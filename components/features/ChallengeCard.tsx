@@ -40,11 +40,11 @@ export default function ChallengeCard({ challenge: c, onAccept }: Props) {
       </View>
       {c.status === 'pending' && onAccept && (
         <TouchableOpacity onPress={onAccept} style={styles.acceptBtn}>
-          <Text style={styles.acceptBtnText}>⚔️ Accept Challenge!</Text>
+          <Text style={styles.acceptBtnText}>⚔️ accept challenge</Text>
         </TouchableOpacity>
       )}
-      {c.status === 'won' && <Text style={styles.resultWon}>🏆 You Won! +{c.xpReward} XP</Text>}
-      {c.status === 'lost' && <Text style={styles.resultLost}>😢 You lost this time...</Text>}
+      {c.status === 'won' && <Text style={styles.resultWon}>🏆 you won — +{c.xpReward} XP</Text>}
+      {c.status === 'lost' && <Text style={styles.resultLost}>😢 lost this one</Text>}
     </View>
   );
 }

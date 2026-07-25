@@ -8,11 +8,11 @@ import HomieBot from '../../components/mascot/HomieBot';
 const { width } = Dimensions.get('window');
 
 const SLIDES = [
-  { mood: 'celebrating' as const, accent: '#7c3aed', title: 'Meet Homie!', sub: 'Your AI study buddy who actually wants you to succeed. 100% free, always.' },
-  { mood: 'happy' as const,       accent: '#10b981', title: 'Study Like a Game', sub: 'Earn XP, maintain streaks, unlock achievements. Learning has never been this fun.' },
-  { mood: 'thinking' as const,    accent: '#3b82f6', title: 'AI Chat + Lessons', sub: 'Ask Homie anything, take structured lessons, use voice mode — all in one app.' },
-  { mood: 'happy' as const,       accent: '#f97316', title: 'Challenge Friends', sub: 'Add friends, race for XP, climb the leaderboard together.' },
-  { mood: 'celebrating' as const, accent: '#7c3aed', title: "Let's Go!", sub: 'Create your free account in seconds. No credit card needed.' },
+  { mood: 'celebrating' as const, accent: '#7c3aed', title: 'meet homie', sub: 'your ai study buddy that actually gets it. 100% free, always.' },
+  { mood: 'happy' as const,       accent: '#10b981', title: 'learning that hits different', sub: 'xp, streaks, achievements — it barely feels like studying.' },
+  { mood: 'thinking' as const,    accent: '#3b82f6', title: 'chat, lessons, voice', sub: 'ask anything, work through real lessons, or just talk it out.' },
+  { mood: 'happy' as const,       accent: '#f97316', title: 'bring your friends', sub: 'race for xp, flex your streak, climb the board together.' },
+  { mood: 'celebrating' as const, accent: '#7c3aed', title: "that's the app", sub: 'free account, no card, 30 seconds.' },
 ];
 
 export default function OnboardingScreen() {
@@ -24,7 +24,7 @@ export default function OnboardingScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: slide.accent + '18' }]}>
       {!isLast && (
         <TouchableOpacity onPress={() => router.replace('/auth/login')} style={styles.skip}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>skip</Text>
         </TouchableOpacity>
       )}
 
@@ -49,11 +49,11 @@ export default function OnboardingScreen() {
           style={[styles.nextBtn, { backgroundColor: slide.accent }]}
           activeOpacity={0.9}
         >
-          <Text style={styles.nextBtnText}>{isLast ? 'Create Free Account' : 'Next'}</Text>
+          <Text style={styles.nextBtnText}>{isLast ? "let's go" : 'next'}</Text>
         </TouchableOpacity>
         {idx === 0 && (
           <TouchableOpacity onPress={() => router.replace('/auth/login')} style={styles.loginLink}>
-            <Text style={styles.loginLinkText}>Already have an account? Sign in</Text>
+            <Text style={styles.loginLinkText}>already got an account? sign in</Text>
           </TouchableOpacity>
         )}
       </View>

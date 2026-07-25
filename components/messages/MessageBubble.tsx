@@ -17,12 +17,12 @@ export default function MessageBubble({ message: m, isMe, senderAvatar }: Props)
           {m.type === 'streak_share' && <>
             <Text style={styles.specialIcon}>🔥</Text>
             <Text style={styles.specialTitle}>{m.payload?.streak} day streak!</Text>
-            <Text style={styles.specialSub}>They're on fire bro!</Text>
+            <Text style={styles.specialSub}>they're on fire bro</Text>
           </>}
           {m.type === 'xp_share' && <>
             <Text style={styles.specialIcon}>⭐</Text>
             <Text style={styles.specialTitle}>+{m.payload?.xp} XP earned!</Text>
-            <Text style={styles.specialSub}>Challenge them back!</Text>
+            <Text style={styles.specialSub}>challenge them back</Text>
           </>}
           {m.type === 'challenge' && <>
             <Text style={styles.specialIcon}>⚔️</Text>

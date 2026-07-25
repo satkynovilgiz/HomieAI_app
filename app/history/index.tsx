@@ -36,16 +36,16 @@ export default function HistoryScreen() {
           {history.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
               <HomieBot mood="sad" size={100}/>
-              <Text style={styles.emptyTitle}>No sessions yet 😢</Text>
-              <Text style={styles.emptySub}>Start chatting with HOMIE!</Text>
+              <Text style={styles.emptyTitle}>nothing here yet 😢</Text>
+              <Text style={styles.emptySub}>start chatting with homie</Text>
               <TouchableOpacity onPress={() => router.push('/chat')} style={styles.startBtn}>
-                <Text style={styles.startBtnText}>Start Studying 🚀</Text>
+                <Text style={styles.startBtnText}>start studying 🚀</Text>
               </TouchableOpacity>
             </View>
           ) : history.map((h, i) => (
             <View key={i} style={styles.historyRow}>
               <View style={styles.historyIcon}>
-                <Text style={{ fontSize: 28 }}>{h.subj_emoji || '📚'}</Text>
+                <Text style={{ fontSize: 28 }}>📚</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.historySubject}>{h.subject || 'Study Session'}</Text>

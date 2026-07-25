@@ -70,8 +70,8 @@ export default function LessonsScreen() {
           {unitProgress?.lessons.every(l => l.completed) && (
             <View style={styles.completeBanner}>
               <Text style={styles.completeBannerIcon}>👑</Text>
-              <Text style={styles.completeBannerTitle}>Unit Complete!</Text>
-              <Text style={styles.completeBannerSub}>You crushed it!</Text>
+              <Text style={styles.completeBannerTitle}>unit complete</Text>
+              <Text style={styles.completeBannerSub}>you crushed it</Text>
             </View>
           )}
           <View style={{ height: 40 }}/>
@@ -90,7 +90,7 @@ export default function LessonsScreen() {
         <Text style={styles.pageTitle}>Lessons</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.sectionLabel}>Choose a subject</Text>
+        <Text style={styles.sectionLabel}>choose a subject</Text>
         {ALL_UNITS.map(unit => (
           <UnitCard
             key={unit.id}

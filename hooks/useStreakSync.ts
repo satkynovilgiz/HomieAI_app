@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { hydrate } from '../store/slices/streakSlice';
-import { localAuth } from '../lib/auth';
+import { updateUser } from '../lib/authService';
 
 export function useStreakSync() {
   const dispatch = useDispatch();
@@ -13,22 +13,22 @@ export function useStreakSync() {
 
   useEffect(() => {
     if (!user) { hydratedFor.current = null; return; }
-    if (hydratedFor.current === user.email) return;
-    hydratedFor.current = user.email;
+    if (hydratedFor.current === user.uid) return;
+    hydratedFor.current = user.uid;
     dispatch(hydrate({
       current: user.streak || 0,
       longest: user.longestStreak || user.streak || 0,
-      lastStudy: user.lastStudy || null,
+      lastStudy: user.lastStudyDate || null,
       studiedDates: user.studiedDates || [],
     }));
-  }, [user?.email]);
+  }, [user?.uid]);
 
   useEffect(() => {
-    if (!user || hydratedFor.current !== user.email) return;
-    localAuth.update(user.email, {
+    if (!user || hydratedFor.current !== user.uid) return;
+    updateUser(user.uid, {
       streak: streak.current,
       longestStreak: streak.longest,
-      lastStudy: streak.lastStudy,
+      lastStudyDate: streak.lastStudy,
       studiedDates: streak.studiedDates,
     });
   }, [streak.current, streak.longest, streak.lastStudy, streak.studiedDates.length]);

@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { clearUser, updateUser } from '../../store/slices/userSlice';
-import { localAuth } from '../../lib/auth';
+import { updateUser } from '../../store/slices/userSlice';
+import { signOutUser, updateUser as updateUserRemote } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
 import { AVATARS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -63,12 +63,11 @@ export default function ProfileScreen() {
   if (!user) return null;
 
   const logout = () => {
-    Alert.alert('Sign Out', 'See you soon!', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('sign out?', 'see you soon', [
+      { text: 'nvm', style: 'cancel' },
       {
-        text: 'Sign Out', style: 'destructive', onPress: async () => {
-          await localAuth.logout();
-          dispatch(clearUser());
+        text: 'sign out', style: 'destructive', onPress: async () => {
+          await signOutUser();
           router.replace('/auth/login');
         }
       },
@@ -76,14 +75,14 @@ export default function ProfileScreen() {
   };
 
   const saveAvatar = async () => {
-    const updated = await localAuth.update(user.email, { avatar: selAvatar });
+    const updated = await updateUserRemote(user.uid, { avatar: selAvatar });
     if (updated) dispatch(updateUser({ avatar: selAvatar }));
     setTab('stats');
   };
 
   const saveName = async () => {
     if (!name.trim()) return;
-    await localAuth.update(user.email, { name: name.trim() });
+    await updateUserRemote(user.uid, { name: name.trim() });
     dispatch(updateUser({ name: name.trim() }));
     setEditName(false);
   };
@@ -121,7 +120,7 @@ export default function ProfileScreen() {
                   onSubmitEditing={saveName}
                 />
                 <TouchableOpacity onPress={saveName} style={styles.saveNameBtn}>
-                  <Text style={styles.saveNameText}>Save</Text>
+                  <Text style={styles.saveNameText}>save</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -131,7 +130,7 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
             <Text style={styles.profileEmail}>{user.email}</Text>
-            <Text style={styles.profileJoined}>Joined {user.joined}</Text>
+            <Text style={styles.profileJoined}>Joined {new Date(user.createdAt).toLocaleDateString()}</Text>
           </View>
 
           <View style={styles.levelBlock}>
@@ -178,7 +177,7 @@ export default function ProfileScreen() {
         {/* Avatar tab */}
         {tab === 'avatar' && (
           <View style={styles.avatarPicker}>
-            <Text style={styles.avatarPickerTitle}>Choose your avatar</Text>
+            <Text style={styles.avatarPickerTitle}>choose your avatar</Text>
             <View style={styles.avatarGrid}>
               {AVATARS.map(a => (
                 <TouchableOpacity
@@ -190,7 +189,7 @@ export default function ProfileScreen() {
               ))}
             </View>
             <TouchableOpacity onPress={saveAvatar} style={styles.saveAvatarBtn}>
-              <Text style={styles.saveAvatarText}>Save Avatar</Text>
+              <Text style={styles.saveAvatarText}>save avatar</Text>
             </TouchableOpacity>
           </View>
         )}

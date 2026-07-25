@@ -4,3 +4,6 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# EAS Update export output (regenerated on every `eas update`)
+dist/

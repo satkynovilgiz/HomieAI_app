@@ -36,7 +36,7 @@ function WordleGame({ dispatch }: { dispatch: any }) {
   return (
     <View style={{ alignItems: 'center', gap: 12 }}>
       <Text style={styles.gameTitle}>HOMIE Wordle</Text>
-      <Text style={styles.gameSub}>Guess the 5-letter study word</Text>
+      <Text style={styles.gameSub}>guess the 5-letter study word</Text>
       <View style={{ gap: 6 }}>
         {[...Array(6)].map((_,ri) => (
           <View key={ri} style={{ flexDirection: 'row', gap: 6 }}>
@@ -56,17 +56,17 @@ function WordleGame({ dispatch }: { dispatch: any }) {
           <TextInput
             value={current} onChangeText={t => setCurrent(t.toUpperCase().slice(0,5))}
             style={styles.wordleInput} maxLength={5} autoCapitalize="characters"
-            placeholder="Type 5 letters..." placeholderTextColor={Colors.muted}
+            placeholder="type 5 letters..." placeholderTextColor={Colors.muted}
           />
           <TouchableOpacity onPress={submit} style={styles.wordleBtn}>
-            <Text style={{ color: Colors.white, fontWeight: '800' }}>Guess</Text>
+            <Text style={{ color: Colors.white, fontWeight: '800' }}>guess</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={{ alignItems: 'center', gap: 8 }}>
           <HomieBot mood={won ? 'celebrating' : 'sad'} size={80}/>
           <Text style={{ fontSize: 18, fontWeight: '800', color: won ? Colors.green : Colors.red }}>
-            {won ? 'YOOOO YOU GOT IT! 🎉 +30 XP' : `Word was: ${word} 😭`}
+            {won ? 'YOOOO YOU GOT IT 🎉 +30 XP' : `word was ${word} 😭`}
           </Text>
         </View>
       )}
@@ -94,10 +94,10 @@ function QuizGame({ dispatch }: { dispatch: any }) {
   if (done) return (
     <View style={{ alignItems: 'center', gap: 12 }}>
       <HomieBot mood={score >= 6 ? 'celebrating' : 'happy'} size={100}/>
-      <Text style={styles.gameTitle}>{score}/{QUIZ_BANK.length} Correct!</Text>
+      <Text style={styles.gameTitle}>{score}/{QUIZ_BANK.length} correct</Text>
       <Text style={{ color: Colors.green, fontSize: 15, fontWeight: '700' }}>+{score * 10} XP earned</Text>
       <TouchableOpacity onPress={() => { setIdx(0); setScore(0); setAnswered(null); setDone(false); }} style={styles.playAgainBtn}>
-        <Text style={{ color: Colors.white, fontWeight: '800', fontSize: 15 }}>Play Again</Text>
+        <Text style={{ color: Colors.white, fontWeight: '800', fontSize: 15 }}>play again</Text>
       </TouchableOpacity>
     </View>
   );

@@ -27,15 +27,15 @@ export default function DetectorScreen() {
       const prompt = 'Rewrite this text to sound completely human-written by a student. Casual, add natural imperfections, vary sentence length. Sound like a real student:\n\n' + text;
       const out = await callGemini([{ role: 'user', content: prompt }], 'You are a text humanizer. Make text sound like a real student wrote it.');
       setHumanized(out);
-    } catch(err: any) { setHumanized('Error: ' + err.message); }
+    } catch(err: any) { setHumanized('something broke — try again'); }
     finally { setLoading(false); }
   };
 
   const getVerdict = (pct: number) => pct > 65
-    ? { label: 'Likely AI 🤖', color: Colors.red }
+    ? { label: 'likely AI 🤖', color: Colors.red }
     : 100 - pct > 65
-    ? { label: 'Likely Human ✅', color: Colors.green }
-    : { label: 'Mixed 🤔', color: Colors.yellow };
+    ? { label: 'likely human ✅', color: Colors.green }
+    : { label: 'mixed 🤔', color: Colors.yellow };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -67,7 +67,7 @@ export default function DetectorScreen() {
         <View style={{ padding: 16 }}>
           <TextInput
             value={text} onChangeText={setText}
-            placeholder="Paste your text here bro... (min 50 characters)"
+            placeholder="paste your text here bro... (min 50 characters)"
             placeholderTextColor={Colors.muted} multiline
             style={styles.textarea}
           />
@@ -77,7 +77,7 @@ export default function DetectorScreen() {
             onPress={tab === 'detect' ? analyze : humanize}
             disabled={loading || text.length < 50}
             style={[styles.analyzeBtn, (loading || text.length < 50) && styles.analyzeBtnDisabled]}>
-            <Text style={styles.analyzeBtnText}>{loading ? '⏳ Working...' : tab === 'detect' ? '🔍 Analyze' : '✏️ Humanize'}</Text>
+            <Text style={styles.analyzeBtnText}>{loading ? 'hold on...' : tab === 'detect' ? '🔍 analyze' : '✏️ humanize'}</Text>
           </TouchableOpacity>
 
           {tab === 'detect' && result && (
@@ -98,7 +98,7 @@ export default function DetectorScreen() {
                 <HomieBot mood={result.aiPct > 60 ? 'shocked' : 'celebrating'} size={48}/>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.verdictLabel, { color: getVerdict(result.aiPct).color }]}>{getVerdict(result.aiPct).label}</Text>
-                  <Text style={styles.verdictSub}>{result.aiPct > 60 ? 'High AI probability. Try humanizing! 👆' : 'Looks human-written! ✅'}</Text>
+                  <Text style={styles.verdictSub}>{result.aiPct > 60 ? 'high AI probability — try humanizing 👆' : 'looks human-written ✅'}</Text>
                 </View>
               </View>
             </View>
@@ -106,7 +106,7 @@ export default function DetectorScreen() {
 
           {tab === 'humanize' && humanized && (
             <View style={styles.resultCard}>
-              <Text style={styles.resultTitle}>✅ Humanized Version</Text>
+              <Text style={styles.resultTitle}>✅ humanized version</Text>
               <Text style={{ color: Colors.text2, fontSize: 14, lineHeight: 22 }}>{humanized}</Text>
             </View>
           )}

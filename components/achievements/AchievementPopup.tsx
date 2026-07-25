@@ -32,7 +32,7 @@ export default function AchievementPopup({ achievement, onDismiss }: Props) {
       <TouchableOpacity onPress={onDismiss} style={styles.card}>
         <Text style={styles.icon}>{achievement.icon}</Text>
         <View style={styles.info}>
-          <Text style={styles.label}>🏆 Achievement Unlocked!</Text>
+          <Text style={styles.label}>🏆 unlocked</Text>
           <Text style={styles.title}>{achievement.title}</Text>
           <Text style={styles.desc}>{achievement.desc}</Text>
         </View>

@@ -62,7 +62,7 @@ export default function FriendsTab() {
               <FriendCard key={f.id} friend={f} onMessage={() => openConversation(f)} onChallenge={() => {}}/>
             ))}
             <TouchableOpacity style={styles.addFriendBtn} onPress={() => router.push('/friends/add')}>
-              <Text style={styles.addFriendText}>+ Add Friends</Text>
+              <Text style={styles.addFriendText}>+ add friends</Text>
             </TouchableOpacity>
           </>
         )}
@@ -88,7 +88,7 @@ export default function FriendsTab() {
               </>
             )}
             <TouchableOpacity style={styles.newChallengeBtn}>
-              <Text style={styles.newChallengeBtnText}>Challenge a Friend</Text>
+              <Text style={styles.newChallengeBtnText}>challenge a friend</Text>
             </TouchableOpacity>
           </>
         )}

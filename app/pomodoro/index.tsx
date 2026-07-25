@@ -108,19 +108,19 @@ export default function PomodoroScreen() {
         <TextInput
           style={styles.taskInput}
           value={task} onChangeText={setTask}
-          placeholder="What are you working on? 📝"
+          placeholder="what are you working on? 📝"
           placeholderTextColor={Colors.muted}
         />
 
         {/* Controls */}
         <View style={styles.controls}>
           <TouchableOpacity onPress={() => { setTimeLeft(mode.time); setRunning(false); }} style={styles.resetBtn}>
-            <Text style={styles.resetText}>Reset</Text>
+            <Text style={styles.resetText}>reset</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setRunning(!running)}
             style={[styles.startBtn, { backgroundColor: mode.color }]}>
             <Text style={styles.startText}>
-              {running ? '⏸ Pause' : timeLeft === mode.time ? '▶ Start' : '▶ Resume'}
+              {running ? '⏸ pause' : timeLeft === mode.time ? '▶ start' : '▶ resume'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -138,10 +138,10 @@ export default function PomodoroScreen() {
           <HomieBot mood={running ? 'happy' : 'thinking'} size={56}/>
           <Text style={styles.tipText}>
             {running && modeIdx === 0
-              ? "You're locked in bro! Phone down, let's crush it 💪"
+              ? "you're locked in bro, phone down, let's crush it 💪"
               : running
-              ? "Real break: stretch, water, rest your eyes 🌿"
-              : "Commit to 25 mins of pure focus. You got this! 🎯"}
+              ? "real break: stretch, water, rest your eyes 🌿"
+              : "commit to 25 mins of pure focus. you got this 🎯"}
           </Text>
         </View>
       </ScrollView>

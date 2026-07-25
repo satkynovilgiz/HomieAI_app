@@ -20,7 +20,7 @@ export default function AchievementsScreen() {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.progress}>
-          <Text style={styles.progressLabel}>{earned.length}/{achievements.length} Unlocked</Text>
+          <Text style={styles.progressLabel}>{earned.length}/{achievements.length} unlocked</Text>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width:`${pct}%` as any }]}/>
           </View>

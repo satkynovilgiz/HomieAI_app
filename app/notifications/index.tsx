@@ -18,7 +18,7 @@ export default function NotificationsScreen() {
         <Text style={styles.title}>Notifications</Text>
         {unread > 0 && (
           <TouchableOpacity onPress={markAll} style={styles.markAllBtn}>
-            <Text style={styles.markAllText}>Mark all read</Text>
+            <Text style={styles.markAllText}>mark all read</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -26,8 +26,8 @@ export default function NotificationsScreen() {
         {notifications.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>🔔</Text>
-            <Text style={styles.emptyTitle}>No notifications</Text>
-            <Text style={styles.emptySub}>You're all caught up bro!</Text>
+            <Text style={styles.emptyTitle}>no notifications</Text>
+            <Text style={styles.emptySub}>you're all caught up bro</Text>
           </View>
         ) : notifications.map(n => (
           <TouchableOpacity key={n.id} onPress={() => mark(n.id)} style={[styles.notif, !n.read && styles.notifUnread]} activeOpacity={0.8}>

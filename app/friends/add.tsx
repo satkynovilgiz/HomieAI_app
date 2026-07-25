@@ -35,7 +35,7 @@ export default function AddFriendsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <TextInput
           value={search} onChangeText={setSearch}
-          placeholder="Search by username..."
+          placeholder="search by username..."
           placeholderTextColor={Colors.muted}
           style={styles.searchInput}
         />
@@ -50,13 +50,13 @@ export default function AddFriendsScreen() {
             <TouchableOpacity
               onPress={() => handleAdd(s)} disabled={added.includes(s.id)}
               style={[styles.addBtn, added.includes(s.id) && styles.addBtnDone]}>
-              <Text style={styles.addBtnText}>{added.includes(s.id) ? '✓ Added' : '+ Add'}</Text>
+              <Text style={styles.addBtnText}>{added.includes(s.id) ? '✓ added' : '+ add'}</Text>
             </TouchableOpacity>
           </View>
         ))}
         <View style={styles.shareCard}>
           <HomieBot mood="happy" size={80}/>
-          <Text style={styles.shareTitle}>Invite your friends!</Text>
+          <Text style={styles.shareTitle}>invite your friends</Text>
           <Text style={styles.shareSub}>Share your code and study together</Text>
           <TouchableOpacity style={styles.shareBtn}>
             <Text style={styles.shareBtnText}>📤 Share HOMIE AI</Text>

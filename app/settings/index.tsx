@@ -5,9 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { clearUser } from '../../store/slices/userSlice';
 import { toggleTheme } from '../../store/slices/themeSlice';
-import { localAuth } from '../../lib/auth';
+import { signOutUser } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
 
 export default function SettingsScreen() {
@@ -19,8 +18,7 @@ export default function SettingsScreen() {
   const [haptics, setHaptics] = useState(true);
 
   const logout = async () => {
-    await localAuth.logout();
-    dispatch(clearUser());
+    await signOutUser();
     router.replace('/auth/login');
   };
 
@@ -93,7 +91,7 @@ export default function SettingsScreen() {
         </View>
 
         <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-          <Text style={styles.logoutText}>Sign Out</Text>
+          <Text style={styles.logoutText}>sign out</Text>
         </TouchableOpacity>
         <View style={{ height:40 }}/>
       </ScrollView>

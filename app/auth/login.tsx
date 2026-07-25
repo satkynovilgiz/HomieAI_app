@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
-import { useDispatch } from 'react-redux';
-import { localAuth } from '../../lib/auth';
-import { setUser } from '../../store/slices/userSlice';
+import { signInWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { GoogleIcon } from '../../components/icons';
+
+const GOOGLE_AVAILABLE = isGoogleSignInSupported();
 
 export default function LoginScreen() {
-  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,18 +19,17 @@ export default function LoginScreen() {
   const [mood, setMood] = useState<'happy' | 'sad' | 'celebrating'>('happy');
 
   const login = async () => {
-    if (!email || !pass) { setError('Fill in all fields!'); return; }
+    if (!email || !pass) { setError('fill in your info'); return; }
     setLoading(true); setError('');
     try {
-      const { user, err } = await localAuth.login(email.toLowerCase().trim(), pass);
+      const { user, err } = await signInWithEmail(email.toLowerCase().trim(), pass);
       if (err) { setError(err); setMood('sad'); return; }
       if (user) {
-        dispatch(setUser(user));
         setMood('celebrating');
         setTimeout(() => router.replace('/(tabs)'), 300);
       }
     } catch (e: any) {
-      setError('Something went wrong: ' + (e?.message || 'please try again'));
+      setError('something broke — try again');
       setMood('sad');
     } finally {
       setLoading(false);
@@ -41,18 +40,15 @@ export default function LoginScreen() {
     setGoogleLoading(true);
     setError('');
     try {
-      const googleEmail = 'google@homie.app';
-      let result = await localAuth.login(googleEmail, 'google123');
-      if (result.err) {
-        result = await localAuth.create({ name: 'Google User', email: googleEmail, pass: 'google123', avatar: 'G' });
-      }
-      if (result.user) {
-        dispatch(setUser(result.user));
+      const { user, err } = await signInWithGoogle();
+      if (err) { setError(err); setMood('sad'); return; }
+      if (user) {
         setMood('celebrating');
         setTimeout(() => router.replace('/(tabs)'), 300);
       }
     } catch {
-      setError('Google sign-in failed. Use email instead.');
+      setError("google's not cooperating — use email instead");
+      setMood('sad');
     } finally {
       setGoogleLoading(false);
     }
@@ -63,18 +59,19 @@ export default function LoginScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <HomieBot mood={mood} size={90} />
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.sub}>Your streak is waiting...</Text>
+          <Text style={styles.title}>welcome back</Text>
+          <Text style={styles.sub}>your streak's waiting</Text>
         </View>
 
         <View style={styles.card}>
           {/* Google */}
-          <TouchableOpacity onPress={googleSignIn} disabled={googleLoading} style={styles.googleBtn} activeOpacity={0.85}>
-            <View style={styles.googleIconWrap}>
-              <Text style={styles.googleIconText}>G</Text>
-            </View>
-            <Text style={styles.googleText}>{googleLoading ? 'Signing in...' : 'Continue with Google'}</Text>
+          <TouchableOpacity onPress={googleSignIn} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
+            <GoogleIcon size={20} />
+            <Text style={styles.googleText}>{googleLoading ? 'signing in...' : 'continue with google'}</Text>
           </TouchableOpacity>
+          {!GOOGLE_AVAILABLE && (
+            <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
+          )}
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
@@ -84,16 +81,16 @@ export default function LoginScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Input label="Email" placeholder="your@email.com" value={email}
+          <Input label="email" placeholder="your@email.com" value={email}
             onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-          <Input label="Password" placeholder="Your password" value={pass}
+          <Input label="password" placeholder="your password" value={pass}
             onChangeText={setPass} secureTextEntry />
 
-          <Button title="Sign In" onPress={login} loading={loading} size="lg" style={{ marginTop: 8 }} />
+          <Button title="sign in" onPress={login} loading={loading} size="lg" style={{ marginTop: 8 }} />
 
           <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/auth/signup')}>
             <Text style={styles.signupText}>
-              No account? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>Sign up free</Text>
+              new here? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>sign up</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -110,9 +107,9 @@ const styles = StyleSheet.create({
   sub: { fontSize: 14, color: Colors.muted, marginTop: 6 },
   card: { width: '100%', backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
   googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', borderRadius: Radius.md, paddingVertical: 14, marginBottom: 20 },
-  googleIconWrap: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#4285F4', alignItems: 'center', justifyContent: 'center' },
-  googleIconText: { fontSize: 13, fontWeight: '900', color: 'white' },
+  googleBtnDisabled: { opacity: 0.55, marginBottom: 8 },
   googleText: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
+  googleNote: { fontSize: 11, color: Colors.muted, textAlign: 'center', marginBottom: 20 },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
   divText: { fontSize: 12, color: Colors.muted },

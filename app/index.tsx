@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useDispatch } from 'react-redux';
-import { localAuth } from '../lib/auth';
+import { getSession } from '../lib/authService';
 import { setUser } from '../store/slices/userSlice';
 import HomieBot from '../components/mascot/HomieBot';
 import { Colors } from '../constants/theme';
@@ -15,7 +15,7 @@ export default function SplashScreen() {
     const init = async () => {
       await new Promise(r => setTimeout(r, 2000));
       try {
-        const session = await localAuth.getSession();
+        const session = await getSession();
         if (session) {
           dispatch(setUser(session));
           router.replace('/(tabs)');

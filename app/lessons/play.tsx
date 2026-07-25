@@ -101,8 +101,8 @@ export default function LessonPlayScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.completeScreen}>
           <HomieBot mood={stars===3?'celebrating':'happy'} size={140}/>
-          <Text style={styles.completeTitle}>{stars===3?'Perfect! 🎉':stars===2?'Great job! 🔥':'Well done! 💪'}</Text>
-          <Text style={styles.completeSub}>{lesson.title} complete!</Text>
+          <Text style={styles.completeTitle}>{stars===3?'nailed it 🎉':stars===2?'solid 🔥':'you got through it 💪'}</Text>
+          <Text style={styles.completeSub}>{lesson.title}, done</Text>
           <View style={styles.stars}>
             {[0,1,2].map(i => <Text key={i} style={[styles.starIcon, i < stars && styles.starActive]}>★</Text>)}
           </View>
@@ -112,7 +112,7 @@ export default function LessonPlayScreen() {
             <View style={styles.reward}><Text style={styles.rewardIcon}>✅</Text><Text style={styles.rewardVal}>{correct}/{totalQ}</Text><Text style={styles.rewardLabel}>Correct</Text></View>
           </View>
           <TouchableOpacity onPress={() => router.back()} style={styles.doneBtn}>
-            <Text style={styles.doneBtnText}>Continue 🚀</Text>
+            <Text style={styles.doneBtnText}>keep going 🚀</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -159,7 +159,7 @@ export default function LessonPlayScreen() {
           <Text style={styles.expIcon}>{selected===q.answer?'🎉':'❌'}</Text>
           <View style={{ flex:1 }}>
             <Text style={[styles.expTitle, { color: selected===q.answer?Colors.green:Colors.red }]}>
-              {selected===q.answer?'Correct! +'+q.xp+' XP':'Not quite...'}
+              {selected===q.answer?'yeah exactly — +'+q.xp+' XP':'not quite — here\'s why'}
             </Text>
             <Text style={styles.expText}>{q.explanation}</Text>
           </View>

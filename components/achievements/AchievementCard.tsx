@@ -12,7 +12,7 @@ export default function AchievementCard({ achievement }: { achievement: Achievem
         <Text style={[styles.title, !achievement.earned && styles.textLocked]}>{achievement.title}</Text>
         <Text style={styles.desc}>{achievement.desc}</Text>
         {achievement.earned && achievement.earnedAt && (
-          <Text style={styles.date}>Earned {new Date(achievement.earnedAt).toLocaleDateString()}</Text>
+          <Text style={styles.date}>earned {new Date(achievement.earnedAt).toLocaleDateString()}</Text>
         )}
       </View>
       <View style={[styles.xpBadge, !achievement.earned && styles.xpBadgeLocked]}>
