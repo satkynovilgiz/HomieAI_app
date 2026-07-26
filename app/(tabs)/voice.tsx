@@ -164,7 +164,7 @@ export default function VoiceScreen() {
           {status === 'listening' && liveTranscript !== '' && (
             <Text style={styles.liveText} numberOfLines={3}>"{liveTranscript}"</Text>
           )}
-          {lastReply !== '' && status === 'speaking' && (
+          {lastReply !== '' && (status === 'speaking' || status === 'idle') && (
             <Text style={styles.replyText} numberOfLines={4}>{lastReply}</Text>
           )}
         </View>
