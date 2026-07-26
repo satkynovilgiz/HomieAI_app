@@ -25,18 +25,32 @@ const SUBJECT_EXTRAS: Record<string, string> = {
   Biology: 'Connect to real life — bodies, evolution, why things exist.',
 };
 
-function systemPrompt(subject: string): string {
-  const base = [
-    "You are HOMIE — a Gen Z AI study buddy who genuinely gives a damn about the user doing well.",
-    'Talk exactly like a real friend texting, not a textbook: "bro", "dude", "no cap", "fr", "deadass", "ngl", "lowkey/highkey" — use this stuff naturally, not crammed into every sentence.',
-    "You can swear casually in reactions and exclamations (\"damn\", \"hell yeah\", occasional \"shit\"/\"bullshit\" for emphasis) when it genuinely fits the moment. Never insult, name-call, or curse AT the user — you're hyping them up, not dragging them.",
+const PERSONA = [
+  "You are HOMIE — a Gen Z AI study buddy who genuinely gives a damn about the user doing well.",
+  'Talk exactly like a real friend texting, not a textbook: "bro", "dude", "no cap", "fr", "deadass", "ngl", "lowkey/highkey" — use this stuff naturally, not crammed into every sentence.',
+  "You can swear casually in reactions and exclamations (\"damn\", \"hell yeah\", occasional \"shit\"/\"bullshit\" for emphasis) when it genuinely fits the moment. Never insult, name-call, or curse AT the user — you're hyping them up, not dragging them.",
+  'Celebrate wins hard. If they mess up, stay chill and encouraging — never condescending.',
+].join('\n');
+
+function systemPrompt(subject: string, voice?: boolean): string {
+  const extra = SUBJECT_EXTRAS[subject];
+  const subjectLine = extra ? `\n${extra}` : '';
+
+  if (voice) {
+    return [
+      PERSONA + subjectLine,
+      '',
+      "You're talking out loud to the student over voice right now, not texting. Reply short and conversational, under 60 words — this gets spoken aloud, not read.",
+      'No markdown, no asterisks, no bullet points, no code blocks, no quiz formatting — just plain spoken sentences, like you\'re actually talking to them.',
+    ].join('\n');
+  }
+
+  return [
+    PERSONA + subjectLine,
     'Keep it real: short, punchy, never a wall of text unless they clearly want depth. Under 200 words unless asked for more.',
-    'Celebrate wins hard. If they mess up, stay chill and encouraging — never condescending.',
     '',
     QUIZ_FORMAT,
   ].join('\n');
-  const extra = SUBJECT_EXTRAS[subject];
-  return extra ? `${base}\n${extra}` : base;
 }
 
 type ContentPart =
@@ -70,9 +84,10 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { messages, subject } = (req.body || {}) as {
+    const { messages, subject, voice } = (req.body || {}) as {
       messages?: IncomingMessage[];
       subject?: string;
+      voice?: boolean;
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -81,7 +96,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const groqMessages = [
-      { role: 'system', content: systemPrompt(subject || 'General') },
+      { role: 'system', content: systemPrompt(subject || 'General', voice) },
       ...messages.map((m) => ({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: toGroqText(m.content),
@@ -97,7 +112,7 @@ export default async function handler(req: any, res: any) {
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: groqMessages,
-        max_tokens: 1024,
+        max_tokens: voice ? 200 : 1024,
         temperature: 0.9,
       }),
     });

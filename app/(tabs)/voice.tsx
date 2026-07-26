@@ -8,7 +8,7 @@ import { requireOptionalNativeModule } from 'expo-modules-core';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
-import { callGemini, getSystemPrompt } from '../../lib/gemini';
+import { callAI } from '../../lib/aiChat';
 import HomieBot from '../../components/mascot/HomieBot';
 
 // expo-speech-recognition's native module only exists in a custom EAS build, not Expo Go.
@@ -79,8 +79,7 @@ export default function VoiceScreen() {
     try {
       const history = convoRef.current.map(c => ({ role: c.role === 'you' ? 'user' : 'assistant', content: c.text }));
       history.push({ role: 'user', content: text });
-      const prompt = 'You are talking out loud to the student via voice. Reply short and conversational, under 60 words — this will be spoken aloud, not read.';
-      const reply = await callGemini(history, getSystemPrompt('General') + '\n' + prompt);
+      const reply = await callAI(history, 'General', true);
       const clean = reply.replace(/[*_`#]/g, '').trim();
       setLastReply(clean);
       setConvo(prev => [...prev, { role: 'homie', text: clean }]);

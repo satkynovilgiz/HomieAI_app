@@ -1,10 +1,10 @@
 const CHAT_API_URL = 'https://homie-chat-api.vercel.app/api/chat';
 
-export async function callAI(messages: any[], subject: string): Promise<string> {
+export async function callAI(messages: any[], subject: string, voice?: boolean): Promise<string> {
   const res = await fetch(CHAT_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, subject }),
+    body: JSON.stringify({ messages, subject, voice }),
   });
 
   if (!res.ok) {
