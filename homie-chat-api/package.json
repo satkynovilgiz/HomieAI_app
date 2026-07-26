@@ -1,0 +1,9 @@
+{
+  "name": "homie-chat-api",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

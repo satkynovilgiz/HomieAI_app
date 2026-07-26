@@ -10,7 +10,7 @@ import { RootState } from '../../store';
 import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg } from '../../store/slices/chatSlice';
 import { addXP, addCorrect, addHistory } from '../../store/slices/userSlice';
 import { addToHistory } from '../../lib/firestoreService';
-import { callGemini, getSystemPrompt } from '../../lib/gemini';
+import { callAI } from '../../lib/aiChat';
 import { parseQuiz } from '../../lib/utils';
 import { Colors, Radius } from '../../constants/theme';
 import { SUBJECTS, VIDEO_DB } from '../../constants/subjects';
@@ -69,7 +69,7 @@ export default function ChatScreen() {
 
     try {
       const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
-      const reply = await callGemini(apiMsgs, getSystemPrompt(subject));
+      const reply = await callAI(apiMsgs, subject);
       const quiz = parseQuiz(reply);
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
       const video = Math.random() > 0.5 ? VIDEO_DB[Math.floor(Math.random() * VIDEO_DB.length)] : null;
