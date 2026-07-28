@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Linking, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -12,7 +12,7 @@ import HomieBot from '../../components/mascot/HomieBot';
 import InAppPlayer from '../../components/ui/InAppPlayer';
 import InAppBrowser from '../../components/ui/InAppBrowser';
 
-const YOUTUBE_API_KEY = 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
+const YOUTUBE_API_KEY = 'AIzaSyCbq92JLyP5TGtI9bidgOaqOBtwHv-vXdg';
 
 const STUDY_SEARCHES = [
   { label: 'Math', query: 'math tutorial for students', color: '#7c3aed', emoji: '📐' },
