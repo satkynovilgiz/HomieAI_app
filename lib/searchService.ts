@@ -100,13 +100,23 @@ export async function searchWeb(query: string): Promise<ArticleResult[]> {
   }
 }
 
+function youtubeSearchFallback(query: string): ArticleResult {
+  return {
+    id: 'youtube_search',
+    title: `Search YouTube for "${query}"`,
+    description: `Couldn't pull specific videos right now — tap to see YouTube's search results for "${query}" instead.`,
+    url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+    source: 'YouTube',
+  };
+}
+
 export async function smartSearch(query: string, type: SearchType): Promise<{
   videos: VideoResult[];
   articles: ArticleResult[];
 }> {
   if (type === 'video') {
     const videos = await searchYouTube(query);
-    return { videos, articles: [] };
+    return videos.length ? { videos, articles: [] } : { videos: [], articles: [youtubeSearchFallback(query)] };
   }
   if (type === 'article') {
     const articles = await searchWeb(query);

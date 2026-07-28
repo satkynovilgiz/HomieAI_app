@@ -204,6 +204,11 @@ export default function ChatScreen() {
             {(item.articles as ArticleResult[] || []).map(a => (
               <SearchArticleCard key={a.id} article={a} isSaved={isItemSaved(a.url)} onSave={() => handleSaveArticle(a, item.query)}/>
             ))}
+            {!item.videos?.length && !item.articles?.length && (
+              <View style={[styles.bubble, styles.bubbleAI]}>
+                <Text style={styles.bubbleText}>couldn't find anything for that — try rephrasing</Text>
+              </View>
+            )}
           </View>
         </View>
       );
