@@ -26,6 +26,18 @@ export interface ArticleResult {
 
 export type SearchResult = VideoResult | ArticleResult;
 
+const HTML_ENTITIES: Record<string, string> = {
+  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&apos;': "'", '&nbsp;': ' ',
+};
+
+// YouTube (and most REST APIs returning HTML-safe text) send titles/descriptions
+// HTML-escaped — there's no DOM in React Native to unescape them, so decode by hand.
+export function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;|&lt;|&gt;|&quot;|&#39;|&apos;|&nbsp;/g, m => HTML_ENTITIES[m])
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+}
+
 export async function searchYouTube(query: string): Promise<VideoResult[]> {
   try {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=4&q=${encodeURIComponent(query)}&key=${YOUTUBE_KEY}`;
@@ -34,10 +46,10 @@ export async function searchYouTube(query: string): Promise<VideoResult[]> {
     return (data.items || []).map((item: any) => ({
       id: item.id.videoId,
       videoId: item.id.videoId,
-      title: item.snippet.title,
-      channelTitle: item.snippet.channelTitle,
+      title: decodeHtmlEntities(item.snippet.title),
+      channelTitle: decodeHtmlEntities(item.snippet.channelTitle),
       thumbnail: item.snippet.thumbnails?.medium?.url || '',
-      description: item.snippet.description,
+      description: decodeHtmlEntities(item.snippet.description),
       url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
       source: 'youtube' as const,
     }));

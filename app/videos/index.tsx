@@ -8,6 +8,7 @@ import { RootState } from '../../store';
 import store from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import { SavedItem, removeItem, loadItems, persistSavedItems, loadSavedItemsFromStorage } from '../../store/slices/videosSlice';
+import { decodeHtmlEntities } from '../../lib/searchService';
 import HomieBot from '../../components/mascot/HomieBot';
 import InAppPlayer from '../../components/ui/InAppPlayer';
 import InAppBrowser from '../../components/ui/InAppBrowser';
@@ -83,8 +84,8 @@ export default function VideosScreen() {
       if (data.items && data.items.length > 0) {
         setVideos(data.items.map((item: any) => ({
           id: item.id.videoId,
-          title: item.snippet.title,
-          channel: item.snippet.channelTitle,
+          title: decodeHtmlEntities(item.snippet.title),
+          channel: decodeHtmlEntities(item.snippet.channelTitle),
           thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
         })));
       } else {
