@@ -72,7 +72,10 @@ export default function ChatScreen() {
       const reply = await callAI(apiMsgs, subject);
       const quiz = parseQuiz(reply);
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
-      const video = Math.random() > 0.5 ? VIDEO_DB[Math.floor(Math.random() * VIDEO_DB.length)] : null;
+      const relevantVideos = VIDEO_DB.filter(v => v.tags.includes(subject.toLowerCase()));
+      const video = relevantVideos.length && Math.random() > 0.5
+        ? relevantVideos[Math.floor(Math.random() * relevantVideos.length)]
+        : null;
 
       dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: clean, quiz, video, timestamp: Date.now() }));
       dispatch(setMood('happy'));

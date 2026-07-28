@@ -29,13 +29,19 @@ const initialUnits: UnitProgress[] = [
     { id:'l10', completed:false, stars:0, score:0, attempts:0 },
     { id:'l11', completed:false, stars:0, score:0, attempts:0 },
   ]},
+  { unitId:'science-basics', unlocked:true, completed:false, lessons:[
+    { id:'ls1', completed:false, stars:0, score:0, attempts:0 },
+    { id:'ls2', completed:false, stars:0, score:0, attempts:0 },
+  ]},
 ];
+
+const UNIT_UNLOCKS: Record<string, string> = { 'math-basics': 'algebra' };
 
 const lessonsSlice = createSlice({
   name: 'lessons',
-  initialState: { units: initialUnits, currentLesson: null as string | null, inSession: false, sessionHearts: 3, sessionXP: 0 },
+  initialState: { units: initialUnits, currentLesson: null as string | null, inSession: false, sessionXP: 0 },
   reducers: {
-    startLesson(state, { payload }: PayloadAction<string>) { state.currentLesson = payload; state.inSession = true; state.sessionHearts = 3; state.sessionXP = 0; },
+    startLesson(state, { payload }: PayloadAction<string>) { state.currentLesson = payload; state.inSession = true; state.sessionXP = 0; },
     completeLesson(state, { payload }: PayloadAction<{ lessonId: string; stars: number; score: number }>) {
       state.inSession = false;
       for (const unit of state.units) {
@@ -46,11 +52,16 @@ const lessonsSlice = createSlice({
           lesson.score = Math.max(lesson.score, payload.score);
           lesson.attempts++;
           lesson.lastAttempt = new Date().toISOString();
+          if (unit.lessons.every(l => l.completed)) {
+            unit.completed = true;
+            const nextUnitId = UNIT_UNLOCKS[unit.unitId];
+            const nextUnit = nextUnitId && state.units.find(u => u.unitId === nextUnitId);
+            if (nextUnit) nextUnit.unlocked = true;
+          }
           break;
         }
       }
     },
-    loseSessionHeart(state) { if (state.sessionHearts > 0) state.sessionHearts--; },
     addSessionXP(state, { payload }: PayloadAction<number>) { state.sessionXP += payload; },
     unlockUnit(state, { payload }: PayloadAction<string>) {
       const u = state.units.find(u => u.unitId === payload);
@@ -59,5 +70,5 @@ const lessonsSlice = createSlice({
   },
 });
 
-export const { startLesson, completeLesson, loseSessionHeart, addSessionXP: addLessonXP, unlockUnit } = lessonsSlice.actions;
+export const { startLesson, completeLesson, addSessionXP: addLessonXP, unlockUnit } = lessonsSlice.actions;
 export default lessonsSlice.reducer;

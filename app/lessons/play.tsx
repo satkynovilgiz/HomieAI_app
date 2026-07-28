@@ -6,11 +6,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Haptics from 'expo-haptics';
 import { RootState } from '../../store';
-import { startLesson, completeLesson, loseSessionHeart } from '../../store/slices/lessonsSlice';
+import { startLesson, completeLesson } from '../../store/slices/lessonsSlice';
 import { addXP, addHistory } from '../../store/slices/userSlice';
 import { addToHistory } from '../../lib/firestoreService';
 import { earnGems } from '../../store/slices/gemsSlice';
 import { checkInToday } from '../../store/slices/streakSlice';
+import { loseHeart } from '../../store/slices/heartsSlice';
 import { Colors, Radius } from '../../constants/theme';
 import { MATH_UNITS } from '../../constants/lessons/mathLessons';
 import { CODING_UNITS } from '../../constants/lessons/codingLessons';
@@ -34,6 +35,7 @@ export default function LessonPlayScreen() {
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
   const [done, setDone] = useState(false);
+  const [outOfHearts, setOutOfHearts] = useState(false);
   const [mood, setMood] = useState<'happy'|'celebrating'|'sad'|'thinking'>('happy');
   const [showExp, setShowExp] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
@@ -41,6 +43,10 @@ export default function LessonPlayScreen() {
   useEffect(() => {
     if (lesson) dispatch(startLesson(lessonId));
   }, []);
+
+  useEffect(() => {
+    if (hearts <= 0 && !done) setOutOfHearts(true);
+  }, [hearts, done]);
 
   if (!lesson || !unit) return null;
 
@@ -66,7 +72,7 @@ export default function LessonPlayScreen() {
       setWrong(w => w + 1);
       setMood('sad');
       setShowExp(true);
-      dispatch(loseSessionHeart());
+      dispatch(loseHeart());
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -101,6 +107,24 @@ export default function LessonPlayScreen() {
     if (idx === selected) return { bg: 'rgba(239,68,68,0.1)', border: Colors.red, text: Colors.red };
     return { bg: Colors.bg3, border: Colors.border, text: Colors.muted };
   };
+
+  if (outOfHearts) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.completeScreen}>
+          <HomieBot mood="sad" size={140}/>
+          <Text style={styles.completeTitle}>out of hearts 💔</Text>
+          <Text style={styles.completeSub}>refill your hearts to keep going</Text>
+          <TouchableOpacity onPress={() => router.push('/shop')} style={styles.doneBtn}>
+            <Text style={styles.doneBtnText}>go to shop 💎</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.back()} style={[styles.doneBtn, { backgroundColor: Colors.bg3 }]}>
+            <Text style={styles.doneBtnText}>back to lessons</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (done) {
     const stars = wrong === 0 ? 3 : wrong <= 1 ? 2 : 1;
