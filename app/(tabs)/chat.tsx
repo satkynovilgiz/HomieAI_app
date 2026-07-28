@@ -7,16 +7,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { RootState } from '../../store';
+import store from '../../store';
 import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg } from '../../store/slices/chatSlice';
 import { addXP, addCorrect, addHistory } from '../../store/slices/userSlice';
+import { saveItem, loadItems, persistSavedItems, loadSavedItemsFromStorage } from '../../store/slices/videosSlice';
 import { addToHistory } from '../../lib/firestoreService';
 import { callAI } from '../../lib/aiChat';
 import { parseQuiz } from '../../lib/utils';
+import { detectSearchIntent } from '../../lib/searchDetector';
+import { smartSearch, VideoResult, ArticleResult } from '../../lib/searchService';
 import { Colors, Radius } from '../../constants/theme';
 import { SUBJECTS, VIDEO_DB } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import QuizCard from '../../components/ui/QuizCard';
 import VideoCard from '../../components/ui/VideoCard';
+import SearchVideoCard from '../../components/chat/VideoCard';
+import SearchArticleCard from '../../components/chat/ArticleCard';
 import { TrashIcon, CameraIcon } from '../../components/icons';
 
 const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challenge me', 'real world use?'];
@@ -25,6 +31,7 @@ export default function ChatScreen() {
   const dispatch = useDispatch();
   const { messages, loading, subject, mood, sessionXP } = useSelector((s: RootState) => s.chat);
   const user = useSelector((s: RootState) => s.user.current);
+  const savedItems = useSelector((s: RootState) => s.videos.items);
   const [input, setInput] = useState('');
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
@@ -35,6 +42,7 @@ export default function ChatScreen() {
 
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
+  useEffect(() => { loadSavedItemsFromStorage().then(items => dispatch(loadItems(items))); }, []);
 
   // Record this chat session into history when leaving the screen, not per-message —
   // one meaningful entry per visit instead of spamming a row for every reply.
@@ -49,6 +57,25 @@ export default function ChatScreen() {
       addToHistory(u.uid, { subject: subj, preview, xp_earned: xp, duration_mins });
     };
   }, []);
+
+  const isItemSaved = (url: string) => savedItems.some(i => i.url === url);
+
+  const handleSaveVideo = (video: VideoResult, query: string) => {
+    dispatch(saveItem({
+      id: `v_${video.videoId}`, type: 'video', title: video.title, url: video.url,
+      thumbnail: video.thumbnail, source: video.source, channelTitle: video.channelTitle,
+      videoId: video.videoId, savedAt: new Date().toISOString(), query,
+    }));
+    persistSavedItems(store.getState().videos.items);
+  };
+
+  const handleSaveArticle = (article: ArticleResult, query: string) => {
+    dispatch(saveItem({
+      id: `a_${article.id}_${Date.now()}`, type: 'article', title: article.title, url: article.url,
+      thumbnail: article.thumbnail, source: article.source, savedAt: new Date().toISOString(), query,
+    }));
+    persistSavedItems(store.getState().videos.items);
+  };
 
   const send = useCallback(async (overText?: string, overImg?: string | null) => {
     const text = overText ?? input.trim();
@@ -66,6 +93,42 @@ export default function ChatScreen() {
     dispatch(addMsg(userMsg));
     dispatch(setLoading(true));
     dispatch(setMood('thinking'));
+
+    const { type: searchType, query } = !img ? detectSearchIntent(text) : { type: null, query: '' };
+
+    if (searchType) {
+      const loadingId = `search_loading_${Date.now()}`;
+      const loadingMsg: any = { id: loadingId, role: 'assistant', type: 'loading', content: `Searching for "${query}"...`, timestamp: Date.now() };
+      dispatch(addMsg(loadingMsg));
+
+      try {
+        const { videos, articles } = await smartSearch(query, searchType);
+        dispatch(updateMsg({
+          id: loadingId, type: 'search_results', content: `here's what I found on ${query}`,
+          videos, articles, query,
+        } as any));
+        dispatch(setMood('happy'));
+        dispatch(addSessionXP(5));
+        dispatch(addXP(5));
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        try {
+          const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
+          apiMsgs.push({ role: 'user', content: `Give me a brief 2 sentence summary about ${query} so the student knows what they are looking at` });
+          const reply = await callAI(apiMsgs, subject);
+          dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: reply.trim(), timestamp: Date.now() }));
+        } catch {
+          // summary is a nice-to-have — the results are already shown, so a failure here is silent
+        }
+      } catch (err: any) {
+        dispatch(updateMsg({ id: loadingId, type: undefined, content: "couldn't search right now — try again" } as any));
+        dispatch(setMood('sad'));
+      } finally {
+        dispatch(setLoading(false));
+        setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+      }
+      return;
+    }
 
     try {
       const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
@@ -113,6 +176,39 @@ export default function ChatScreen() {
 
   const renderMsg = ({ item }: { item: any }) => {
     const isUser = item.role === 'user';
+
+    if (item.type === 'loading') {
+      return (
+        <View style={styles.msgRow}>
+          <HomieBot mood="thinking" size={28}/>
+          <View style={styles.msgCol}>
+            <View style={[styles.bubble, styles.bubbleAI]}>
+              <Text style={styles.bubbleText}>{item.content}</Text>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    if (item.type === 'search_results') {
+      return (
+        <View style={styles.msgRow}>
+          <HomieBot mood="happy" size={28}/>
+          <View style={styles.msgCol}>
+            <View style={[styles.bubble, styles.bubbleAI]}>
+              <Text style={styles.bubbleText}>{item.content}</Text>
+            </View>
+            {(item.videos as VideoResult[] || []).map(v => (
+              <SearchVideoCard key={v.id} video={v} isSaved={isItemSaved(v.url)} onSave={() => handleSaveVideo(v, item.query)}/>
+            ))}
+            {(item.articles as ArticleResult[] || []).map(a => (
+              <SearchArticleCard key={a.id} article={a} isSaved={isItemSaved(a.url)} onSave={() => handleSaveArticle(a, item.query)}/>
+            ))}
+          </View>
+        </View>
+      );
+    }
+
     const textContent = typeof item.content === 'string' ? item.content : item.content?.find?.((c: any) => c.type === 'text')?.text || '';
 
     return (

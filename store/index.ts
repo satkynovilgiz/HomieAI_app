@@ -12,6 +12,7 @@ import lessonsReducer from './slices/lessonsSlice';
 import shopReducer from './slices/shopSlice';
 import challengesReducer from './slices/challengesSlice';
 import notificationsReducer from './slices/notificationsSlice';
+import videosReducer from './slices/videosSlice';
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     shop: shopReducer,
     challenges: challengesReducer,
     notifications: notificationsReducer,
+    videos: videosReducer,
   },
   middleware: g => g({ serializableCheck: false }),
 });
