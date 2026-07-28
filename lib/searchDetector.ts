@@ -1,8 +1,8 @@
 export type SearchType = 'video' | 'article' | 'image' | 'general' | null;
 
 const VIDEO_PHRASES = [
-  'explain with video', 'show me how', 'how to',
-  'video', 'youtube', 'watch', 'tutorial', 'lecture',
+  'find me a video', 'show me a video', 'youtube video', 'watch a video',
+  'video about', 'video on', 'find video', 'search video',
 ];
 
 const ARTICLE_PHRASES = [

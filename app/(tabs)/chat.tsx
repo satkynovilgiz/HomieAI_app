@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,15 +16,106 @@ import { addToHistory } from '../../lib/firestoreService';
 import { callAI } from '../../lib/aiChat';
 import { parseQuiz } from '../../lib/utils';
 import { detectSearchIntent } from '../../lib/searchDetector';
-import { smartSearch, VideoResult, ArticleResult } from '../../lib/searchService';
+import { smartSearch, searchWeb, VideoResult, ArticleResult } from '../../lib/searchService';
 import { Colors, Radius } from '../../constants/theme';
-import { SUBJECTS, VIDEO_DB } from '../../constants/subjects';
+import { SUBJECTS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import QuizCard from '../../components/ui/QuizCard';
-import VideoCard from '../../components/ui/VideoCard';
 import SearchVideoCard from '../../components/chat/VideoCard';
 import SearchArticleCard from '../../components/chat/ArticleCard';
 import { TrashIcon, CameraIcon } from '../../components/icons';
+
+const CASUAL_STARTS = ['hi', 'hey', 'hello', 'yo', 'sup', 'thanks', 'thank you', 'ok', 'okay', 'lol', 'bye', 'cool', 'nice', 'k'];
+
+const CONFUSION_PHRASES = [
+  "i don't understand", "i still don't get it", 'can you explain more', 'more detail',
+  'deeper', "i'm confused", 'what do you mean', 'can you elaborate', 'not making sense',
+  'more info', 'tell me more', 'go deeper', 'more please', 'still confused', 'huh', '???',
+];
+
+const TOPIC_STOPWORDS = new Set([
+  'the', 'a', 'an', 'is', 'are', 'was', 'were', 'and', 'but', 'or', 'so', 'to', 'of', 'in',
+  'on', 'at', 'for', 'with', 'about', 'what', 'why', 'how', 'do', 'does', 'did', 'you', 'i',
+  'me', 'my', 'it', 'this', 'that', 'can', 'could', 'would', 'should', 'ok', 'okay', 'explain',
+  'tell', 'give', 'show', 'more', 'please', 'bro',
+]);
+
+// Extra conversational filler that survives TOPIC_STOPWORDS (fine for a single-word
+// bookkeeping keyword) but would otherwise pollute an actual search query — e.g. "cool
+// now walk me through the chain rule step by step" search well as "chain rule" alone.
+const QUERY_STOPWORDS = new Set([...TOPIC_STOPWORDS, 'now', 'walk', 'through', 'step', 'by', 'cool', 'another', 'real', 'world', 'scenario', 'example']);
+
+// Best-effort keyword for bookkeeping/display — the "same topic" gate itself doesn't rely
+// on this matching exactly (see isGreeting below), since real topic continuity across a
+// conversation ("derivatives" -> "dy/dx" -> "chain rule") can't be detected from keywords alone.
+function extractTopicKeyword(text: string): string {
+  const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !TOPIC_STOPWORDS.has(w));
+  return words.sort((a, b) => b.length - a.length)[0] || '';
+}
+
+// Strips conversational filler so the resource-bar search hits the actual subject
+// instead of the whole sentence — a raw "cool now walk me through..." query returns
+// garbage from YouTube/DuckDuckGo, but "chain rule" alone returns real results.
+function cleanSearchQuery(text: string): string {
+  const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !QUERY_STOPWORDS.has(w));
+  return words.join(' ') || text.trim();
+}
+
+// Only a bare greeting/acknowledgement counts as a reset — "cool now walk me
+// through X" legitimately starts with "cool" but is a real follow-up question,
+// so this must match the WHOLE message, not just a leading word.
+function isGreetingMessage(text: string): boolean {
+  const normalized = text.trim().toLowerCase().replace(/[.!?]+$/, '');
+  return CASUAL_STARTS.includes(normalized);
+}
+
+function PlayIcon() {
+  return (
+    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+      <Path d="M6 4L20 12L6 20V4Z" fill="#ef4444"/>
+    </Svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+      <Circle cx="10.5" cy="10.5" r="6.5" stroke="#3b82f6" strokeWidth="2"/>
+      <Path d="M20 20L15.2 15.2" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+function DocIcon() {
+  return (
+    <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+      <Path d="M6 3H14L19 8V21H6V3Z" stroke="#10b981" strokeWidth="2" strokeLinejoin="round"/>
+      <Path d="M9 12H15M9 16H15" stroke="#10b981" strokeWidth="1.6" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+function ResourceBar({ onWatchVideo, onSearchWeb, onArticle }: { onWatchVideo: () => void; onSearchWeb: () => void; onArticle: () => void }) {
+  return (
+    <View style={styles.resourceBar}>
+      <Text style={styles.resourceBarTitle}>want to go deeper on this?</Text>
+      <View style={styles.resourceBtnRow}>
+        <TouchableOpacity onPress={onWatchVideo} style={[styles.resourceBtn, styles.resourceBtnVideo]}>
+          <PlayIcon/>
+          <Text style={styles.resourceBtnTextVideo}>Watch Video</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onSearchWeb} style={[styles.resourceBtn, styles.resourceBtnWeb]}>
+          <SearchIcon/>
+          <Text style={styles.resourceBtnTextWeb}>Search Web</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onArticle} style={[styles.resourceBtn, styles.resourceBtnArticle]}>
+          <DocIcon/>
+          <Text style={styles.resourceBtnTextArticle}>Article</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challenge me', 'real world use?'];
 
@@ -36,6 +128,9 @@ export default function ChatScreen() {
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
   const [showSubjects, setShowSubjects] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+  const [shownResources, setShownResources] = useState(false);
+  const [currentTopic, setCurrentTopic] = useState('');
   const listRef = useRef<FlatList>(null);
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
@@ -43,6 +138,11 @@ export default function ChatScreen() {
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
   useEffect(() => { loadSavedItemsFromStorage().then(items => dispatch(loadItems(items))); }, []);
+
+  // New chat session (cleared or subject switched) — reset topic-depth tracking.
+  useEffect(() => {
+    if (messages.length === 0) { setMessageCount(0); setShownResources(false); setCurrentTopic(''); }
+  }, [messages.length]);
 
   // Record this chat session into history when leaving the screen, not per-message —
   // one meaningful entry per visit instead of spamming a row for every reply.
@@ -77,6 +177,24 @@ export default function ChatScreen() {
     persistSavedItems(store.getState().videos.items);
   };
 
+  const handleResourceAction = async (msgId: string, kind: 'video' | 'web' | 'article', query: string) => {
+    dispatch(updateMsg({ id: msgId, showResourceBar: false, resourceLoading: kind } as any));
+    try {
+      if (kind === 'video') {
+        const { videos } = await smartSearch(query, 'video');
+        dispatch(updateMsg({ id: msgId, resourceLoading: null, videos, resourceQuery: query } as any));
+      } else if (kind === 'web') {
+        const articles = await searchWeb(query);
+        dispatch(updateMsg({ id: msgId, resourceLoading: null, articles, resourceQuery: query } as any));
+      } else {
+        const articles = await searchWeb(`${query} explained`);
+        dispatch(updateMsg({ id: msgId, resourceLoading: null, articles, resourceQuery: query } as any));
+      }
+    } catch {
+      dispatch(updateMsg({ id: msgId, resourceLoading: null } as any));
+    }
+  };
+
   const send = useCallback(async (overText?: string, overImg?: string | null) => {
     const text = overText ?? input.trim();
     const img = overImg !== undefined ? overImg : imgB64;
@@ -93,6 +211,23 @@ export default function ChatScreen() {
     dispatch(addMsg(userMsg));
     dispatch(setLoading(true));
     dispatch(setMood('thinking'));
+
+    // Track conversation depth on the current topic — a resource bar (Watch Video /
+    // Search Web / Article) is offered once a topic has been discussed for a few
+    // messages, or immediately if the user signals confusion. A greeting resets it.
+    let triggerResourceBar = false;
+    if (!img && text) {
+      const lowerText = text.toLowerCase();
+      if (isGreetingMessage(text)) {
+        setMessageCount(0); setShownResources(false); setCurrentTopic('');
+      } else {
+        const nextCount = messageCount + 1;
+        setMessageCount(nextCount);
+        setCurrentTopic(extractTopicKeyword(text));
+        const isConfused = CONFUSION_PHRASES.some(p => lowerText.includes(p));
+        triggerResourceBar = !shownResources && (isConfused || nextCount >= 3);
+      }
+    }
 
     const { type: searchType, query } = !img ? detectSearchIntent(text) : { type: null, query: '' };
 
@@ -135,12 +270,10 @@ export default function ChatScreen() {
       const reply = await callAI(apiMsgs, subject);
       const quiz = parseQuiz(reply);
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
-      const relevantVideos = VIDEO_DB.filter(v => v.tags.includes(subject.toLowerCase()));
-      const video = relevantVideos.length && Math.random() > 0.5
-        ? relevantVideos[Math.floor(Math.random() * relevantVideos.length)]
-        : null;
 
-      dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: clean, quiz, video, timestamp: Date.now() }));
+      const assistantMsg: any = { id: (Date.now() + 1).toString(), role: 'assistant', content: clean, quiz, timestamp: Date.now() };
+      if (triggerResourceBar) { assistantMsg.showResourceBar = true; assistantMsg.resourceQuery = cleanSearchQuery(text); setShownResources(true); }
+      dispatch(addMsg(assistantMsg));
       dispatch(setMood('happy'));
       dispatch(addSessionXP(5 + (quiz ? 10 : 0)));
       dispatch(addXP(5));
@@ -152,7 +285,7 @@ export default function ChatScreen() {
       dispatch(setLoading(false));
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, imgB64, messages, subject, dispatch]);
+  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });
@@ -226,8 +359,21 @@ export default function ChatScreen() {
           {item.quiz && !isUser && (
             <QuizCard quiz={item.quiz} onAnswer={(idx, correct) => handleQuizAnswer(item.id, idx, correct)}/>
           )}
-          {item.video && !isUser && (
-            <VideoCard video={item.video} onPress={() => {}}/>
+          {!isUser && item.resourceLoading && (
+            <Text style={styles.resourceLoadingText}>looking that up...</Text>
+          )}
+          {!isUser && (item.videos as VideoResult[] || []).map((v: VideoResult) => (
+            <SearchVideoCard key={v.id} video={v} isSaved={isItemSaved(v.url)} onSave={() => handleSaveVideo(v, item.resourceQuery || '')}/>
+          ))}
+          {!isUser && (item.articles as ArticleResult[] || []).map((a: ArticleResult) => (
+            <SearchArticleCard key={a.id} article={a} isSaved={isItemSaved(a.url)} onSave={() => handleSaveArticle(a, item.resourceQuery || '')}/>
+          ))}
+          {!isUser && item.showResourceBar && (
+            <ResourceBar
+              onWatchVideo={() => handleResourceAction(item.id, 'video', item.resourceQuery)}
+              onSearchWeb={() => handleResourceAction(item.id, 'web', item.resourceQuery)}
+              onArticle={() => handleResourceAction(item.id, 'article', item.resourceQuery)}
+            />
           )}
         </View>
         {isUser && <Text style={styles.avatar}>{user?.avatar || '🧑'}</Text>}
@@ -380,4 +526,15 @@ const styles = StyleSheet.create({
   sendBtn: { width: 42, height: 42, borderRadius: 12, backgroundColor: Colors.purple, alignItems: 'center', justifyContent: 'center' },
   sendBtnDisabled: { opacity: 0.5 },
   sendBtnText: { fontSize: 20, color: Colors.white, fontWeight: '700' },
+  resourceLoadingText: { fontSize: 12, color: Colors.muted, fontStyle: 'italic' },
+  resourceBar: { backgroundColor: 'rgba(124,58,237,0.08)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.18)', borderRadius: 12, padding: 12, marginTop: 6 },
+  resourceBarTitle: { fontSize: 11, color: '#9090c0', marginBottom: 8 },
+  resourceBtnRow: { flexDirection: 'row', gap: 6 },
+  resourceBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8, borderWidth: 1 },
+  resourceBtnVideo: { backgroundColor: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.25)' },
+  resourceBtnWeb: { backgroundColor: 'rgba(59,130,246,0.12)', borderColor: 'rgba(59,130,246,0.25)' },
+  resourceBtnArticle: { backgroundColor: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.25)' },
+  resourceBtnTextVideo: { color: '#ef4444', fontSize: 11, fontWeight: '700' },
+  resourceBtnTextWeb: { color: '#3b82f6', fontSize: 11, fontWeight: '700' },
+  resourceBtnTextArticle: { color: '#10b981', fontSize: 11, fontWeight: '700' },
 });
