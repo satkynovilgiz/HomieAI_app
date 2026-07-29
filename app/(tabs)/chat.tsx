@@ -42,23 +42,28 @@ function isConfusionMessage(msg: string): boolean {
   return CONFUSION_PHRASES.some(phrase => lower.includes(phrase));
 }
 
-// Extracts a short topic keyword string from a real (non-confusion) user message
-// by stripping conversational filler — e.g. "explain the chain rule to me pls" -> "chain rule".
+// Extracts a short topic keyword string from a user message by stripping
+// conversational filler — e.g. "explain the chain rule to me pls" -> "chain rule".
+// Also strips search-command words ("video", "watch") and topic-reference words
+// ("it", "this", "that") so a bare "find video about it" extracts nothing and
+// buildSearchQuery falls back to the tracked realTopic instead of searching "it".
 function extractTopic(msg: string): string {
   const stopWords = [
-    'explain', 'what', 'is', 'are', 'the', 'a', 'an',
-    'how', 'does', 'work', 'tell', 'me', 'about', 'can',
-    'you', 'please', 'bro', 'help', 'understand', 'define',
-    'meaning', 'of', 'do', 'and', 'for', 'to', 'in',
-    'it', 'this', 'that', 'with', 'on', 'at', 'by',
-    'give', 'show', 'find', 'get', 'let', 'want',
-    'need', 'know', 'think', 'see', 'try', 'use',
-    'make', 'take', 'go', 'come', 'look', 'also',
-    'just', 'like', 'so', 'but', 'if', 'then',
-    'than', 'too', 'very', 'really', 'actually',
-    'basically', 'fr', 'ngl', 'nah', 'yeah', 'ok',
-    'okay', 'uh', 'um', 'hmm', 'huh', 'pls', 'plz',
-    'u', 'ur', 'im', 'i', 'my', 'me', 'we', 'they',
+    // fillers / commands
+    'explain', 'what', 'is', 'are', 'the', 'a', 'an', 'how', 'does', 'work',
+    'tell', 'me', 'about', 'can', 'you', 'please', 'bro', 'help', 'understand',
+    'define', 'meaning', 'of', 'do', 'and', 'for', 'to', 'in', 'with', 'on',
+    'at', 'by', 'give', 'show', 'find', 'get', 'let', 'want', 'need', 'know',
+    'think', 'see', 'try', 'use', 'make', 'take', 'go', 'come', 'look', 'also',
+    'just', 'like', 'so', 'but', 'if', 'then', 'than', 'too', 'very', 'really',
+    'actually', 'basically', 'we', 'they',
+    // search-trigger words — so "find video about X" doesn't leave "video" behind
+    'video', 'videos', 'youtube', 'watch', 'search', 'up', 'tutorial', 'lecture',
+    // topic-reference words — "it"/"this"/"that" mean realTopic, not a literal query
+    'it', 'this', 'that', 'these', 'those', 'topic', 'above', 'same', 'one', 'thing',
+    // confusion / gen-z filler
+    'confused', 'huh', 'fr', 'ngl', 'nah', 'yeah', 'ok', 'okay', 'uh', 'um',
+    'hmm', 'pls', 'plz', 'u', 'ur', 'im', 'i', 'my', 'bruh',
   ];
 
   const words = msg.toLowerCase()
@@ -68,6 +73,15 @@ function extractTopic(msg: string): string {
     .filter(w => w.length > 2);
 
   return words.slice(0, 4).join(' ');
+}
+
+// Chain used whenever a search query needs to be built from a live message:
+// this message's real content -> last tracked topic -> current subject. Never
+// returns empty, and never returns a bare reference word like "it"/"this".
+function buildSearchQuery(text: string, realTopic: string, subject: string): string {
+  const extracted = extractTopic(text);
+  const topic = extracted.length > 2 ? extracted : realTopic;
+  return topic.length > 2 ? topic : subject;
 }
 
 // Only a bare greeting/acknowledgement counts as a reset — "cool now walk me
@@ -259,18 +273,24 @@ export default function ChatScreen() {
       }
     }
 
-    const { type: searchType, query } = !img ? detectSearchIntent(text) : { type: null, query: '' };
+    const { type: searchType } = !img ? detectSearchIntent(text) : { type: null };
 
     if (searchType) {
+      // detectSearchIntent only tells us the user wants a search — its own query
+      // extraction leaves reference words like "it" behind ("find video about it"
+      // -> "it"), so the actual query is built here via the same realTopic chain
+      // as the confusion resource bar: this message -> resourceTopic -> subject.
+      const topic = buildSearchQuery(text, resourceTopic, subject);
+      const searchQuery = searchType === 'video' ? `${topic} explained tutorial education` : topic;
       const loadingId = `search_loading_${Date.now()}`;
-      const loadingMsg: any = { id: loadingId, role: 'assistant', type: 'loading', content: `Searching for "${query}"...`, timestamp: Date.now() };
+      const loadingMsg: any = { id: loadingId, role: 'assistant', type: 'loading', content: `Searching for "${topic}"...`, timestamp: Date.now() };
       dispatch(addMsg(loadingMsg));
 
       try {
-        const { videos, articles } = await smartSearch(query, searchType);
+        const { videos, articles } = await smartSearch(searchQuery, searchType);
         dispatch(updateMsg({
-          id: loadingId, type: 'search_results', content: `here's what I found on ${query}`,
-          videos, articles, query,
+          id: loadingId, type: 'search_results', content: `here's what I found on ${topic}`,
+          videos, articles, query: topic,
         } as any));
         dispatch(setMood('happy'));
         dispatch(addSessionXP(5));
@@ -279,7 +299,7 @@ export default function ChatScreen() {
 
         try {
           const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
-          apiMsgs.push({ role: 'user', content: `Give me a brief 2 sentence summary about ${query} so the student knows what they are looking at` });
+          apiMsgs.push({ role: 'user', content: `Give me a brief 2 sentence summary about ${topic} so the student knows what they are looking at` });
           const reply = await callAI(apiMsgs, subject);
           dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: reply.trim(), timestamp: Date.now() }));
         } catch {
