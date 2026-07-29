@@ -13,11 +13,13 @@ import shopReducer from './slices/shopSlice';
 import challengesReducer from './slices/challengesSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import videosReducer from './slices/videosSlice';
+import chatHistoryReducer from './slices/chatHistorySlice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     chat: chatReducer,
+    chatHistory: chatHistoryReducer,
     theme: themeReducer,
     streak: streakReducer,
     hearts: heartsReducer,

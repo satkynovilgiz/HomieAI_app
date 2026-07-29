@@ -1,12 +1,25 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import store from '../store';
 import { useStreakSync } from '../hooks/useStreakSync';
+import { loadSessions, loadChatHistoryFromStorage } from '../store/slices/chatHistorySlice';
 
 function StreakSync() {
   useStreakSync();
+  return null;
+}
+
+// Loaded here (not inside the chat screen) so chat sessions are available to
+// any screen — the History screen and the chat sidebar both read them, and
+// either can be the first screen opened in a session.
+function ChatHistorySync() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    loadChatHistoryFromStorage().then(data => dispatch(loadSessions(data)));
+  }, []);
   return null;
 }
 
@@ -15,6 +28,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <StreakSync />
+        <ChatHistorySync />
         <StatusBar style="light" backgroundColor="#07070f" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#07070f' } }}>
           <Stack.Screen name="index" />

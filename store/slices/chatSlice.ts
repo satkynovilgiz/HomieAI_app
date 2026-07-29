@@ -21,6 +21,7 @@ const chatSlice = createSlice({
   reducers: {
     addMsg: (state, { payload }: PayloadAction<Message>) => { state.messages.push(payload); },
     clearMsgs: (state) => { state.messages = []; state.sessionXP = 0; },
+    loadMessages: (state, { payload }: PayloadAction<Message[]>) => { state.messages = payload; },
     setSubject: (state, { payload }: PayloadAction<string>) => { state.subject = payload; state.messages = []; },
     setLoading: (state, { payload }: PayloadAction<boolean>) => { state.loading = payload; },
     addSessionXP: (state, { payload }: PayloadAction<number>) => { state.sessionXP += payload; },
@@ -32,5 +33,5 @@ const chatSlice = createSlice({
   },
 });
 
-export const { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg } = chatSlice.actions;
+export const { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg, loadMessages } = chatSlice.actions;
 export default chatSlice.reducer;

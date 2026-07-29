@@ -226,6 +226,34 @@ export function MicIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
   );
 }
 
+export function MenuIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Line x1="4" y1="6" x2="20" y2="6" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      <Line x1="4" y1="12" x2="20" y2="12" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      <Line x1="4" y1="18" x2="20" y2="18" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+export function PlusIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Line x1="12" y1="4" x2="12" y2="20" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+      <Line x1="4" y1="12" x2="20" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+export function CloseIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Line x1="5" y1="5" x2="19" y2="19" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      <Line x1="19" y1="5" x2="5" y2="19" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
 export function ChatBubbleIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

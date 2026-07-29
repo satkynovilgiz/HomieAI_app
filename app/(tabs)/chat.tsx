@@ -3,15 +3,19 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { RootState } from '../../store';
 import store from '../../store';
-import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg } from '../../store/slices/chatSlice';
+import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg, loadMessages, Message } from '../../store/slices/chatSlice';
 import { addXP, addCorrect, addHistory } from '../../store/slices/userSlice';
 import { saveItem, loadItems, persistSavedItems, loadSavedItemsFromStorage } from '../../store/slices/videosSlice';
+import {
+  createSession, addMessageToSession, updateSessionTitle, setActiveChat,
+  persistChatHistory, ChatMessage,
+} from '../../store/slices/chatHistorySlice';
 import { addToHistory } from '../../lib/firestoreService';
 import { callAI } from '../../lib/aiChat';
 import { parseQuiz } from '../../lib/utils';
@@ -23,7 +27,8 @@ import HomieBot from '../../components/mascot/HomieBot';
 import QuizCard from '../../components/ui/QuizCard';
 import SearchVideoCard from '../../components/chat/VideoCard';
 import SearchArticleCard from '../../components/chat/ArticleCard';
-import { TrashIcon, CameraIcon } from '../../components/icons';
+import ChatSidebar from '../../components/chat/ChatSidebar';
+import { TrashIcon, CameraIcon, MenuIcon, PlusIcon } from '../../components/icons';
 
 const CASUAL_STARTS = ['hi', 'hey', 'hello', 'yo', 'sup', 'thanks', 'thank you', 'ok', 'okay', 'lol', 'bye', 'cool', 'nice', 'k'];
 
@@ -82,6 +87,23 @@ function buildSearchQuery(text: string, realTopic: string, subject: string): str
   const extracted = extractTopic(text);
   const topic = extracted.length > 2 ? extracted : realTopic;
   return topic.length > 2 ? topic : subject;
+}
+
+// Reduces a live chat message (rich content: image arrays, quiz objects, resource
+// bar flags) down to the flat shape the sidebar/history screen persist — only the
+// text survives, since that's all ChatMessage.content supports.
+function toHistoryMessage(m: Message, type: ChatMessage['type'], xpEarned?: number): ChatMessage {
+  const content = typeof m.content === 'string'
+    ? m.content
+    : m.content?.find?.((c: any) => c.type === 'text')?.text || 'Sent a photo';
+  return {
+    id: m.id,
+    role: m.role,
+    content,
+    timestamp: new Date(m.timestamp).toISOString(),
+    type,
+    ...(xpEarned ? { xpEarned } : {}),
+  };
 }
 
 // Only a bare greeting/acknowledgement counts as a reset — "cool now walk me
@@ -145,22 +167,51 @@ const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challeng
 export default function ChatScreen() {
   const dispatch = useDispatch();
   const { messages, loading, subject, mood, sessionXP } = useSelector((s: RootState) => s.chat);
+  const { sessions: chatSessions, activeChatId, loaded: chatHistoryLoaded } = useSelector((s: RootState) => s.chatHistory);
   const user = useSelector((s: RootState) => s.user.current);
   const savedItems = useSelector((s: RootState) => s.videos.items);
+  const { chatId: chatIdParam } = useLocalSearchParams<{ chatId?: string }>();
   const [input, setInput] = useState('');
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
   const [showSubjects, setShowSubjects] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [shownResources, setShownResources] = useState(false);
   const [realTopic, setRealTopic] = useState('');
   const listRef = useRef<FlatList>(null);
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
+  const restoredRef = useRef(false);
 
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
   useEffect(() => { loadSavedItemsFromStorage().then(items => dispatch(loadItems(items))); }, []);
+
+  // Sessions themselves are loaded from AsyncStorage once, app-wide, by
+  // ChatHistorySync in the root layout (so History/sidebar have them no matter
+  // which screen opens first). Once that load lands, resume the previously
+  // active session's messages here — but only if this chat is still empty, so
+  // it doesn't clobber a conversation already in progress.
+  useEffect(() => {
+    if (!chatHistoryLoaded || restoredRef.current || messages.length > 0) return;
+    restoredRef.current = true;
+    const active = activeChatId && chatSessions.find(s => s.id === activeChatId);
+    if (active) {
+      dispatch(setSubject(active.subject));
+      dispatch(loadMessages(active.messages.map(m => ({
+        id: m.id, role: m.role, content: m.content, timestamp: new Date(m.timestamp).getTime(),
+      }))));
+    }
+  }, [chatHistoryLoaded]);
+
+  // Persist sessions/activeChatId on every change — same fire-and-forget pattern
+  // as saved videos/articles. Skipped until the initial load lands so we don't
+  // immediately overwrite storage with the pre-load empty state.
+  useEffect(() => {
+    if (!chatHistoryLoaded) return;
+    persistChatHistory(chatSessions, activeChatId);
+  }, [chatSessions, activeChatId, chatHistoryLoaded]);
 
   // New chat session (cleared or subject switched) — reset topic-depth tracking.
   useEffect(() => {
@@ -180,6 +231,36 @@ export default function ChatScreen() {
       addToHistory(u.uid, { subject: subj, preview, xp_earned: xp, duration_mins });
     };
   }, []);
+
+  const handleNewChat = () => {
+    dispatch(createSession(subject));
+    dispatch(clearMsgs());
+    setMessageCount(0);
+    setRealTopic('');
+    setShownResources(false);
+    setShowSidebar(false);
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    const session = chatSessions.find(s => s.id === chatId);
+    if (!session) return;
+    dispatch(setActiveChat(chatId));
+    dispatch(setSubject(session.subject));
+    dispatch(loadMessages(session.messages.map(m => ({
+      id: m.id, role: m.role, content: m.content, timestamp: new Date(m.timestamp).getTime(),
+    }))));
+    setRealTopic('');
+    setShownResources(false);
+    setShowSidebar(false);
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: false }), 100);
+  };
+
+  // "Continue Chat" from the history screen navigates here with ?chatId=... —
+  // load it once when the param shows up (and only if it isn't already active,
+  // so re-rendering this screen doesn't re-trigger the load on every render).
+  useEffect(() => {
+    if (chatIdParam && chatIdParam !== activeChatId) handleSelectChat(chatIdParam);
+  }, [chatIdParam]);
 
   const isItemSaved = (url: string) => savedItems.some(i => i.url === url);
 
@@ -242,6 +323,22 @@ export default function ChatScreen() {
     dispatch(setLoading(true));
     dispatch(setMood('thinking'));
 
+    // Every conversation lives in a chatHistory session so the sidebar/history
+    // screen can list and resume it — create one lazily on the first message
+    // instead of eagerly on mount, so an unused chat never shows up as a saved
+    // session. store.getState() reads the id synchronously right after dispatch,
+    // the same pattern already used for saved videos/articles above.
+    let chatId = activeChatId;
+    let isNewSession = false;
+    if (!chatId) {
+      dispatch(createSession(subject));
+      chatId = store.getState().chatHistory.activeChatId;
+      isNewSession = true;
+    }
+    if (!chatId) return;
+    dispatch(addMessageToSession({ chatId, message: toHistoryMessage(userMsg, img ? 'image' : 'text') }));
+    if (isNewSession) dispatch(updateSessionTitle({ chatId, title: text || 'Photo' }));
+
     // Track conversation depth on the current topic — a resource bar (Watch Video /
     // Search Web / Article) is offered once a topic has been discussed for a few
     // messages, or immediately if the user signals confusion. A greeting resets it.
@@ -288,20 +385,26 @@ export default function ChatScreen() {
 
       try {
         const { videos, articles } = await smartSearch(searchQuery, searchType);
+        const resultContent = `here's what I found on ${topic}`;
         dispatch(updateMsg({
-          id: loadingId, type: 'search_results', content: `here's what I found on ${topic}`,
+          id: loadingId, type: 'search_results', content: resultContent,
           videos, articles, query: topic,
         } as any));
         dispatch(setMood('happy'));
         dispatch(addSessionXP(5));
         dispatch(addXP(5));
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        dispatch(addMessageToSession({
+          chatId, message: toHistoryMessage({ id: loadingId, role: 'assistant', content: resultContent, timestamp: Date.now() }, 'search_results', 5),
+        }));
 
         try {
           const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
           apiMsgs.push({ role: 'user', content: `Give me a brief 2 sentence summary about ${topic} so the student knows what they are looking at` });
           const reply = await callAI(apiMsgs, subject);
-          dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: reply.trim(), timestamp: Date.now() }));
+          const summaryMsg = { id: (Date.now() + 1).toString(), role: 'assistant' as const, content: reply.trim(), timestamp: Date.now() };
+          dispatch(addMsg(summaryMsg));
+          dispatch(addMessageToSession({ chatId, message: toHistoryMessage(summaryMsg, 'text') }));
         } catch {
           // summary is a nice-to-have — the results are already shown, so a failure here is silent
         }
@@ -325,9 +428,11 @@ export default function ChatScreen() {
       if (triggerResourceBar) { assistantMsg.showResourceBar = true; assistantMsg.resourceQuery = resourceTopic; setShownResources(true); }
       dispatch(addMsg(assistantMsg));
       dispatch(setMood('happy'));
-      dispatch(addSessionXP(5 + (quiz ? 10 : 0)));
+      const xpEarned = 5 + (quiz ? 10 : 0);
+      dispatch(addSessionXP(xpEarned));
       dispatch(addXP(5));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      dispatch(addMessageToSession({ chatId, message: toHistoryMessage(assistantMsg, quiz ? 'quiz' : 'text', xpEarned) }));
     } catch (err: any) {
       dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: 'my bad bro 😅 — try again', timestamp: Date.now() }));
       dispatch(setMood('sad'));
@@ -335,7 +440,7 @@ export default function ChatScreen() {
       dispatch(setLoading(false));
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic]);
+  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic, activeChatId]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });
@@ -433,8 +538,18 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <ChatSidebar
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+      />
+
       {/* Topbar */}
       <View style={styles.topbar}>
+        <TouchableOpacity onPress={() => setShowSidebar(true)} style={styles.iconBtnSm}>
+          <MenuIcon color={Colors.muted} size={20} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
@@ -446,6 +561,9 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => setShowSubjects(!showSubjects)} style={styles.subjBtn}>
           <Text style={styles.subjBtnText}>{SUBJECTS.find(s => s.s === subject)?.e} {subject} ▾</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={handleNewChat} style={styles.iconBtnSm}>
+          <PlusIcon color={Colors.muted} size={18} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => dispatch(clearMsgs())} style={styles.clearBtn}>
           <TrashIcon color={Colors.muted} size={18} />
         </TouchableOpacity>
@@ -455,7 +573,7 @@ export default function ChatScreen() {
       {showSubjects && (
         <View style={styles.subjectPicker}>
           {SUBJECTS.map(s => (
-            <TouchableOpacity key={s.s} onPress={() => { dispatch(setSubject(s.s)); setShowSubjects(false); }}
+            <TouchableOpacity key={s.s} onPress={() => { dispatch(setSubject(s.s)); dispatch(setActiveChat(null)); setShowSubjects(false); }}
               style={[styles.subjectChip, subject === s.s && styles.subjectChipActive]}>
               <Text style={styles.subjectChipText}>{s.e} {s.s}</Text>
             </TouchableOpacity>
@@ -534,6 +652,7 @@ const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', alignItems: 'center', padding: 10, gap: 8, borderBottomWidth: 1, borderBottomColor: Colors.border, backgroundColor: Colors.bg2 },
   backBtn: { padding: 4 },
   backArrow: { fontSize: 22, color: Colors.text },
+  iconBtnSm: { padding: 4 },
   topbarInfo: { flex: 1 },
   topbarTitle: { fontSize: 14, fontWeight: '800', color: Colors.text },
   topbarSub: { fontSize: 10, color: Colors.muted },
