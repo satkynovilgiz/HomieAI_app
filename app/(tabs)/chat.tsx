@@ -27,30 +27,47 @@ import { TrashIcon, CameraIcon } from '../../components/icons';
 
 const CASUAL_STARTS = ['hi', 'hey', 'hello', 'yo', 'sup', 'thanks', 'thank you', 'ok', 'okay', 'lol', 'bye', 'cool', 'nice', 'k'];
 
+// Substring-matched deliberately (not word-boundary) so contractions, typos, and
+// trailing slang ("i don't get it fr") all still hit — see isConfusionMessage.
 const CONFUSION_PHRASES = [
-  "i don't understand", "i still don't get it", "i don't get it", 'can you explain more', 'more detail',
-  'deeper', "i'm confused", 'what do you mean', 'can you elaborate', 'not making sense',
-  'more info', 'tell me more', 'go deeper', 'more please', 'still confused', 'explain again', 'huh', '???',
+  "i don't understand", "i don't get it", "don't get it", "i don't get", "don't understand",
+  "i still don't", "still don't", 'not making sense', 'makes no sense', 'what do you mean',
+  'explain again', 'explain more', 'more detail', 'go deeper', 'tell me more', 'more info',
+  "i'm confused", 'im confused', 'confused', 'huh', 'what', '???', '??', "don't get",
+  'ngl', 'fr', 'bruh', 'bro what', 'what bro',
 ];
 
-const TOPIC_STOPWORDS = new Set([
-  'the', 'a', 'an', 'is', 'are', 'was', 'were', 'and', 'but', 'or', 'so', 'to', 'of', 'in',
-  'on', 'at', 'for', 'with', 'about', 'what', 'why', 'how', 'do', 'does', 'did', 'you', 'i',
-  'me', 'my', 'it', 'this', 'that', 'can', 'could', 'would', 'should', 'ok', 'okay', 'explain',
-  'tell', 'give', 'show', 'more', 'please', 'bro',
-]);
+function isConfusionMessage(msg: string): boolean {
+  const lower = msg.toLowerCase().trim();
+  return CONFUSION_PHRASES.some(phrase => lower.includes(phrase));
+}
 
-// Extra conversational filler that survives TOPIC_STOPWORDS (fine for a single-word
-// bookkeeping keyword) but would otherwise pollute an actual search query — e.g. "cool
-// now walk me through the chain rule step by step" search well as "chain rule" alone.
-const QUERY_STOPWORDS = new Set([...TOPIC_STOPWORDS, 'now', 'walk', 'through', 'step', 'by', 'cool', 'another', 'real', 'world', 'scenario', 'example']);
+// Extracts a short topic keyword string from a real (non-confusion) user message
+// by stripping conversational filler — e.g. "explain the chain rule to me pls" -> "chain rule".
+function extractTopic(msg: string): string {
+  const stopWords = [
+    'explain', 'what', 'is', 'are', 'the', 'a', 'an',
+    'how', 'does', 'work', 'tell', 'me', 'about', 'can',
+    'you', 'please', 'bro', 'help', 'understand', 'define',
+    'meaning', 'of', 'do', 'and', 'for', 'to', 'in',
+    'it', 'this', 'that', 'with', 'on', 'at', 'by',
+    'give', 'show', 'find', 'get', 'let', 'want',
+    'need', 'know', 'think', 'see', 'try', 'use',
+    'make', 'take', 'go', 'come', 'look', 'also',
+    'just', 'like', 'so', 'but', 'if', 'then',
+    'than', 'too', 'very', 'really', 'actually',
+    'basically', 'fr', 'ngl', 'nah', 'yeah', 'ok',
+    'okay', 'uh', 'um', 'hmm', 'huh', 'pls', 'plz',
+    'u', 'ur', 'im', 'i', 'my', 'me', 'we', 'they',
+  ];
 
-// Strips conversational filler so the resource-bar search hits the actual subject
-// instead of the whole sentence — a raw "cool now walk me through..." query returns
-// garbage from YouTube/DuckDuckGo, but "chain rule" alone returns real results.
-function cleanSearchQuery(text: string): string {
-  const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !QUERY_STOPWORDS.has(w));
-  return words.join(' ') || text.trim();
+  const words = msg.toLowerCase()
+    .replace(/[?!.,]/g, '')
+    .split(' ')
+    .filter(w => !stopWords.includes(w))
+    .filter(w => w.length > 2);
+
+  return words.slice(0, 4).join(' ');
 }
 
 // Only a bare greeting/acknowledgement counts as a reset — "cool now walk me
@@ -122,7 +139,7 @@ export default function ChatScreen() {
   const [showSubjects, setShowSubjects] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [shownResources, setShownResources] = useState(false);
-  const [conversationTopic, setConversationTopic] = useState('');
+  const [realTopic, setRealTopic] = useState('');
   const listRef = useRef<FlatList>(null);
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
@@ -133,7 +150,7 @@ export default function ChatScreen() {
 
   // New chat session (cleared or subject switched) — reset topic-depth tracking.
   useEffect(() => {
-    if (messages.length === 0) { setMessageCount(0); setShownResources(false); setConversationTopic(''); }
+    if (messages.length === 0) { setMessageCount(0); setShownResources(false); setRealTopic(''); }
   }, [messages.length]);
 
   // Record this chat session into history when leaving the screen, not per-message —
@@ -171,15 +188,19 @@ export default function ChatScreen() {
 
   const handleResourceAction = async (msgId: string, kind: 'video' | 'web' | 'article', query: string) => {
     dispatch(updateMsg({ id: msgId, showResourceBar: false, resourceLoading: kind } as any));
+    // query is realTopic captured when the resource bar was shown — it's never a
+    // confusion phrase (see the tracking block in send()). If realTopic is still
+    // empty (e.g. the very first message was confusion), fall back to the subject.
     try {
       if (kind === 'video') {
-        const { videos } = await smartSearch(`${query} explained`, 'video');
+        const searchQuery = query ? `${query} explained` : `${subject} tutorial`;
+        const { videos } = await smartSearch(searchQuery, 'video');
         dispatch(updateMsg({ id: msgId, resourceLoading: null, videos, resourceQuery: query } as any));
       } else if (kind === 'web') {
-        const articles = await searchWeb(query);
+        const articles = await searchWeb(query || subject);
         dispatch(updateMsg({ id: msgId, resourceLoading: null, articles, resourceQuery: query } as any));
       } else {
-        const articles = await searchWeb(`${query} explained`);
+        const articles = await searchWeb(`${query || subject} explained`);
         dispatch(updateMsg({ id: msgId, resourceLoading: null, articles, resourceQuery: query } as any));
       }
     } catch {
@@ -208,26 +229,28 @@ export default function ChatScreen() {
     // Search Web / Article) is offered once a topic has been discussed for a few
     // messages, or immediately if the user signals confusion. A greeting resets it.
     //
-    // resourceTopic defaults to the already-tracked conversationTopic (not this
-    // message's text) so that a confusion message ("I don't understand") never
-    // becomes the search query — it only gets replaced below when this message
-    // is a genuine, non-confused topic statement. We compute it into a local
-    // instead of reading conversationTopic state after the setState call below,
-    // since state updates aren't visible until the next render.
+    // resourceTopic defaults to the already-tracked realTopic (not this message's
+    // text) so that a confusion message ("i don't get it fr") never becomes the
+    // search query — it only gets replaced below when this message is a genuine,
+    // non-confused topic statement. We compute it into a local instead of reading
+    // realTopic state after the setState call below, since state updates aren't
+    // visible until the next render.
     let triggerResourceBar = false;
-    let resourceTopic = conversationTopic;
+    let resourceTopic = realTopic;
     if (!img && text) {
-      const lowerText = text.toLowerCase();
       if (isGreetingMessage(text)) {
-        setMessageCount(0); setShownResources(false); setConversationTopic('');
+        setMessageCount(0); setShownResources(false); setRealTopic('');
         resourceTopic = '';
       } else {
         const nextCount = messageCount + 1;
         setMessageCount(nextCount);
-        const isConfused = CONFUSION_PHRASES.some(p => lowerText.includes(p));
-        if (!isConfused) {
-          resourceTopic = cleanSearchQuery(text);
-          setConversationTopic(resourceTopic);
+        const isConfused = isConfusionMessage(text);
+        if (!isConfused && text.length > 10) {
+          const extracted = extractTopic(text);
+          if (extracted.length > 2) {
+            resourceTopic = extracted;
+            setRealTopic(extracted);
+          }
         }
         triggerResourceBar = !shownResources && (isConfused || nextCount >= 3);
       }
@@ -289,7 +312,7 @@ export default function ChatScreen() {
       dispatch(setLoading(false));
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, conversationTopic]);
+  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });

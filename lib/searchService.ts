@@ -1,6 +1,6 @@
 import { SearchType } from './searchDetector';
 
-const YOUTUBE_KEY = 'AIzaSyCbq92JLyP5TGtI9bidgOaqOBtwHv-vXdg';
+const YOUTUBE_KEY = 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
 
 export interface VideoResult {
   id: string;
@@ -40,7 +40,7 @@ export function decodeHtmlEntities(text: string): string {
 
 export async function searchYouTube(query: string): Promise<VideoResult[]> {
   try {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=4&q=${encodeURIComponent(query)}&key=${YOUTUBE_KEY}`;
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=4&videoCategoryId=27&relevanceLanguage=en&safeSearch=strict&q=${encodeURIComponent(query)}&key=${YOUTUBE_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
     return (data.items || []).map((item: any) => ({
