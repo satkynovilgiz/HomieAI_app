@@ -28,9 +28,9 @@ import { TrashIcon, CameraIcon } from '../../components/icons';
 const CASUAL_STARTS = ['hi', 'hey', 'hello', 'yo', 'sup', 'thanks', 'thank you', 'ok', 'okay', 'lol', 'bye', 'cool', 'nice', 'k'];
 
 const CONFUSION_PHRASES = [
-  "i don't understand", "i still don't get it", 'can you explain more', 'more detail',
+  "i don't understand", "i still don't get it", "i don't get it", 'can you explain more', 'more detail',
   'deeper', "i'm confused", 'what do you mean', 'can you elaborate', 'not making sense',
-  'more info', 'tell me more', 'go deeper', 'more please', 'still confused', 'huh', '???',
+  'more info', 'tell me more', 'go deeper', 'more please', 'still confused', 'explain again', 'huh', '???',
 ];
 
 const TOPIC_STOPWORDS = new Set([
@@ -44,14 +44,6 @@ const TOPIC_STOPWORDS = new Set([
 // bookkeeping keyword) but would otherwise pollute an actual search query — e.g. "cool
 // now walk me through the chain rule step by step" search well as "chain rule" alone.
 const QUERY_STOPWORDS = new Set([...TOPIC_STOPWORDS, 'now', 'walk', 'through', 'step', 'by', 'cool', 'another', 'real', 'world', 'scenario', 'example']);
-
-// Best-effort keyword for bookkeeping/display — the "same topic" gate itself doesn't rely
-// on this matching exactly (see isGreeting below), since real topic continuity across a
-// conversation ("derivatives" -> "dy/dx" -> "chain rule") can't be detected from keywords alone.
-function extractTopicKeyword(text: string): string {
-  const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !TOPIC_STOPWORDS.has(w));
-  return words.sort((a, b) => b.length - a.length)[0] || '';
-}
 
 // Strips conversational filler so the resource-bar search hits the actual subject
 // instead of the whole sentence — a raw "cool now walk me through..." query returns
@@ -130,7 +122,7 @@ export default function ChatScreen() {
   const [showSubjects, setShowSubjects] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [shownResources, setShownResources] = useState(false);
-  const [currentTopic, setCurrentTopic] = useState('');
+  const [conversationTopic, setConversationTopic] = useState('');
   const listRef = useRef<FlatList>(null);
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
@@ -141,7 +133,7 @@ export default function ChatScreen() {
 
   // New chat session (cleared or subject switched) — reset topic-depth tracking.
   useEffect(() => {
-    if (messages.length === 0) { setMessageCount(0); setShownResources(false); setCurrentTopic(''); }
+    if (messages.length === 0) { setMessageCount(0); setShownResources(false); setConversationTopic(''); }
   }, [messages.length]);
 
   // Record this chat session into history when leaving the screen, not per-message —
@@ -181,7 +173,7 @@ export default function ChatScreen() {
     dispatch(updateMsg({ id: msgId, showResourceBar: false, resourceLoading: kind } as any));
     try {
       if (kind === 'video') {
-        const { videos } = await smartSearch(query, 'video');
+        const { videos } = await smartSearch(`${query} explained`, 'video');
         dispatch(updateMsg({ id: msgId, resourceLoading: null, videos, resourceQuery: query } as any));
       } else if (kind === 'web') {
         const articles = await searchWeb(query);
@@ -215,16 +207,28 @@ export default function ChatScreen() {
     // Track conversation depth on the current topic — a resource bar (Watch Video /
     // Search Web / Article) is offered once a topic has been discussed for a few
     // messages, or immediately if the user signals confusion. A greeting resets it.
+    //
+    // resourceTopic defaults to the already-tracked conversationTopic (not this
+    // message's text) so that a confusion message ("I don't understand") never
+    // becomes the search query — it only gets replaced below when this message
+    // is a genuine, non-confused topic statement. We compute it into a local
+    // instead of reading conversationTopic state after the setState call below,
+    // since state updates aren't visible until the next render.
     let triggerResourceBar = false;
+    let resourceTopic = conversationTopic;
     if (!img && text) {
       const lowerText = text.toLowerCase();
       if (isGreetingMessage(text)) {
-        setMessageCount(0); setShownResources(false); setCurrentTopic('');
+        setMessageCount(0); setShownResources(false); setConversationTopic('');
+        resourceTopic = '';
       } else {
         const nextCount = messageCount + 1;
         setMessageCount(nextCount);
-        setCurrentTopic(extractTopicKeyword(text));
         const isConfused = CONFUSION_PHRASES.some(p => lowerText.includes(p));
+        if (!isConfused) {
+          resourceTopic = cleanSearchQuery(text);
+          setConversationTopic(resourceTopic);
+        }
         triggerResourceBar = !shownResources && (isConfused || nextCount >= 3);
       }
     }
@@ -272,7 +276,7 @@ export default function ChatScreen() {
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
 
       const assistantMsg: any = { id: (Date.now() + 1).toString(), role: 'assistant', content: clean, quiz, timestamp: Date.now() };
-      if (triggerResourceBar) { assistantMsg.showResourceBar = true; assistantMsg.resourceQuery = cleanSearchQuery(text); setShownResources(true); }
+      if (triggerResourceBar) { assistantMsg.showResourceBar = true; assistantMsg.resourceQuery = resourceTopic; setShownResources(true); }
       dispatch(addMsg(assistantMsg));
       dispatch(setMood('happy'));
       dispatch(addSessionXP(5 + (quiz ? 10 : 0)));
@@ -285,7 +289,7 @@ export default function ChatScreen() {
       dispatch(setLoading(false));
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources]);
+  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, conversationTopic]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });
