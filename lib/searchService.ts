@@ -1,6 +1,6 @@
 import { SearchType } from './searchDetector';
 
-const YOUTUBE_KEY = 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY';
+const YOUTUBE_KEY = 'AIzaSyCbq92JLyP5TGtI9bidgOaqOBtwHv-vXdg';
 
 export interface VideoResult {
   id: string;

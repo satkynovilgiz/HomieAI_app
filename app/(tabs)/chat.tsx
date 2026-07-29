@@ -194,8 +194,11 @@ export default function ChatScreen() {
     try {
       if (kind === 'video') {
         const searchQuery = query ? `${query} explained` : `${subject} tutorial`;
-        const { videos } = await smartSearch(searchQuery, 'video');
-        dispatch(updateMsg({ id: msgId, resourceLoading: null, videos, resourceQuery: query } as any));
+        // smartSearch falls back to a "search YouTube for X" link in `articles`
+        // when zero videos come back — must keep it or the bar just vanishes
+        // with nothing to show in its place.
+        const { videos, articles } = await smartSearch(searchQuery, 'video');
+        dispatch(updateMsg({ id: msgId, resourceLoading: null, videos, articles, resourceQuery: query } as any));
       } else if (kind === 'web') {
         const articles = await searchWeb(query || subject);
         dispatch(updateMsg({ id: msgId, resourceLoading: null, articles, resourceQuery: query } as any));
