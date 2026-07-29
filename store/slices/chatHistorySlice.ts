@@ -65,6 +65,14 @@ const chatHistorySlice = createSlice({
       session.messageCount = session.messages.length;
       session.preview = payload.message.content.slice(0, 100);
       if (payload.message.xpEarned) session.totalXP += payload.message.xpEarned;
+      // Auto-name from the first user message. Keyed off session.title (not a
+      // "just created this session" flag from the caller) so it fires no matter
+      // how the session came to exist — lazily on first send, or eagerly via the
+      // "+ New Chat" button, which previously left the title stuck on "New Chat".
+      if (payload.message.role === 'user' && session.title === 'New Chat') {
+        const content = payload.message.content;
+        session.title = content.length > 35 ? `${content.slice(0, 35)}...` : content;
+      }
     },
 
     // Also used for user-triggered rename (long-press > Rename) — same mutation,

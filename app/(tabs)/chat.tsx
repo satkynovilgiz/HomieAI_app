@@ -13,7 +13,7 @@ import { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updat
 import { addXP, addCorrect, addHistory } from '../../store/slices/userSlice';
 import { saveItem, loadItems, persistSavedItems, loadSavedItemsFromStorage } from '../../store/slices/videosSlice';
 import {
-  createSession, addMessageToSession, updateSessionTitle, setActiveChat,
+  createSession, addMessageToSession, setActiveChat,
   persistChatHistory, ChatMessage,
 } from '../../store/slices/chatHistorySlice';
 import { addToHistory } from '../../lib/firestoreService';
@@ -87,6 +87,42 @@ function buildSearchQuery(text: string, realTopic: string, subject: string): str
   const extracted = extractTopic(text);
   const topic = extracted.length > 2 ? extracted : realTopic;
   return topic.length > 2 ? topic : subject;
+}
+
+// Looser, video-specific intent check — deliberately broader than
+// detectSearchIntent's VIDEO_PHRASES (e.g. it alone doesn't catch "video cal"
+// or "can u find video"), so it's OR'd with detectSearchIntent below rather
+// than replacing it, guaranteeing no existing trigger phrase regresses.
+const VIDEO_TRIGGERS = [
+  'find video', 'find me video', 'find me a video', 'show video', 'show me video',
+  'show me a video', 'video about', 'video on', 'video cal', 'video for', 'youtube',
+  'watch video', 'get video', 'search video', 'look up video', 'can u find video',
+  'can you find video', 'give me video', 'video please',
+];
+
+function isVideoRequest(message: string): boolean {
+  const lower = message.toLowerCase();
+  return VIDEO_TRIGGERS.some(trigger => lower.includes(trigger));
+}
+
+// Video-specific topic extraction — a shorter stopword list than extractTopic's
+// so short course codes survive ("cal 1" keeps the "1"; extractTopic's own
+// w.length > 2 filter would drop it).
+const videoStopWords = [
+  'can', 'u', 'you', 'find', 'me', 'a', 'an', 'the',
+  'show', 'get', 'give', 'look', 'up', 'search',
+  'video', 'videos', 'youtube', 'watch', 'about',
+  'on', 'for', 'please', 'bro', 'it', 'this',
+  'that', 'some', 'any', 'ok', 'pls',
+];
+
+function extractVideoTopic(message: string): string {
+  const lower = message.toLowerCase();
+  const words = lower
+    .replace(/[?!.,]/g, '')
+    .split(' ')
+    .filter(w => w.length > 0 && !videoStopWords.includes(w));
+  return words.join(' ').trim();
 }
 
 // Reduces a live chat message (rich content: image arrays, quiz objects, resource
@@ -329,15 +365,12 @@ export default function ChatScreen() {
     // session. store.getState() reads the id synchronously right after dispatch,
     // the same pattern already used for saved videos/articles above.
     let chatId = activeChatId;
-    let isNewSession = false;
     if (!chatId) {
       dispatch(createSession(subject));
       chatId = store.getState().chatHistory.activeChatId;
-      isNewSession = true;
     }
     if (!chatId) return;
     dispatch(addMessageToSession({ chatId, message: toHistoryMessage(userMsg, img ? 'image' : 'text') }));
-    if (isNewSession) dispatch(updateSessionTitle({ chatId, title: text || 'Photo' }));
 
     // Track conversation depth on the current topic — a resource bar (Watch Video /
     // Search Web / Article) is offered once a topic has been discussed for a few
@@ -370,15 +403,22 @@ export default function ChatScreen() {
       }
     }
 
-    const { type: searchType } = !img ? detectSearchIntent(text) : { type: null };
+    // isVideoRequest is OR'd with detectSearchIntent rather than replacing it —
+    // it catches phrasings ("video cal", "can u find video") detectSearchIntent's
+    // own VIDEO_PHRASES misses, without dropping anything it already caught.
+    const isVideo = !img && isVideoRequest(text);
+    const { type: detectedType } = !img ? detectSearchIntent(text) : { type: null };
+    const searchType = isVideo ? 'video' : detectedType;
 
     if (searchType) {
-      // detectSearchIntent only tells us the user wants a search — its own query
-      // extraction leaves reference words like "it" behind ("find video about it"
-      // -> "it"), so the actual query is built here via the same realTopic chain
-      // as the confusion resource bar: this message -> resourceTopic -> subject.
-      const topic = buildSearchQuery(text, resourceTopic, subject);
-      const searchQuery = searchType === 'video' ? `${topic} explained tutorial education` : topic;
+      // Video requests get their own topic extraction (shorter stopword list so
+      // short course codes like "cal 1" survive) and fallback chain: this
+      // message -> resourceTopic -> subject — never an empty or literal "it".
+      // Everything else keeps the existing buildSearchQuery chain.
+      const topic = searchType === 'video'
+        ? (extractVideoTopic(text) || resourceTopic || subject)
+        : buildSearchQuery(text, resourceTopic, subject);
+      const searchQuery = searchType === 'video' ? `${topic} explained tutorial` : topic;
       const loadingId = `search_loading_${Date.now()}`;
       const loadingMsg: any = { id: loadingId, role: 'assistant', type: 'loading', content: `Searching for "${topic}"...`, timestamp: Date.now() };
       dispatch(addMsg(loadingMsg));

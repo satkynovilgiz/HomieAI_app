@@ -33,7 +33,7 @@ export default function ArticleCard({ article, onSave, isSaved }: Props) {
         <Text style={styles.title} numberOfLines={2}>{article.title}</Text>
         <Text style={styles.desc} numberOfLines={3}>{article.description}</Text>
         <View style={styles.row}>
-          <TouchableOpacity onPress={() => setShowBrowser(true)} style={styles.readBtn}>
+          <TouchableOpacity onPress={() => article.url && setShowBrowser(true)} style={styles.readBtn}>
             <Text style={styles.readBtnText}>Read Article →</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onSave} style={[styles.saveBtn, isSaved && styles.saveBtnActive]}>

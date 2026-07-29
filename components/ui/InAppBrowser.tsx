@@ -25,12 +25,14 @@ export default function InAppBrowser({ url, title, onClose }: Props) {
             <Text style={styles.iconText}>✕</Text>
           </TouchableOpacity>
         </View>
-        {failed ? (
+        {failed || !url ? (
           <View style={styles.fallback}>
-            <Text style={styles.fallbackText}>couldn't load this page here</Text>
-            <TouchableOpacity onPress={() => Linking.openURL(url)} style={styles.fallbackBtn}>
-              <Text style={styles.fallbackBtnText}>Open in browser</Text>
-            </TouchableOpacity>
+            <Text style={styles.fallbackText}>{url ? "couldn't load this page here" : 'no link to open'}</Text>
+            {!!url && (
+              <TouchableOpacity onPress={() => Linking.openURL(url)} style={styles.fallbackBtn}>
+                <Text style={styles.fallbackBtnText}>Open in browser</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <WebView
