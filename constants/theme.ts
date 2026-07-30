@@ -37,5 +37,9 @@ export const Radius = {
   full: 999,
 };
 
-export const GEMINI_API_KEY = 'AQ.Ab8RN6JpmzuPmAeGxNF-Y-HkQWnetmK3bfqS7v6Q-W_O70RCTQ';
-export const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+export const GEMINI_API_KEY = 'AQ.Ab8RN6IFI-uMfEaWt97SdmrCYwevL_CQVctOaduI3HpE3Wz9-A';
+// The gemini-2.0-flash family returns a hard 0-quota 429 on this account's free
+// tier (verified directly against the API), but gemma-4-26b-a4b-it — a Gemma
+// model served through the same endpoint/key — works. Gemma is a "thinking"
+// model: see the parts-filtering fix in callGemini() in lib/gemini.ts.
+export const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${GEMINI_API_KEY}`;

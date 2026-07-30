@@ -37,6 +37,16 @@ export default function RootLayout() {
           <Stack.Screen name="auth/signup" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="games/index" />
+          <Stack.Screen name="games/wordscramble" />
+          <Stack.Screen name="games/mathlightning" />
+          <Stack.Screen name="games/trueorfalse" />
+          <Stack.Screen name="games/fillinblank" />
+          <Stack.Screen name="games/flashcardflip" />
+          <Stack.Screen name="games/speedquiz" />
+          <Stack.Screen name="games/matchingpairs" />
+          <Stack.Screen name="games/definitiondetective" />
+          <Stack.Screen name="games/buildequation" />
+          <Stack.Screen name="games/trivia" />
           <Stack.Screen name="pomodoro/index" />
           <Stack.Screen name="detector/index" />
           <Stack.Screen name="leaderboard/index" />
