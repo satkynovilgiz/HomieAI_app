@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
@@ -55,15 +54,15 @@ export default function SignupScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <HomieBot mood="happy" size={90}/>
-          <Text style={styles.title}>let's get you set up 🚀</Text>
-          <Text style={styles.sub}>free forever. no credit card.</Text>
+          <HomieBot mood="wink" size={80} />
+          <Text style={styles.title}>Join Homie</Text>
+          <Text style={styles.sub}>Free forever. No credit card.</Text>
         </View>
 
         <View style={styles.card}>
           <TouchableOpacity onPress={googleSignUp} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? 'signing in...' : 'continue with google'}</Text>
+            <Text style={styles.googleText}>{googleLoading ? 'Signing in...' : 'Continue with Google'}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -76,12 +75,12 @@ export default function SignupScreen() {
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Input label="your name 👋" placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)}/>
-          <Input label="email" placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none"/>
-          <Input label="password" placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry/>
-          <Input label="confirm password" placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry/>
+          <Input label="Name" placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)} />
+          <Input label="Email" placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none" />
+          <Input label="Password" placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry />
+          <Input label="Confirm password" placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry />
 
-          <Text style={styles.avatarLabel}>pick your avatar</Text>
+          <Text style={styles.avatarLabel}>Pick your avatar</Text>
           <View style={styles.avatarGrid}>
             {AVATARS.map(a => (
               <TouchableOpacity key={a} onPress={() => setAvatar(a)}
@@ -91,9 +90,9 @@ export default function SignupScreen() {
             ))}
           </View>
 
-          <Button title="let's go 🚀" onPress={signup} loading={loading} size="lg" style={{ marginTop: 16 }}/>
+          <Button title="Create Account" onPress={signup} loading={loading} size="lg" style={styles.submitBtn} />
           <TouchableOpacity style={styles.loginLink} onPress={() => router.back()}>
-            <Text style={styles.loginText}>already have one? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>sign in</Text></Text>
+            <Text style={styles.loginText}>Already have an account? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>Sign in</Text></Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -105,10 +104,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   content: { padding: 24, paddingTop: 60, alignItems: 'center' },
   header: { alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 26, fontWeight: '900', color: Colors.text, marginTop: 14 },
-  sub: { fontSize: 13, color: Colors.muted, marginTop: 5 },
+  title: { fontSize: 28, fontWeight: '900', color: Colors.text, marginTop: 16 },
+  sub: { fontSize: 14, color: Colors.muted, marginTop: 6 },
   card: { width: '100%', backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
-  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', borderRadius: Radius.md, paddingVertical: 14, marginBottom: 20 },
+  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', height: 52, borderRadius: 14, marginBottom: 20 },
   googleBtnDisabled: { opacity: 0.55, marginBottom: 8 },
   googleText: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
   googleNote: { fontSize: 11, color: Colors.muted, textAlign: 'center', marginBottom: 20 },
@@ -118,9 +117,10 @@ const styles = StyleSheet.create({
   error: { color: Colors.red, fontSize: 13, marginBottom: 12, textAlign: 'center' },
   avatarLabel: { fontSize: 12, fontWeight: '600', color: Colors.text2, marginBottom: 10, marginTop: 4 },
   avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  avatarBtn: { width: 46, height: 46, borderRadius: 12, borderWidth: 2, borderColor: Colors.border, backgroundColor: Colors.bg3, alignItems: 'center', justifyContent: 'center' },
-  avatarSelected: { borderColor: Colors.purpleL, backgroundColor: 'rgba(124,58,237,0.15)' },
-  avatarEmoji: { fontSize: 22 },
+  avatarBtn: { width: 52, height: 52, borderRadius: 12, borderWidth: 2, borderColor: Colors.border, backgroundColor: Colors.bg3, alignItems: 'center', justifyContent: 'center' },
+  avatarSelected: { borderColor: Colors.purple, backgroundColor: 'rgba(124,58,237,0.15)' },
+  avatarEmoji: { fontSize: 24 },
+  submitBtn: { height: 52, borderRadius: 14, marginTop: 16 },
   loginLink: { alignItems: 'center', marginTop: 16 },
   loginText: { fontSize: 13, color: Colors.muted },
 });

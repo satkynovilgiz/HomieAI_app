@@ -1,60 +1,321 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, Animated,
+  NativeSyntheticEvent, NativeScrollEvent, useWindowDimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Svg, { Path } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
+import { MicIcon, VideoIcon, GameIcon, CameraIcon, CalendarIcon, GemIcon, TrophyIcon, FlameIcon } from '../../components/icons';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+async function markOnboardingDone() {
+  try { await AsyncStorage.setItem('hm_onboarding_done', 'true'); } catch {}
+}
+
+function StarIcon({ size = 18 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 2L14.5 9H22L16 13.5L18 21L12 16.5L6 21L8 13.5L2 9H9.5L12 2Z" fill="#fbbf24" />
+    </Svg>
+  );
+}
+
+function HeartIconSmall() {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 21C12 21 3 15 3 8.5C3 5.4 5.4 3 8.5 3C10.2 3 11.7 3.8 12 4.5C12.3 3.8 13.8 3 15.5 3C18.6 3 21 5.4 21 8.5C21 15 12 21 12 21Z" fill="#ef4444" />
+    </Svg>
+  );
+}
+
+// Floats down from just above the mascot, loops back to the top, staggered by `delay`.
+function ConfettiPiece({ color, left, delay }: { color: string; left: number; delay: number }) {
+  const translateY = useRef(new Animated.Value(-20)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(translateY, { toValue: 170, duration: 3200, useNativeDriver: true }),
+          Animated.timing(rotate, { toValue: 1, duration: 3200, useNativeDriver: true }),
+        ]),
+        Animated.timing(translateY, { toValue: -20, duration: 0, useNativeDriver: true }),
+        Animated.timing(rotate, { toValue: 0, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+
+  const spin = rotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+
+  return (
+    <Animated.View
+      style={[styles.confetti, { left, backgroundColor: color, transform: [{ translateY }, { rotate: spin }] }]}
+    />
+  );
+}
+
+const CONFETTI = [
+  { color: '#7c3aed', left: 10, delay: 0 },
+  { color: '#f97316', left: 55, delay: 300 },
+  { color: '#10b981', left: 100, delay: 600 },
+  { color: '#3b82f6', left: 150, delay: 150 },
+  { color: '#fda4af', left: 195, delay: 450 },
+  { color: '#7c3aed', left: 235, delay: 750 },
+  { color: '#f97316', left: 275, delay: 200 },
+  { color: '#10b981', left: 30, delay: 900 },
+];
+
+function PulsingStar({ style }: { style: any }) {
+  const scale = useRef(new Animated.Value(0.85)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scale, { toValue: 1.2, duration: 700, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 0.85, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+
+  return (
+    <Animated.View style={[style, { transform: [{ scale }] }]}>
+      <StarIcon size={18} />
+    </Animated.View>
+  );
+}
+
+function Slide1() {
+  return (
+    <View style={styles.topHalf}>
+      <View style={styles.purpleGlow} />
+      <View style={styles.confettiWrap} pointerEvents="none">
+        {CONFETTI.map((c, i) => <ConfettiPiece key={i} {...c} />)}
+      </View>
+      <HomieBot mood="celebrating" size={160} />
+    </View>
+  );
+}
+
+function Slide2() {
+  return (
+    <View style={[styles.topHalf, styles.slide2Row]}>
+      <HomieBot mood="happy" size={100} />
+      <View style={styles.bubbleCol}>
+        <View style={[styles.bubble, styles.bubbleDark]}>
+          <Text style={styles.bubbleTextDark}>explain derivatives bro</Text>
+        </View>
+        <View style={[styles.bubble, styles.bubblePurple]}>
+          <Text style={styles.bubbleTextLight}>okay so a derivative is basically how fast something changes. think of your car speedometer. fr.</Text>
+        </View>
+        <View style={[styles.bubble, styles.bubbleDark]}>
+          <Text style={styles.bubbleTextDark}>quiz me on it</Text>
+        </View>
+        <View style={[styles.bubble, styles.bubblePurple]}>
+          <Text style={styles.bubbleTextLight}>bet, here is a question...</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function Slide3() {
+  const barAnim = useRef(new Animated.Value(0)).current;
+  const shimmer = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    Animated.timing(barAnim, { toValue: 0.8, duration: 1200, useNativeDriver: false }).start();
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 0.6, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+
+  const barWidth = barAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
+
+  return (
+    <View style={styles.topHalf}>
+      <Animated.Text style={[styles.xpBig, { opacity: shimmer }]}>+50 XP</Animated.Text>
+      <View style={styles.xpTrack}>
+        <Animated.View style={[styles.xpFill, { width: barWidth }]} />
+      </View>
+      <View style={styles.statsInlineRow}>
+        {[0, 1, 2, 3, 4].map(i => <HeartIconSmall key={i} />)}
+        <View style={{ width: 12 }} />
+        <GemIcon color={Colors.blue} size={16} />
+        <Text style={styles.statsInlineText}>500</Text>
+      </View>
+      <View style={styles.streakPillOnboard}>
+        <FlameIcon color={Colors.orange} size={14} />
+        <Text style={styles.streakPillOnboardText}>7 day streak</Text>
+      </View>
+      <View style={styles.achievementCard}>
+        <TrophyIcon color={Colors.yellow} size={22} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.achievementTitle}>Achievement Unlocked!</Text>
+          <Text style={styles.achievementDesc}>First Chat — +20 XP</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const FEATURES = [
+  { label: 'Voice Mode', Icon: MicIcon, color: '#22d3ee' },
+  { label: 'Video Search', Icon: VideoIcon, color: '#f97316' },
+  { label: 'Quiz Games', Icon: GameIcon, color: '#10b981' },
+  { label: 'Scan Homework', Icon: CameraIcon, color: '#f43f5e' },
+  { label: 'Study Planner', Icon: CalendarIcon, color: '#3b82f6' },
+  { label: 'Lecture Recorder', Icon: MicIcon, color: '#ef4444' },
+];
+
+function Slide4() {
+  return (
+    <View style={[styles.topHalf, styles.featureGridWrap]}>
+      <View style={styles.featureGrid}>
+        {FEATURES.map(({ label, Icon, color }) => (
+          <View key={label} style={styles.featureBox}>
+            <Icon color={color} size={22} />
+            <Text style={styles.featureLabel}>{label}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function Slide5() {
+  return (
+    <View style={styles.topHalf}>
+      <View style={styles.mascotStarsWrap}>
+        <PulsingStar style={styles.starTL} />
+        <PulsingStar style={styles.starTR} />
+        <PulsingStar style={styles.starBL} />
+        <PulsingStar style={styles.starBR} />
+        <HomieBot mood="celebrating" size={140} />
+      </View>
+      <View style={styles.statsFinalRow}>
+        <View style={styles.statFinal}>
+          <Text style={styles.statFinalValue}>100%</Text>
+          <Text style={styles.statFinalLabel}>Free forever</Text>
+        </View>
+        <View style={styles.statFinal}>
+          <Text style={styles.statFinalValue}>9+</Text>
+          <Text style={styles.statFinalLabel}>Subjects covered</Text>
+        </View>
+        <View style={styles.statFinal}>
+          <Text style={styles.statFinalValue}>10+</Text>
+          <Text style={styles.statFinalLabel}>Study tools</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 const SLIDES = [
-  { mood: 'celebrating' as const, accent: '#7c3aed', title: 'meet homie', sub: 'your ai study buddy that actually gets it. 100% free, always.' },
-  { mood: 'happy' as const,       accent: '#10b981', title: 'learning that hits different', sub: 'xp, streaks, achievements — it barely feels like studying.' },
-  { mood: 'thinking' as const,    accent: '#3b82f6', title: 'chat, lessons, voice', sub: 'ask anything, work through real lessons, or just talk it out.' },
-  { mood: 'happy' as const,       accent: '#f97316', title: 'bring your friends', sub: 'race for xp, flex your streak, climb the board together.' },
-  { mood: 'celebrating' as const, accent: '#7c3aed', title: "that's the app", sub: 'free account, no card, 30 seconds.' },
+  { key: '1', Top: Slide1, title: 'Meet Homie', sub: 'Your free AI study buddy that actually gets how you learn.' },
+  { key: '2', Top: Slide2, title: 'Chat with Homie', sub: 'Ask anything. Get Gen Z explanations, quizzes, and real examples. No cap.' },
+  { key: '3', Top: Slide3, title: 'Level Up While You Study', sub: 'Earn XP, maintain streaks, collect gems. Studying has never felt this good.' },
+  { key: '4', Top: Slide4, title: 'Everything You Need', sub: 'Voice mode, video search, games, homework scanner and way more.' },
+  { key: '5', Top: Slide5, title: 'Ready to study smarter?', sub: 'Join thousands of students already using Homie.' },
 ];
 
 export default function OnboardingScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   const [idx, setIdx] = useState(0);
-  const slide = SLIDES[idx];
+  const listRef = useRef<FlatList>(null);
   const isLast = idx === SLIDES.length - 1;
 
-  return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: slide.accent + '18' }]}>
-      {!isLast && (
-        <TouchableOpacity onPress={() => router.replace('/auth/login')} style={styles.skip}>
-          <Text style={styles.skipText}>skip</Text>
-        </TouchableOpacity>
-      )}
+  // scrollToIndex/getItemLayout are unreliable on react-native-web (the page
+  // often doesn't actually move even though it reports success), so slides
+  // are paged with a plain pixel offset instead — that works everywhere.
+  const goTo = (i: number) => {
+    listRef.current?.scrollToOffset({ offset: i * screenWidth, animated: true });
+    setIdx(i);
+  };
 
-      <View style={styles.content}>
-        <View style={[styles.glow, { backgroundColor: slide.accent }]} />
-        <HomieBot mood={slide.mood} size={190} />
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.sub}>{slide.sub}</Text>
+  const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const newIdx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    setIdx(newIdx);
+  };
+
+  const finish = async (dest: '/auth/signup' | '/auth/login') => {
+    await markOnboardingDone();
+    router.replace(dest);
+  };
+
+  const renderSlide = ({ item }: { item: typeof SLIDES[number] }) => {
+    const { Top, title, sub } = item;
+    return (
+      <View style={{ width: screenWidth }}>
+        <Top />
+        <View style={styles.bottomHalf}>
+          <Text style={styles.slideTitle}>{title}</Text>
+          <Text style={styles.slideSub}>{sub}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.topRow}>
+        {!isLast ? (
+          <TouchableOpacity onPress={() => goTo(SLIDES.length - 1)}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+        ) : <View style={{ width: 40 }} />}
+        <Text style={styles.counterText}>{idx + 1} of {SLIDES.length}</Text>
       </View>
 
-      <View style={styles.dots}>
+      <FlatList
+        ref={listRef}
+        data={SLIDES}
+        keyExtractor={s => s.key}
+        renderItem={renderSlide}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={onMomentumEnd}
+        scrollEventThrottle={16}
+        getItemLayout={(_, index) => ({ length: screenWidth, offset: screenWidth * index, index })}
+        style={{ flex: 1 }}
+      />
+
+      <View style={styles.pageDotsRow}>
         {SLIDES.map((_, i) => (
-          <TouchableOpacity key={i} onPress={() => setIdx(i)}>
-            <View style={[styles.dot, i === idx && [styles.dotActive, { backgroundColor: slide.accent }]]} />
-          </TouchableOpacity>
+          <View key={i} style={[styles.pageDot, i === idx && styles.pageDotActive]} />
         ))}
       </View>
 
-      <View style={styles.bottom}>
-        <TouchableOpacity
-          onPress={() => isLast ? router.replace('/auth/signup') : setIdx(i => i + 1)}
-          style={[styles.nextBtn, { backgroundColor: slide.accent }]}
-          activeOpacity={0.9}
-        >
-          <Text style={styles.nextBtnText}>{isLast ? "let's go" : 'next'}</Text>
-        </TouchableOpacity>
-        {idx === 0 && (
-          <TouchableOpacity onPress={() => router.replace('/auth/login')} style={styles.loginLink}>
-            <Text style={styles.loginLinkText}>already got an account? sign in</Text>
+      <View style={styles.bottomBtnArea}>
+        {!isLast ? (
+          <TouchableOpacity style={styles.nextBtn} onPress={() => goTo(idx + 1)} activeOpacity={0.9}>
+            <Text style={styles.nextBtnText}>Next</Text>
           </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.ctaPrimary} onPress={() => finish('/auth/signup')} activeOpacity={0.9}>
+              <Text style={styles.ctaPrimaryText}>Get Started Free</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.ctaSecondary} onPress={() => finish('/auth/login')} activeOpacity={0.85}>
+              <Text style={styles.ctaSecondaryText}>I already have an account</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </SafeAreaView>
@@ -63,18 +324,62 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  skip: { position: 'absolute', top: 52, right: 24, zIndex: 10, padding: 8 },
-  skipText: { fontSize: 14, color: 'rgba(255,255,255,0.5)', fontWeight: '600' },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 20 },
-  glow: { position: 'absolute', width: 300, height: 300, borderRadius: 150, opacity: 0.1, top: '10%' },
-  title: { fontSize: 32, fontWeight: '900', color: Colors.text, textAlign: 'center' },
-  sub: { fontSize: 16, color: Colors.muted, textAlign: 'center', lineHeight: 24 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.2)' },
-  dotActive: { width: 26 },
-  bottom: { padding: 24, gap: 14 },
-  nextBtn: { paddingVertical: 16, borderRadius: Radius.lg, alignItems: 'center' },
-  nextBtnText: { color: 'white', fontWeight: '900', fontSize: 17 },
-  loginLink: { alignItems: 'center' },
-  loginLinkText: { fontSize: 14, color: Colors.muted },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, height: 44 },
+  skipText: { fontSize: 14, color: '#9090c0' },
+  counterText: { fontSize: 13, color: '#9090c0' },
+
+  topHalf: { flex: 1.2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  bottomHalf: { paddingHorizontal: 28, paddingBottom: 8, alignItems: 'center' },
+  slideTitle: { fontSize: 36, fontWeight: '900', color: Colors.white, textAlign: 'center' },
+  slideSub: { fontSize: 16, color: '#9090c0', textAlign: 'center', lineHeight: 24, marginTop: 10 },
+
+  purpleGlow: { position: 'absolute', width: 260, height: 260, borderRadius: 130, backgroundColor: 'rgba(124,58,237,0.15)' },
+  confettiWrap: { position: 'absolute', width: '100%', height: 200, top: -20 },
+  confetti: { position: 'absolute', top: 0, width: 8, height: 12, borderRadius: 2 },
+
+  slide2Row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bubbleCol: { flex: 1, gap: 8 },
+  bubble: { maxWidth: '100%', padding: 10, borderRadius: 14 },
+  bubbleDark: { backgroundColor: Colors.bg3, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
+  bubblePurple: { backgroundColor: Colors.purple, alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
+  bubbleTextDark: { fontSize: 12, color: Colors.text },
+  bubbleTextLight: { fontSize: 12, color: Colors.white },
+
+  xpBig: { fontSize: 64, fontWeight: '900', color: '#fbbf24' },
+  xpTrack: { width: '80%', height: 10, borderRadius: 5, backgroundColor: Colors.bg4, overflow: 'hidden', marginTop: 16 },
+  xpFill: { height: '100%', borderRadius: 5, backgroundColor: Colors.purple },
+  statsInlineRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18, gap: 3 },
+  statsInlineText: { fontSize: 14, fontWeight: '800', color: Colors.blue, marginLeft: 4 },
+  streakPillOnboard: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(249,115,22,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: 'rgba(249,115,22,0.4)', marginTop: 14 },
+  streakPillOnboardText: { fontSize: 12, fontWeight: '700', color: Colors.orange },
+  achievementCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.bg2, borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(251,191,36,0.4)', padding: 12, marginTop: 16, width: '100%' },
+  achievementTitle: { fontSize: 12, fontWeight: '900', color: Colors.text },
+  achievementDesc: { fontSize: 11, color: Colors.muted, marginTop: 2 },
+
+  featureGridWrap: { paddingHorizontal: 8 },
+  featureGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
+  featureBox: { width: (SCREEN_WIDTH - 48 - 10) / 2, backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: 12, padding: 14, alignItems: 'center', gap: 8 },
+  featureLabel: { fontSize: 12, fontWeight: '700', color: Colors.white, textAlign: 'center' },
+
+  mascotStarsWrap: { alignItems: 'center', justifyContent: 'center', width: 200, height: 180 },
+  starTL: { position: 'absolute', top: 4, left: 10 },
+  starTR: { position: 'absolute', top: 4, right: 10 },
+  starBL: { position: 'absolute', bottom: 10, left: 20 },
+  starBR: { position: 'absolute', bottom: 10, right: 20 },
+  statsFinalRow: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 8 },
+  statFinal: { alignItems: 'center' },
+  statFinalValue: { fontSize: 22, fontWeight: '900', color: Colors.purpleL },
+  statFinalLabel: { fontSize: 11, color: '#9090c0', marginTop: 3, textAlign: 'center' },
+
+  pageDotsRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 16 },
+  pageDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#333' },
+  pageDotActive: { width: 24, height: 8, borderRadius: 4, backgroundColor: '#7c3aed' },
+
+  bottomBtnArea: { paddingHorizontal: 24, paddingBottom: 16, alignItems: 'center' },
+  nextBtn: { width: 160, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },
+  nextBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  ctaPrimary: { width: '100%', height: 56, borderRadius: 28, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },
+  ctaPrimaryText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  ctaSecondary: { width: '100%', height: 48, borderRadius: 24, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#555', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  ctaSecondaryText: { color: '#9090c0', fontSize: 14 },
 });

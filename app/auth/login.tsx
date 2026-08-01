@@ -58,16 +58,15 @@ export default function LoginScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <HomieBot mood={mood} size={90} />
-          <Text style={styles.title}>welcome back</Text>
-          <Text style={styles.sub}>your streak's waiting</Text>
+          <HomieBot mood={mood} size={80} />
+          <Text style={styles.title}>Welcome back</Text>
+          <Text style={styles.sub}>Your streak is waiting</Text>
         </View>
 
         <View style={styles.card}>
-          {/* Google */}
           <TouchableOpacity onPress={googleSignIn} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? 'signing in...' : 'continue with google'}</Text>
+            <Text style={styles.googleText}>{googleLoading ? 'Signing in...' : 'Continue with Google'}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -75,22 +74,22 @@ export default function LoginScreen() {
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
-            <Text style={styles.divText}>or email</Text>
+            <Text style={styles.divText}>or use email</Text>
             <View style={styles.divLine} />
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Input label="email" placeholder="your@email.com" value={email}
+          <Input label="Email" placeholder="your@email.com" value={email}
             onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-          <Input label="password" placeholder="your password" value={pass}
+          <Input label="Password" placeholder="your password" value={pass}
             onChangeText={setPass} secureTextEntry />
 
-          <Button title="sign in" onPress={login} loading={loading} size="lg" style={{ marginTop: 8 }} />
+          <Button title="Sign In" onPress={login} loading={loading} size="lg" style={styles.submitBtn} />
 
           <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/auth/signup')}>
             <Text style={styles.signupText}>
-              new here? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>sign up</Text>
+              No account? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>Sign up free</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -106,7 +105,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '900', color: Colors.text, marginTop: 16 },
   sub: { fontSize: 14, color: Colors.muted, marginTop: 6 },
   card: { width: '100%', backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
-  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', borderRadius: Radius.md, paddingVertical: 14, marginBottom: 20 },
+  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', height: 52, borderRadius: 14, marginBottom: 20 },
   googleBtnDisabled: { opacity: 0.55, marginBottom: 8 },
   googleText: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
   googleNote: { fontSize: 11, color: Colors.muted, textAlign: 'center', marginBottom: 20 },
@@ -114,6 +113,7 @@ const styles = StyleSheet.create({
   divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
   divText: { fontSize: 12, color: Colors.muted },
   error: { color: Colors.red, fontSize: 13, marginBottom: 12, textAlign: 'center' },
+  submitBtn: { height: 52, borderRadius: 14, marginTop: 8 },
   signupLink: { alignItems: 'center', marginTop: 16 },
   signupText: { fontSize: 14, color: Colors.muted },
 });

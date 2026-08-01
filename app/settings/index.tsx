@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootState } from '../../store';
 import { toggleTheme } from '../../store/slices/themeSlice';
 import { signOutUser } from '../../lib/authService';
@@ -20,6 +21,11 @@ export default function SettingsScreen() {
   const logout = async () => {
     await signOutUser();
     router.replace('/auth/login');
+  };
+
+  const resetOnboarding = async () => {
+    await AsyncStorage.removeItem('hm_onboarding_done');
+    Alert.alert('Onboarding reset', 'Restart the app to see the onboarding flow again.');
   };
 
   const S = ({ label, value, onChange }: { label:string; value:boolean; onChange:(v:boolean)=>void }) => (
@@ -89,6 +95,18 @@ export default function SettingsScreen() {
             <Text style={styles.rowValue}>1.0.0</Text>
           </View>
         </View>
+
+        {__DEV__ && (
+          <>
+            <Text style={styles.sectionLabel}>DEVELOPER</Text>
+            <View style={styles.section}>
+              <TouchableOpacity style={styles.row} onPress={resetOnboarding}>
+                <Text style={styles.rowLabel}>Reset Onboarding</Text>
+                <Text style={styles.rowArrow}>→</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
         <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
           <Text style={styles.logoutText}>sign out</Text>
