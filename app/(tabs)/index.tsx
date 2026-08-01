@@ -1,23 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
-import { DAILY_TIPS } from '../../constants/subjects';
+import { xpProgress } from '../../lib/utils';
 import { checkInToday } from '../../store/slices/streakSlice';
 import HomieBot from '../../components/mascot/HomieBot';
-import XPBar from '../../components/ui/XPBar';
-import StatCard from '../../components/ui/StatCard';
-import StreakBanner from '../../components/streak/StreakBanner';
 import HeartsBar from '../../components/ui/HeartsBar';
-import GemsCounter from '../../components/ui/GemsCounter';
 import AchievementPopup from '../../components/achievements/AchievementPopup';
 import { useAchievements } from '../../hooks/useAchievements';
 import {
   ChatBubbleIcon, BookIcon, VideoIcon, GameIcon, TimerIcon,
   DetectorIcon, ShopIcon, TrophyIcon, CalendarIcon, PenIcon, CameraIcon, HistoryIcon,
+  FlameIcon, GemIcon, ArrowRightIcon,
 } from '../../components/icons';
 import Svg, { Path, Circle } from 'react-native-svg';
 
@@ -38,6 +36,24 @@ function SettingsIcon({ color }: { color: string }) {
     </Svg>
   );
 }
+
+type HomieMood = 'happy' | 'sad' | 'thinking' | 'shocked' | 'celebrating' | 'wink' | 'angry' | 'love' | 'cool' | 'sleepy';
+
+// Hero mascot mood and greeting line both key off local time-of-day, independent
+// of streak/study state (that's what the old greeting used) — this is a
+// deliberate redesign per spec, not a bug carried over from the old version.
+// Note: HomieBot's own MOOD_IMAGES map has no 'cool' asset yet, so the
+// afternoon slot currently renders the same image as 'happy' until a
+// homie-cool.png is added — a pre-existing gap in that shared component.
+function getTimeContext(): { greeting: string; mood: HomieMood } {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) return { greeting: 'Good morning,', mood: 'happy' };
+  if (hour >= 12 && hour < 18) return { greeting: 'Hey,', mood: 'cool' };
+  if (hour >= 18 && hour < 22) return { greeting: 'Evening,', mood: 'thinking' };
+  return { greeting: 'Still up,', mood: 'sleepy' };
+}
+
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const QUICK_ACTIONS = [
   { label: 'AI Chat',    route: '/chat',          color: '#7c3aed' },
@@ -70,7 +86,7 @@ const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; si
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_SIZE = (SCREEN_WIDTH - 16 * 2 - 8 * 2) / 3;
+const CARD_SIZE = (SCREEN_WIDTH - 16 * 2 - 10 * 2) / 3;
 
 export default function HomeTab() {
   const dispatch = useDispatch();
@@ -79,7 +95,6 @@ export default function HomeTab() {
   const gems = useSelector((s: RootState) => s.gems.count);
   const notifUnread = useSelector((s: RootState) => s.notifications.unread);
   const { newlyEarned, dismissNew } = useAchievements();
-  const [tip] = useState(DAILY_TIPS[Math.floor(Math.random() * DAILY_TIPS.length)]);
 
   useEffect(() => {
     if (!user) { router.replace('/auth/login'); return; }
@@ -88,7 +103,11 @@ export default function HomeTab() {
 
   if (!user) return null;
 
-  const mood = streak.current >= 7 ? 'celebrating' : streak.current === 0 ? 'sad' : 'happy';
+  const { greeting, mood } = getTimeContext();
+  const todayIdx = new Date().getDay();
+  const firstName = user.name?.split(' ')[0];
+  const xpPct = xpProgress(user.xp);
+  const xpToNext = 100 - (user.xp % 100);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -97,12 +116,17 @@ export default function HomeTab() {
       {/* Top bar */}
       <View style={styles.topbar}>
         <TouchableOpacity onPress={() => router.push('/streak')} style={styles.streakPill}>
-          <Text style={styles.streakNum}>{streak.current}</Text>
-          <Text style={styles.streakLabel}>day streak</Text>
+          <FlameIcon color={Colors.orange} size={14} />
+          <Text style={styles.streakPillText}>{streak.current} day streak</Text>
         </TouchableOpacity>
+
+        <HeartsBar onRefill={() => router.push('/shop')} />
+
         <View style={styles.topRight}>
-          <HeartsBar onRefill={() => router.push('/shop')} />
-          <GemsCounter onPress={() => router.push('/shop')} />
+          <TouchableOpacity onPress={() => router.push('/shop')} style={styles.gemsPill}>
+            <GemIcon color={Colors.blue} size={14} />
+            <Text style={styles.gemsPillText}>{gems.toLocaleString()}</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/notifications')} style={styles.iconBtn}>
             <BellIcon color={Colors.muted} />
             {notifUnread > 0 && (
@@ -118,49 +142,92 @@ export default function HomeTab() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-        {/* Greeting */}
-        <View style={styles.greeting}>
-          <HomieBot mood={mood} size={64} />
-          <View style={styles.greetingText}>
-            <Text style={styles.greetingName}>Hey {user.name?.split(' ')[0]}!</Text>
-            <Text style={styles.greetingSub}>Lv.{user.level} · {user.xp} XP</Text>
+        {/* Hero / greeting */}
+        <LinearGradient
+          colors={['#0d0b22', '#12102a']}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <HomieBot mood={mood} size={80} />
+          <View style={styles.heroText}>
+            <Text style={styles.heroGreeting}>{greeting}</Text>
+            <Text style={styles.heroName}>{firstName}</Text>
+            <Text style={styles.heroSub}>Lv.{user.level} · {user.xp} XP</Text>
+            <View style={styles.heroXpTrack}>
+              <View style={[styles.heroXpFill, { width: `${xpPct * 100}%` }]} />
+            </View>
+            <Text style={styles.heroXpLabel}>{xpToNext} XP to Level {user.level + 1}</Text>
+          </View>
+        </LinearGradient>
+
+        <View style={{ height: 12 }} />
+
+        {/* Stats row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.purpleL }]}>{user.sessions || 0}</Text>
+            <Text style={styles.statLabel}>SESSIONS</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.green }]}>{user.correct || 0}</Text>
+            <Text style={styles.statLabel}>CORRECT</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.orange }]}>{streak.current}d</Text>
+            <Text style={styles.statLabel}>STREAK</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.blue }]}>{gems}</Text>
+            <Text style={styles.statLabel}>GEMS</Text>
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 16 }}>
-          <XPBar xp={user.xp} />
-        </View>
+        <View style={{ height: 12 }} />
 
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <StatCard value={user.sessions || 0} label="Sessions" color={Colors.purpleL} />
-          <StatCard value={user.correct || 0} label="Correct" color={Colors.green} />
-          <StatCard value={`${streak.current}d`} label="Streak" color={Colors.orange} />
-          <StatCard value={gems} label="Gems" color={Colors.blue} />
-        </View>
+        {/* Streak banner */}
+        <TouchableOpacity style={styles.streakBanner} onPress={() => router.push('/streak')} activeOpacity={0.85}>
+          <View style={styles.streakBannerTop}>
+            <View style={styles.streakBannerLeft}>
+              <FlameIcon color={Colors.orange} size={18} />
+              <Text style={styles.streakBannerTitle}>{streak.current} day streak</Text>
+            </View>
+            <Text style={styles.streakBannerSub}>Keep it going!</Text>
+          </View>
+          <View style={styles.weekRow}>
+            {DAY_LABELS.map((d, i) => {
+              const studied = streak.weekActivity[i] === true;
+              const isTodayPending = i === todayIdx && !studied;
+              return (
+                <View key={i} style={styles.dayCol}>
+                  <View style={[styles.dayDot, studied && styles.dayDotFilled, isTodayPending && styles.dayDotToday]}>
+                    {studied && (
+                      <Svg width={14} height={14} viewBox="0 0 24 24">
+                        <Path d="M4 12l6 6L20 6" stroke={Colors.white} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      </Svg>
+                    )}
+                  </View>
+                  <Text style={[styles.dayLabel, i === todayIdx && { color: Colors.orange }]}>{d}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </TouchableOpacity>
 
-        <StreakBanner onPress={() => router.push('/streak')} />
+        <View style={{ height: 12 }} />
 
         {/* Daily quest */}
-        <TouchableOpacity style={styles.questCard} onPress={() => router.push('/lessons')} activeOpacity={0.85}>
-          <View style={[styles.questDot, { backgroundColor: Colors.purple }]} />
+        <View style={styles.questCard}>
+          <View style={styles.questDot} />
           <View style={{ flex: 1 }}>
             <Text style={styles.questTitle}>Daily Quest</Text>
             <Text style={styles.questSub}>one lesson keeps your streak alive</Text>
           </View>
-          <View style={styles.questBtn}>
+          <TouchableOpacity style={styles.questBtn} onPress={() => router.push('/lessons')} activeOpacity={0.85}>
             <Text style={styles.questBtnText}>Go</Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* Tip */}
-        <View style={styles.tipCard}>
-          <HomieBot mood="thinking" size={40} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.tipLabel}>TIP</Text>
-            <Text style={styles.tipText}>{tip}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
+
+        <View style={{ height: 12 }} />
 
         {/* Quick actions */}
         <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
@@ -174,8 +241,8 @@ export default function HomeTab() {
                 onPress={() => router.push(route as any)}
                 activeOpacity={0.75}
               >
-                <View style={[styles.actionIconWrap, { backgroundColor: color + '1f' }]}>
-                  <Icon color={color} size={20} />
+                <View style={[styles.actionIconWrap, { backgroundColor: color + '26' }]}>
+                  <Icon color={color} size={22} />
                 </View>
                 <Text style={styles.actionLabel}>{label}</Text>
               </TouchableOpacity>
@@ -183,16 +250,17 @@ export default function HomeTab() {
           })}
         </View>
 
+        <View style={{ height: 12 }} />
+
         {/* CTA */}
         <TouchableOpacity style={styles.ctaBanner} onPress={() => router.push('/chat')} activeOpacity={0.85}>
           <HomieBot mood="happy" size={52} />
           <View style={{ flex: 1 }}>
             <Text style={styles.ctaTitle}>Ready to study?</Text>
-            <Text style={styles.ctaSub}>Homie is waiting for you!</Text>
+            <Text style={styles.ctaSub}>Homie is waiting for you</Text>
           </View>
+          <ArrowRightIcon color={Colors.purple} size={20} />
         </TouchableOpacity>
-
-        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -200,34 +268,57 @@ export default function HomeTab() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  topbar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  streakPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(249,115,22,0.12)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: 'rgba(249,115,22,0.3)' },
-  streakNum: { fontSize: 14, fontWeight: '900', color: Colors.orange },
-  streakLabel: { fontSize: 11, color: Colors.orange },
-  topRight: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 14 },
+
+  topbar: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
+  streakPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(249,115,22,0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: 'rgba(249,115,22,0.4)' },
+  streakPillText: { fontSize: 12, fontWeight: '700', color: Colors.orange },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  gemsPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(59,130,246,0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: 'rgba(59,130,246,0.4)' },
+  gemsPillText: { fontSize: 12, fontWeight: '700', color: Colors.blue },
   iconBtn: { position: 'relative' },
   notifBadge: { position: 'absolute', top: -4, right: -4, width: 14, height: 14, borderRadius: 7, backgroundColor: Colors.red, alignItems: 'center', justifyContent: 'center' },
   notifBadgeText: { fontSize: 8, fontWeight: '900', color: 'white' },
-  greeting: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
-  greetingText: { flex: 1 },
-  greetingName: { fontSize: 22, fontWeight: '900', color: Colors.text },
-  greetingSub: { fontSize: 13, color: Colors.muted, marginTop: 2 },
-  statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginTop: 12, marginBottom: 4 },
-  questCard: { flexDirection: 'row', alignItems: 'center', margin: 16, marginTop: 8, padding: 16, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, borderLeftWidth: 3, borderLeftColor: Colors.purple, gap: 12 },
-  questDot: { width: 10, height: 10, borderRadius: 5 },
+
+  hero: { flexDirection: 'row', gap: 16, marginHorizontal: 16, padding: 20, borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)' },
+  heroText: { flex: 1, justifyContent: 'center' },
+  heroGreeting: { fontSize: 13, color: Colors.muted },
+  heroName: { fontSize: 22, fontWeight: '900', color: Colors.text, marginTop: 1 },
+  heroSub: { fontSize: 13, color: Colors.muted, marginTop: 2, marginBottom: 10 },
+  heroXpTrack: { height: 6, borderRadius: 3, backgroundColor: Colors.bg4, overflow: 'hidden' },
+  heroXpFill: { height: '100%', borderRadius: 3, backgroundColor: Colors.purple },
+  heroXpLabel: { fontSize: 10, color: Colors.muted, marginTop: 5, alignSelf: 'flex-end' },
+
+  statsRow: { flexDirection: 'row', gap: 8, marginHorizontal: 16 },
+  statCard: { flex: 1, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: Radius.md, padding: 12, alignItems: 'center' },
+  statValue: { fontSize: 22, fontWeight: '900', marginBottom: 4 },
+  statLabel: { fontSize: 9, color: Colors.muted, letterSpacing: 1.5 },
+
+  streakBanner: { marginHorizontal: 16, padding: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: 'rgba(249,115,22,0.06)', borderWidth: 1, borderColor: 'rgba(249,115,22,0.2)', borderLeftWidth: 3, borderLeftColor: Colors.orange },
+  streakBannerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  streakBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  streakBannerTitle: { fontSize: 15, fontWeight: '800', color: Colors.orange },
+  streakBannerSub: { fontSize: 12, color: Colors.muted },
+  weekRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
+  dayCol: { alignItems: 'center', gap: 4 },
+  dayDot: { width: 30, height: 30, borderRadius: 15, backgroundColor: Colors.bg3, borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  dayDotFilled: { backgroundColor: Colors.orange, borderColor: Colors.orange },
+  dayDotToday: { borderColor: Colors.orange, borderWidth: 2, backgroundColor: 'transparent' },
+  dayLabel: { fontSize: 9, color: Colors.muted, fontWeight: '700' },
+
+  questCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, padding: 14, paddingHorizontal: 16, backgroundColor: Colors.bg3, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)', borderLeftWidth: 3, borderLeftColor: Colors.purple, gap: 12 },
+  questDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.purple },
   questTitle: { fontSize: 14, fontWeight: '800', color: Colors.text },
   questSub: { fontSize: 12, color: Colors.muted, marginTop: 2 },
-  questBtn: { paddingHorizontal: 18, paddingVertical: 9, backgroundColor: Colors.purple, borderRadius: Radius.md },
-  questBtnText: { color: 'white', fontWeight: '800', fontSize: 13 },
-  tipCard: { flexDirection: 'row', gap: 12, marginHorizontal: 16, marginBottom: 12, padding: 14, backgroundColor: Colors.bg3, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'flex-start' },
-  tipLabel: { fontSize: 10, fontWeight: '700', color: Colors.purpleL, marginBottom: 4, letterSpacing: 2 },
-  tipText: { fontSize: 13, color: Colors.text2, lineHeight: 19 },
-  sectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.muted, paddingHorizontal: 16, marginBottom: 10, letterSpacing: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 8 },
-  actionCard: { width: CARD_SIZE, height: CARD_SIZE, backgroundColor: Colors.bg3, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  actionIconWrap: { width: 36, height: 36, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
+  questBtn: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: Colors.purple, borderRadius: 20 },
+  questBtnText: { color: Colors.white, fontWeight: '800', fontSize: 14 },
+
+  sectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.muted, marginLeft: 20, marginBottom: 12, letterSpacing: 2 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 10 },
+  actionCard: { width: CARD_SIZE, height: CARD_SIZE, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  actionIconWrap: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   actionLabel: { fontSize: 13, fontWeight: '700', color: Colors.white },
-  ctaBanner: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, gap: 12 },
-  ctaTitle: { fontSize: 17, fontWeight: '900', color: Colors.text },
+
+  ctaBanner: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, backgroundColor: 'rgba(124,58,237,0.1)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', gap: 12 },
+  ctaTitle: { fontSize: 16, fontWeight: '900', color: Colors.text },
   ctaSub: { fontSize: 13, color: Colors.muted, marginTop: 2 },
 });
