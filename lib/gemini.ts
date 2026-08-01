@@ -253,3 +253,67 @@ export async function generateStudyPlan(
     return null;
   }
 }
+
+export interface LectureNotes {
+  summary: string;
+  keyPoints: string[];
+  definitions: { term: string; definition: string }[];
+  examples: string[];
+  examQuestions: string[];
+  flashcards: { front: string; back: string }[];
+  missedTopics: string[];
+  homieAdvice: string;
+}
+
+export async function generateLectureNotes(
+  transcript: string,
+  subject: string,
+  lectureName: string
+): Promise<LectureNotes | null> {
+  try {
+    const prompt = [
+      'You are Homie — a Gen Z AI study buddy.',
+      'A student just recorded this lecture transcript:',
+      '',
+      `"${transcript}"`,
+      '',
+      `Subject: ${subject}`,
+      `Lecture: ${lectureName}`,
+      '',
+      'Generate comprehensive study notes.',
+      'Return ONLY a JSON object (no markdown, no commentary):',
+      '{',
+      '  "summary": "2-3 sentence overview of what was covered",',
+      '  "keyPoints": string[],',
+      '  "definitions": [{ "term": string, "definition": string }],',
+      '  "examples": string[] (examples or analogies mentioned),',
+      '  "examQuestions": string[],',
+      '  "flashcards": [{ "front": string, "back": string }],',
+      '  "missedTopics": string[] (topics mentioned but not fully explained),',
+      '  "homieAdvice": "one casual Gen Z tip for studying this material"',
+      '}',
+    ].join('\n');
+    // Same reasoning-model budget as generateStudyPlan — a full notes JSON
+    // (summary + points + definitions + questions + flashcards) is large
+    // enough to hit MAX_TOKENS on the default budget.
+    const out = await callGemini(
+      [{ role: 'user', content: prompt }],
+      'You are a study notes generator. Reply with ONLY valid JSON, nothing else.',
+      8192
+    );
+    const parsed = extractJSON(out);
+    if (!parsed || typeof parsed.summary !== 'string') return null;
+    return {
+      summary: parsed.summary,
+      keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints : [],
+      definitions: Array.isArray(parsed.definitions) ? parsed.definitions : [],
+      examples: Array.isArray(parsed.examples) ? parsed.examples : [],
+      examQuestions: Array.isArray(parsed.examQuestions) ? parsed.examQuestions : [],
+      flashcards: Array.isArray(parsed.flashcards) ? parsed.flashcards : [],
+      missedTopics: Array.isArray(parsed.missedTopics) ? parsed.missedTopics : [],
+      homieAdvice: typeof parsed.homieAdvice === 'string' ? parsed.homieAdvice : '',
+    };
+  } catch {
+    return null;
+  }
+}

@@ -1,0 +1,54 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.useFocusedInputLayoutHandler = exports.useAnimatedKeyboardHandler = void 0;
+var _reactNativeReanimated = require("react-native-reanimated");
+const useAnimatedKeyboardHandler = (handlers, dependencies) => {
+  const {
+    context,
+    doDependenciesDiffer
+  } = (0, _reactNativeReanimated.useHandler)(handlers, dependencies);
+  return (0, _reactNativeReanimated.useEvent)(event => {
+    "worklet";
+
+    const {
+      onKeyboardMoveStart,
+      onKeyboardMove,
+      onKeyboardMoveEnd,
+      onKeyboardMoveInteractive
+    } = handlers;
+    if (onKeyboardMoveStart && event.eventName.endsWith("onKeyboardMoveStart")) {
+      onKeyboardMoveStart(event, context);
+    }
+    if (onKeyboardMove && event.eventName.endsWith("onKeyboardMove")) {
+      onKeyboardMove(event, context);
+    }
+    if (onKeyboardMoveEnd && event.eventName.endsWith("onKeyboardMoveEnd")) {
+      onKeyboardMoveEnd(event, context);
+    }
+    if (onKeyboardMoveInteractive && event.eventName.endsWith("onKeyboardMoveInteractive")) {
+      onKeyboardMoveInteractive(event, context);
+    }
+  }, ["onKeyboardMoveStart", "onKeyboardMove", "onKeyboardMoveEnd", "onKeyboardMoveInteractive"], doDependenciesDiffer);
+};
+exports.useAnimatedKeyboardHandler = useAnimatedKeyboardHandler;
+const useFocusedInputLayoutHandler = (handlers, dependencies) => {
+  const {
+    context,
+    doDependenciesDiffer
+  } = (0, _reactNativeReanimated.useHandler)(handlers, dependencies);
+  return (0, _reactNativeReanimated.useEvent)(event => {
+    "worklet";
+
+    const {
+      onFocusedInputLayoutChanged
+    } = handlers;
+    if (onFocusedInputLayoutChanged && event.eventName.endsWith("onFocusedInputLayoutChanged")) {
+      onFocusedInputLayoutChanged(event, context);
+    }
+  }, ["onFocusedInputLayoutChanged"], doDependenciesDiffer);
+};
+exports.useFocusedInputLayoutHandler = useFocusedInputLayoutHandler;
+//# sourceMappingURL=reanimated.native.js.map

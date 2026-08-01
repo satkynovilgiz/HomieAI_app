@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 import {
   TimerIcon, CalendarIcon, GameIcon, VideoIcon, CameraIcon,
-  DetectorIcon, PenIcon,
+  DetectorIcon, PenIcon, MicIcon,
   HistoryIcon, ChartIcon, TrophyIcon, FlameIcon, ShopIcon,
   PeopleIcon, MessageIcon, InfoIcon, ChevronRightIcon,
 } from '../../components/icons';
@@ -18,6 +18,7 @@ const SECTIONS = [
       { label: 'Games',    desc: 'Study games',          route: '/games',   color: '#10b981', Icon: GameIcon },
       { label: 'Videos',   desc: 'Watch & learn',        route: '/videos',  color: '#f97316', Icon: VideoIcon },
       { label: 'Scan',     desc: 'Scan homework',        route: '/scanner', color: '#f43f5e', Icon: CameraIcon },
+      { label: 'Lecture Recorder', desc: 'Record & get AI notes', route: '/recorder', color: '#7c3aed', Icon: MicIcon },
     ],
   },
   {

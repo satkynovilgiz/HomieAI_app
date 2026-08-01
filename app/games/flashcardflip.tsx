@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as Haptics from 'expo-haptics';
 import { addXP } from '../../store/slices/userSlice';
 import { Colors, Radius } from '../../constants/theme';
 import { generateGameQuestions, GameQuestion } from '../../lib/gemini';
+import { RootState } from '../../store';
 import HomieBot from '../../components/mascot/HomieBot';
 import GameHeader, { PauseOverlay } from '../../components/games/GameHeader';
 import ResultsScreen from '../../components/games/ResultsScreen';
@@ -26,8 +27,9 @@ const FALLBACK: GameQuestion[] = [
 
 export default function FlashcardFlipGame() {
   const dispatch = useDispatch();
-  const { subject } = useLocalSearchParams<{ subject?: string }>();
+  const { subject, lectureId } = useLocalSearchParams<{ subject?: string; lectureId?: string }>();
   const subj = subject || 'General';
+  const lecture = useSelector((s: RootState) => (lectureId ? s.recorder.lectures.find(l => l.id === lectureId) : undefined));
 
   const [deck, setDeck] = useState<GameQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +45,14 @@ export default function FlashcardFlipGame() {
   const flipAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (lecture) {
+      const cards = (lecture.notes?.flashcards || []).map(f => ({ question: f.front, answer: f.back }));
+      const final = cards.length ? cards : FALLBACK;
+      setDeck(final);
+      setQueue(final.map((_, i) => i));
+      setLoading(false);
+      return;
+    }
     generateGameQuestions('flashcard', subj, '').then(gen => {
       const list = gen.filter(q => q.question && q.answer).slice(0, 10);
       const final = list.length ? list : FALLBACK;

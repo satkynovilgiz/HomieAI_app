@@ -23,6 +23,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   { id:'perfect_lesson', title:'No Mistakes!', desc:'Complete a lesson with no errors', icon:'✨', earned:false, xpReward:200 },
   { id:'night_owl', title:'Night Owl', desc:'Study after midnight', icon:'🦉', earned:false, xpReward:75 },
   { id:'early_bird', title:'Early Bird', desc:'Study before 7am', icon:'🐦', earned:false, xpReward:75 },
+  { id:'lecture_5', title:'Lecture Legend', desc:'Record 5 lectures total', icon:'🎙️', earned:false, xpReward:200 },
 ];
 
 const achievementsSlice = createSlice({

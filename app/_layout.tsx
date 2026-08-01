@@ -54,6 +54,8 @@ export default function RootLayout() {
           <Stack.Screen name="essay/index" />
           <Stack.Screen name="scanner/index" />
           <Stack.Screen name="videos/index" />
+          <Stack.Screen name="recorder/index" />
+          <Stack.Screen name="recorder/notes" />
           <Stack.Screen name="history/index" />
           <Stack.Screen name="about/index" />
           <Stack.Screen name="messages/index" />

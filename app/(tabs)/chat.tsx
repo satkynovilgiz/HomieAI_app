@@ -206,7 +206,7 @@ export default function ChatScreen() {
   const { sessions: chatSessions, activeChatId, loaded: chatHistoryLoaded } = useSelector((s: RootState) => s.chatHistory);
   const user = useSelector((s: RootState) => s.user.current);
   const savedItems = useSelector((s: RootState) => s.videos.items);
-  const { chatId: chatIdParam } = useLocalSearchParams<{ chatId?: string }>();
+  const { chatId: chatIdParam, prefill: prefillParam, subject: prefillSubjectParam } = useLocalSearchParams<{ chatId?: string; prefill?: string; subject?: string }>();
   const [input, setInput] = useState('');
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
@@ -219,6 +219,8 @@ export default function ChatScreen() {
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
   const restoredRef = useRef(false);
+  const prefillHandledRef = useRef(false);
+  const [pendingPrefill, setPendingPrefill] = useState<string | null>(null);
 
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
@@ -342,9 +344,10 @@ export default function ChatScreen() {
     }
   };
 
-  const send = useCallback(async (overText?: string, overImg?: string | null) => {
+  const send = useCallback(async (overText?: string, overImg?: string | null, overSubject?: string) => {
     const text = overText ?? input.trim();
     const img = overImg !== undefined ? overImg : imgB64;
+    const subj = overSubject || subject;
     if (!text && !img) return;
 
     setInput(''); setImgPreview(null); setImgB64(null);
@@ -366,7 +369,7 @@ export default function ChatScreen() {
     // the same pattern already used for saved videos/articles above.
     let chatId = activeChatId;
     if (!chatId) {
-      dispatch(createSession(subject));
+      dispatch(createSession(subj));
       chatId = store.getState().chatHistory.activeChatId;
     }
     if (!chatId) return;
@@ -416,8 +419,8 @@ export default function ChatScreen() {
       // message -> resourceTopic -> subject — never an empty or literal "it".
       // Everything else keeps the existing buildSearchQuery chain.
       const topic = searchType === 'video'
-        ? (extractVideoTopic(text) || resourceTopic || subject)
-        : buildSearchQuery(text, resourceTopic, subject);
+        ? (extractVideoTopic(text) || resourceTopic || subj)
+        : buildSearchQuery(text, resourceTopic, subj);
       const searchQuery = searchType === 'video' ? `${topic} explained tutorial` : topic;
       const loadingId = `search_loading_${Date.now()}`;
       const loadingMsg: any = { id: loadingId, role: 'assistant', type: 'loading', content: `Searching for "${topic}"...`, timestamp: Date.now() };
@@ -460,7 +463,7 @@ export default function ChatScreen() {
 
     try {
       const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
-      const reply = await callAI(apiMsgs, subject);
+      const reply = await callAI(apiMsgs, subj);
       const quiz = parseQuiz(reply);
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
 
@@ -481,6 +484,28 @@ export default function ChatScreen() {
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic, activeChatId]);
+
+  // "Ask Homie about this" (e.g. from the lecture notes screen) arrives with a
+  // pre-written message and its own subject — reset to a clean session first,
+  // then wait for that reset to actually land (messages.length === 0) before
+  // calling send(), so it picks up the fresh subject/activeChatId instead of
+  // this render's stale closures.
+  useEffect(() => {
+    if (!prefillParam || prefillHandledRef.current) return;
+    prefillHandledRef.current = true;
+    if (prefillSubjectParam) dispatch(setSubject(prefillSubjectParam));
+    dispatch(createSession(prefillSubjectParam || subject));
+    dispatch(clearMsgs());
+    setPendingPrefill(prefillParam);
+  }, [prefillParam]);
+
+  useEffect(() => {
+    if (pendingPrefill && messages.length === 0) {
+      const p = pendingPrefill;
+      setPendingPrefill(null);
+      send(p, null, prefillSubjectParam);
+    }
+  }, [pendingPrefill, messages.length]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });

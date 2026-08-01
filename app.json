@@ -18,9 +18,9 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "HOMIE needs camera to scan your homework",
-        "NSMicrophoneUsageDescription": "HOMIE needs your mic to hear you in Voice Mode.",
+        "NSMicrophoneUsageDescription": "HOMIE needs your mic for Voice Mode and to record lectures.",
         "NSPhotoLibraryUsageDescription": "HOMIE needs photos to scan homework",
-        "NSSpeechRecognitionUsageDescription": "HOMIE needs speech recognition to understand you in Voice Mode.",
+        "NSSpeechRecognitionUsageDescription": "HOMIE needs speech recognition for Voice Mode and to transcribe lectures.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

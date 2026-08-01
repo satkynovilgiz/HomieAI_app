@@ -1,0 +1,1 @@
+{"version":3,"names":["useChatKeyboard"],"sources":["hooks.ts"],"sourcesContent":["export { useChatKeyboard } from \"./useChatKeyboard\";\nexport type { KeyboardLiftBehavior } from \"./useChatKeyboard/types\";\n"],"mappings":"AAAA,SAASA,eAAe,QAAQ,mBAAmB","ignoreList":[]}
