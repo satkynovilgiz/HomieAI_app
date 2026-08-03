@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signInWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -18,16 +19,22 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [mood, setMood] = useState<'happy' | 'sad' | 'celebrating'>('happy');
 
+  // Welcome screen shows exactly once ever, gated on this flag — not tied to
+  // signup specifically, so a returning user's very first successful login
+  // (from any provider) still gets it, but never again after.
+  const afterAuth = async () => {
+    const welcomeShown = await AsyncStorage.getItem('hm_welcome_shown');
+    setMood('celebrating');
+    setTimeout(() => router.replace(welcomeShown ? '/(tabs)' : '/auth/welcome'), 300);
+  };
+
   const login = async () => {
     if (!email || !pass) { setError('fill in your info'); return; }
     setLoading(true); setError('');
     try {
       const { user, err } = await signInWithEmail(email.toLowerCase().trim(), pass);
       if (err) { setError(err); setMood('sad'); return; }
-      if (user) {
-        setMood('celebrating');
-        setTimeout(() => router.replace('/(tabs)'), 300);
-      }
+      if (user) { await afterAuth(); }
     } catch (e: any) {
       setError('something broke — try again');
       setMood('sad');
@@ -42,10 +49,7 @@ export default function LoginScreen() {
     try {
       const { user, err } = await signInWithGoogle();
       if (err) { setError(err); setMood('sad'); return; }
-      if (user) {
-        setMood('celebrating');
-        setTimeout(() => router.replace('/(tabs)'), 300);
-      }
+      if (user) { await afterAuth(); }
     } catch {
       setError("google's not cooperating — use email instead");
       setMood('sad');

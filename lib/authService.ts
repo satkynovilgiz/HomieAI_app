@@ -6,7 +6,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithCredential, GoogleAuthProvider, onAuthStateChanged,
-  signOut as firebaseSignOut, updateProfile,
+  signOut as firebaseSignOut, updateProfile, sendEmailVerification,
 } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import * as firestoreService from './firestoreService';
@@ -87,10 +87,31 @@ export async function signUpWithEmail(name: string, email: string, password: str
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
+    // Best-effort — a send failure here shouldn't block account creation, the
+    // user can always hit "Resend email" on the verify screen.
+    try { await sendEmailVerification(cred.user); } catch {}
     const user = await firestoreService.createUser(cred.user.uid, defaultUserData({ name, email, avatar, provider: 'email' }));
     await cacheSession(user);
     store.dispatch(setUser(user as any));
     return { user };
+  } catch (e: any) {
+    return { err: mapFirebaseError(e) };
+  }
+}
+
+// Re-checks Firebase's live emailVerified flag (reload() is required — the
+// cached currentUser object doesn't update on its own after the user clicks
+// the link in a different tab/app).
+export async function checkEmailVerified(): Promise<boolean> {
+  await auth.currentUser?.reload();
+  return !!auth.currentUser?.emailVerified;
+}
+
+export async function resendVerificationEmail(): Promise<{ err?: string }> {
+  try {
+    if (!auth.currentUser) return { err: 'not signed in' };
+    await sendEmailVerification(auth.currentUser);
+    return {};
   } catch (e: any) {
     return { err: mapFirebaseError(e) };
   }

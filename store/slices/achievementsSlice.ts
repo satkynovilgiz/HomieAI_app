@@ -24,6 +24,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   { id:'night_owl', title:'Night Owl', desc:'Study after midnight', icon:'🦉', earned:false, xpReward:75 },
   { id:'early_bird', title:'Early Bird', desc:'Study before 7am', icon:'🐦', earned:false, xpReward:75 },
   { id:'lecture_5', title:'Lecture Legend', desc:'Record 5 lectures total', icon:'🎙️', earned:false, xpReward:200 },
+  { id:'first_step', title:'First Step', desc:'Joined Homie', icon:'🎉', earned:false, xpReward:20 },
 ];
 
 const achievementsSlice = createSlice({

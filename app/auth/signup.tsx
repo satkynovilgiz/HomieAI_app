@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signUpWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
 import { AVATARS } from '../../constants/subjects';
@@ -25,7 +26,12 @@ export default function SignupScreen() {
     try {
       const { user, err } = await signInWithGoogle();
       if (err) { setError(err); return; }
-      if (user) { router.replace('/(tabs)'); }
+      if (user) {
+        // Google accounts are pre-verified — no verify screen, straight to
+        // welcome (or home if this browser/device has already seen it).
+        const welcomeShown = await AsyncStorage.getItem('hm_welcome_shown');
+        router.replace(welcomeShown ? '/(tabs)' : '/auth/welcome');
+      }
     } catch {
       setError("google's not cooperating — use email instead");
     } finally {
@@ -40,9 +46,11 @@ export default function SignupScreen() {
     if (form.pass.length < 6) { setError('needs 6+ characters'); return; }
     setLoading(true); setError('');
     try {
-      const { user, err } = await signUpWithEmail(form.name.trim(), form.email.toLowerCase().trim(), form.pass, avatar);
+      const email = form.email.toLowerCase().trim();
+      const name = form.name.trim();
+      const { user, err } = await signUpWithEmail(name, email, form.pass, avatar);
       if (err) { setError(err); return; }
-      if (user) { router.replace('/(tabs)'); }
+      if (user) { router.push({ pathname: '/auth/verify', params: { email, name } }); }
     } catch (e: any) {
       setError('something broke — try again');
     } finally {
