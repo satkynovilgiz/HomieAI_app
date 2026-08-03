@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithCredential, GoogleAuthProvider, onAuthStateChanged,
   signOut as firebaseSignOut, updateProfile, sendEmailVerification,
+  deleteUser as deleteFirebaseUser,
 } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import * as firestoreService from './firestoreService';
@@ -186,6 +187,25 @@ export async function signOutUser(): Promise<void> {
   await firebaseSignOut(auth);
   await AsyncStorage.removeItem(SESSION_KEY);
   store.dispatch(clearUser());
+}
+
+// Deletes the Firestore profile doc and the Firebase Auth account itself.
+// Clearing the rest of this device's local data (AsyncStorage keys, Redux
+// slices) is the caller's job — this function only owns the remote side.
+export async function deleteAccount(): Promise<{ err?: string }> {
+  const current = auth.currentUser;
+  if (!current) return { err: 'not signed in' };
+  try {
+    try { await firestoreService.deleteUserDoc(current.uid); } catch {}
+    await deleteFirebaseUser(current);
+    await AsyncStorage.removeItem(SESSION_KEY);
+    return {};
+  } catch (e: any) {
+    if (e?.code === 'auth/requires-recent-login') {
+      return { err: 'For security, sign out and log back in, then try deleting your account again.' };
+    }
+    return { err: mapFirebaseError(e) };
+  }
 }
 
 export async function getSession(): Promise<User | null> {

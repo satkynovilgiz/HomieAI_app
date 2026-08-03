@@ -8,7 +8,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootState } from '../../store';
 import { toggleTheme } from '../../store/slices/themeSlice';
 import { signOutUser } from '../../lib/authService';
+import { useDeleteAccount } from '../../hooks/useDeleteAccount';
 import { Colors, Radius } from '../../constants/theme';
+import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
@@ -17,6 +19,7 @@ export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [sound, setSound] = useState(true);
   const [haptics, setHaptics] = useState(true);
+  const { modalVisible, openModal, closeModal, confirmDelete, deleting } = useDeleteAccount();
 
   const logout = async () => {
     await signOutUser();
@@ -108,11 +111,29 @@ export default function SettingsScreen() {
           </>
         )}
 
+        <Text style={styles.dangerLabel}>DANGER ZONE</Text>
+        <View style={styles.dangerSection}>
+          <TouchableOpacity style={styles.dangerRow} onPress={logout}>
+            <Text style={styles.dangerRowText}>Sign Out of all devices</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dangerRow} onPress={openModal}>
+            <Text style={styles.dangerRowText}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
           <Text style={styles.logoutText}>sign out</Text>
         </TouchableOpacity>
         <View style={{ height:40 }}/>
       </ScrollView>
+
+      <DeleteAccountModal
+        visible={modalVisible}
+        onClose={closeModal}
+        onConfirm={confirmDelete}
+        loading={deleting}
+        userName={user?.name || ''}
+      />
     </SafeAreaView>
   );
 }
@@ -138,4 +159,8 @@ const styles = StyleSheet.create({
   toggleLabel: { fontSize:14, color:Colors.text },
   logoutBtn: { marginTop:24, paddingVertical:14, backgroundColor:'rgba(239,68,68,0.1)', borderRadius:Radius.lg, alignItems:'center', borderWidth:1, borderColor:'rgba(239,68,68,0.3)' },
   logoutText: { fontSize:15, fontWeight:'700', color:Colors.red },
+  dangerLabel: { fontSize:10, fontWeight:'700', color:Colors.red, letterSpacing:2, marginBottom:8, marginTop:16 },
+  dangerSection: { gap:8 },
+  dangerRow: { padding:16, backgroundColor:'rgba(239,68,68,0.06)', borderWidth:1, borderColor:'rgba(239,68,68,0.15)', borderRadius:Radius.lg },
+  dangerRowText: { fontSize:14, fontWeight:'700', color:Colors.red },
 });

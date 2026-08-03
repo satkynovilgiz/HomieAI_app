@@ -6,11 +6,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { updateUser } from '../../store/slices/userSlice';
 import { signOutUser, updateUser as updateUserRemote } from '../../lib/authService';
+import { useDeleteAccount } from '../../hooks/useDeleteAccount';
 import { Colors, Radius } from '../../constants/theme';
 import { AVATARS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import XPBar from '../../components/ui/XPBar';
+import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+
+function TrashIcon() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 7H20" stroke={Colors.red} strokeWidth="1.8" strokeLinecap="round"/>
+      <Path d="M9 7V4.5C9 3.7 9.7 3 10.5 3H13.5C14.3 3 15 3.7 15 4.5V7" stroke={Colors.red} strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+      <Path d="M6 7L7 20C7 20.6 7.4 21 8 21H16C16.6 21 17 20.6 17 20L18 7" stroke={Colors.red} strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+      <Path d="M10 11V17" stroke={Colors.red} strokeWidth="1.6" strokeLinecap="round"/>
+      <Path d="M14 11V17" stroke={Colors.red} strokeWidth="1.6" strokeLinecap="round"/>
+    </Svg>
+  );
+}
 
 function EditIcon() {
   return (
@@ -58,6 +72,7 @@ export default function ProfileScreen() {
   const [selAvatar, setSelAvatar] = useState(user?.avatar || '');
   const [editName, setEditName] = useState(false);
   const [name, setName] = useState(user?.name || '');
+  const { modalVisible, openModal, closeModal, confirmDelete, deleting } = useDeleteAccount();
 
   useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   if (!user) return null;
@@ -194,8 +209,26 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Danger zone */}
+        <View style={styles.dangerSection}>
+          <Text style={styles.dangerLabel}>DANGER ZONE</Text>
+          <TouchableOpacity style={styles.dangerBtn} onPress={openModal} activeOpacity={0.8}>
+            <TrashIcon />
+            <Text style={styles.dangerBtnText}>Delete Account</Text>
+            <Text style={styles.dangerArrow}>{'›'}</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      <DeleteAccountModal
+        visible={modalVisible}
+        onClose={closeModal}
+        onConfirm={confirmDelete}
+        loading={deleting}
+        userName={user.name}
+      />
     </SafeAreaView>
   );
 }
@@ -240,4 +273,9 @@ const styles = StyleSheet.create({
   avatarOptText: { fontSize: 26 },
   saveAvatarBtn: { paddingVertical: 14, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
   saveAvatarText: { color: 'white', fontWeight: '700', fontSize: 15 },
+  dangerSection: { paddingHorizontal: 16, marginTop: 24 },
+  dangerLabel: { fontSize: 11, fontWeight: '700', color: Colors.red, letterSpacing: 2, marginBottom: 8 },
+  dangerBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(239,68,68,0.06)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', borderRadius: 14, padding: 16 },
+  dangerBtnText: { flex: 1, fontSize: 15, fontWeight: '600', color: Colors.red },
+  dangerArrow: { fontSize: 18, color: Colors.red },
 });

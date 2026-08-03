@@ -33,10 +33,11 @@ const videosSlice = createSlice({
     loadItems(state, { payload }: PayloadAction<SavedItem[]>) {
       state.items = payload;
     },
+    clearVideos() { return initialState; },
   },
 });
 
-export const { saveItem, removeItem, loadItems } = videosSlice.actions;
+export const { saveItem, removeItem, loadItems, clearVideos } = videosSlice.actions;
 export default videosSlice.reducer;
 
 export async function persistSavedItems(items: SavedItem[]): Promise<void> {

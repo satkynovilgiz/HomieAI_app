@@ -1,5 +1,5 @@
 import {
-  doc, getDoc, setDoc, updateDoc,
+  doc, getDoc, setDoc, updateDoc, deleteDoc,
   collection, query, orderBy, limit, getDocs,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
@@ -20,6 +20,10 @@ export async function getUserByUid(uid: string): Promise<User | null> {
 
 export async function updateUser(uid: string, updates: Partial<User>): Promise<void> {
   await updateDoc(doc(db, USERS, uid), { ...updates, updatedAt: new Date().toISOString() });
+}
+
+export async function deleteUserDoc(uid: string): Promise<void> {
+  await deleteDoc(doc(db, USERS, uid));
 }
 
 export async function getLeaderboard(max = 20): Promise<User[]> {

@@ -101,6 +101,8 @@ const chatHistorySlice = createSlice({
     setActiveChat: (state, { payload: chatId }: PayloadAction<string | null>) => {
       state.activeChatId = chatId;
     },
+
+    clearChatHistory: () => ({ ...initialState, loaded: true }),
   },
 });
 
@@ -111,6 +113,7 @@ export const {
   deleteSession,
   loadSessions,
   setActiveChat,
+  clearChatHistory,
 } = chatHistorySlice.actions;
 export default chatHistorySlice.reducer;
 

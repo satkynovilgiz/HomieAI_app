@@ -30,8 +30,9 @@ const chatSlice = createSlice({
       const i = state.messages.findIndex(m => m.id === payload.id);
       if (i >= 0) Object.assign(state.messages[i], payload);
     },
+    clearChat: () => initialState,
   },
 });
 
-export const { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg, loadMessages } = chatSlice.actions;
+export const { addMsg, clearMsgs, setSubject, setLoading, addSessionXP, setMood, updateMsg, loadMessages, clearChat } = chatSlice.actions;
 export default chatSlice.reducer;

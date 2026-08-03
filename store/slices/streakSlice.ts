@@ -44,6 +44,7 @@ const streakSlice = createSlice({
     useFreeze(state) { if (state.freezesLeft > 0) state.freezesLeft--; },
     addFreeze(state) { state.freezesLeft++; },
     resetStreak(state) { state.current = 0; },
+    clearStreak() { return init; },
     hydrate(state, { payload }: PayloadAction<{ current: number; longest: number; lastStudy: string | null; studiedDates: string[] }>) {
       state.current = payload.current;
       state.longest = payload.longest;
@@ -54,5 +55,5 @@ const streakSlice = createSlice({
   },
 });
 
-export const { checkInToday, useFreeze, addFreeze, resetStreak, hydrate } = streakSlice.actions;
+export const { checkInToday, useFreeze, addFreeze, resetStreak, hydrate, clearStreak } = streakSlice.actions;
 export default streakSlice.reducer;

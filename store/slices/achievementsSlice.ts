@@ -40,8 +40,11 @@ const achievementsSlice = createSlice({
       }
     },
     clearNew(state) { state.newlyEarned = null; },
+    clearAchievements() {
+      return { list: ALL_ACHIEVEMENTS.map(a => ({ ...a, earned: false, earnedAt: undefined })), newlyEarned: null };
+    },
   },
 });
 
-export const { unlock, clearNew } = achievementsSlice.actions;
+export const { unlock, clearNew, clearAchievements } = achievementsSlice.actions;
 export default achievementsSlice.reducer;
