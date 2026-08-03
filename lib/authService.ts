@@ -129,6 +129,11 @@ export async function signInWithGoogle(): Promise<{ user?: User; err?: string }>
       scopes: ['openid', 'profile', 'email'],
       redirectUri,
       responseType: AuthSession.ResponseType.IdToken,
+      // PKCE only applies to the authorization-code flow — Google rejects
+      // code_challenge/code_challenge_method outright on an id_token request
+      // ("invalid_request: Parameter not allowed for this message type"),
+      // and AuthRequest defaults usePKCE to true regardless of responseType.
+      usePKCE: false,
       extraParams: { nonce: Math.random().toString(36).slice(2) },
     });
     const result = await request.promptAsync(GOOGLE_DISCOVERY);
