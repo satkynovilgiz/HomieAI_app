@@ -15,6 +15,7 @@ import notificationsReducer from './slices/notificationsSlice';
 import videosReducer from './slices/videosSlice';
 import chatHistoryReducer from './slices/chatHistorySlice';
 import recorderReducer from './slices/recorderSlice';
+import languageReducer from './slices/languageSlice';
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ export const store = configureStore({
     challenges: challengesReducer,
     notifications: notificationsReducer,
     videos: videosReducer,
+    language: languageReducer,
   },
   middleware: g => g({ serializableCheck: false }),
 });

@@ -8,6 +8,8 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/theme';
+import { useTranslation } from '../../hooks/useTranslation';
+import { TranslationKey } from '../../constants/translations';
 import HomieBot from '../../components/mascot/HomieBot';
 import { MicIcon, VideoIcon, GameIcon, CameraIcon, CalendarIcon, GemIcon, TrophyIcon, FlameIcon } from '../../components/icons';
 
@@ -130,6 +132,7 @@ function Slide2() {
 }
 
 function Slide3() {
+  const { t } = useTranslation();
   const barAnim = useRef(new Animated.Value(0)).current;
   const shimmer = useRef(new Animated.Value(0.6)).current;
 
@@ -161,36 +164,37 @@ function Slide3() {
       </View>
       <View style={styles.streakPillOnboard}>
         <FlameIcon color={Colors.orange} size={14} />
-        <Text style={styles.streakPillOnboardText}>7 day streak</Text>
+        <Text style={styles.streakPillOnboardText}>7 {t('home_streak')}</Text>
       </View>
       <View style={styles.achievementCard}>
         <TrophyIcon color={Colors.yellow} size={22} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.achievementTitle}>Achievement Unlocked!</Text>
-          <Text style={styles.achievementDesc}>First Chat — +20 XP</Text>
+          <Text style={styles.achievementTitle}>{t('onboarding_achievement_title')}</Text>
+          <Text style={styles.achievementDesc}>{t('onboarding_achievement_desc')}</Text>
         </View>
       </View>
     </View>
   );
 }
 
-const FEATURES = [
-  { label: 'Voice Mode', Icon: MicIcon, color: '#22d3ee' },
-  { label: 'Video Search', Icon: VideoIcon, color: '#f97316' },
-  { label: 'Quiz Games', Icon: GameIcon, color: '#10b981' },
-  { label: 'Scan Homework', Icon: CameraIcon, color: '#f43f5e' },
-  { label: 'Study Planner', Icon: CalendarIcon, color: '#3b82f6' },
-  { label: 'Lecture Recorder', Icon: MicIcon, color: '#ef4444' },
+const FEATURES: { key: TranslationKey; Icon: any; color: string }[] = [
+  { key: 'onboarding_feature_voice', Icon: MicIcon, color: '#22d3ee' },
+  { key: 'onboarding_feature_video', Icon: VideoIcon, color: '#f97316' },
+  { key: 'more_games',    Icon: GameIcon, color: '#10b981' },
+  { key: 'more_scan',     Icon: CameraIcon, color: '#f43f5e' },
+  { key: 'more_planner',  Icon: CalendarIcon, color: '#3b82f6' },
+  { key: 'more_recorder', Icon: MicIcon, color: '#ef4444' },
 ];
 
 function Slide4() {
+  const { t } = useTranslation();
   return (
     <View style={[styles.topHalf, styles.featureGridWrap]}>
       <View style={styles.featureGrid}>
-        {FEATURES.map(({ label, Icon, color }) => (
-          <View key={label} style={styles.featureBox}>
+        {FEATURES.map(({ key, Icon, color }) => (
+          <View key={key} style={styles.featureBox}>
             <Icon color={color} size={22} />
-            <Text style={styles.featureLabel}>{label}</Text>
+            <Text style={styles.featureLabel}>{t(key)}</Text>
           </View>
         ))}
       </View>
@@ -199,6 +203,7 @@ function Slide4() {
 }
 
 function Slide5() {
+  const { t } = useTranslation();
   return (
     <View style={styles.topHalf}>
       <View style={styles.mascotStarsWrap}>
@@ -211,30 +216,31 @@ function Slide5() {
       <View style={styles.statsFinalRow}>
         <View style={styles.statFinal}>
           <Text style={styles.statFinalValue}>100%</Text>
-          <Text style={styles.statFinalLabel}>Free forever</Text>
+          <Text style={styles.statFinalLabel}>{t('onboarding_stat_free')}</Text>
         </View>
         <View style={styles.statFinal}>
           <Text style={styles.statFinalValue}>9+</Text>
-          <Text style={styles.statFinalLabel}>Subjects covered</Text>
+          <Text style={styles.statFinalLabel}>{t('onboarding_stat_subjects')}</Text>
         </View>
         <View style={styles.statFinal}>
           <Text style={styles.statFinalValue}>10+</Text>
-          <Text style={styles.statFinalLabel}>Study tools</Text>
+          <Text style={styles.statFinalLabel}>{t('onboarding_stat_tools')}</Text>
         </View>
       </View>
     </View>
   );
 }
 
-const SLIDES = [
-  { key: '1', Top: Slide1, title: 'Meet Homie', sub: 'Your free AI study buddy that actually gets how you learn.' },
-  { key: '2', Top: Slide2, title: 'Chat with Homie', sub: 'Ask anything. Get Gen Z explanations, quizzes, and real examples. No cap.' },
-  { key: '3', Top: Slide3, title: 'Level Up While You Study', sub: 'Earn XP, maintain streaks, collect gems. Studying has never felt this good.' },
-  { key: '4', Top: Slide4, title: 'Everything You Need', sub: 'Voice mode, video search, games, homework scanner and way more.' },
-  { key: '5', Top: Slide5, title: 'Ready to study smarter?', sub: 'Join thousands of students already using Homie.' },
+const SLIDES: { key: string; Top: any; titleKey: TranslationKey; subKey: TranslationKey }[] = [
+  { key: '1', Top: Slide1, titleKey: 'onboarding_slide1_title', subKey: 'onboarding_slide1_sub' },
+  { key: '2', Top: Slide2, titleKey: 'onboarding_slide2_title', subKey: 'onboarding_slide2_sub' },
+  { key: '3', Top: Slide3, titleKey: 'onboarding_slide3_title', subKey: 'onboarding_slide3_sub' },
+  { key: '4', Top: Slide4, titleKey: 'onboarding_slide4_title', subKey: 'onboarding_slide4_sub' },
+  { key: '5', Top: Slide5, titleKey: 'onboarding_slide5_title', subKey: 'onboarding_slide5_sub' },
 ];
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const { width: screenWidth } = useWindowDimensions();
   const [idx, setIdx] = useState(0);
   const listRef = useRef<FlatList>(null);
@@ -259,13 +265,13 @@ export default function OnboardingScreen() {
   };
 
   const renderSlide = ({ item }: { item: typeof SLIDES[number] }) => {
-    const { Top, title, sub } = item;
+    const { Top, titleKey, subKey } = item;
     return (
       <View style={{ width: screenWidth }}>
         <Top />
         <View style={styles.bottomHalf}>
-          <Text style={styles.slideTitle}>{title}</Text>
-          <Text style={styles.slideSub}>{sub}</Text>
+          <Text style={styles.slideTitle}>{t(titleKey)}</Text>
+          <Text style={styles.slideSub}>{t(subKey)}</Text>
         </View>
       </View>
     );
@@ -276,10 +282,10 @@ export default function OnboardingScreen() {
       <View style={styles.topRow}>
         {!isLast ? (
           <TouchableOpacity onPress={() => goTo(SLIDES.length - 1)}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('onboarding_skip')}</Text>
           </TouchableOpacity>
         ) : <View style={{ width: 40 }} />}
-        <Text style={styles.counterText}>{idx + 1} of {SLIDES.length}</Text>
+        <Text style={styles.counterText}>{idx + 1} {t('onboarding_of')} {SLIDES.length}</Text>
       </View>
 
       <FlatList
@@ -305,15 +311,15 @@ export default function OnboardingScreen() {
       <View style={styles.bottomBtnArea}>
         {!isLast ? (
           <TouchableOpacity style={styles.nextBtn} onPress={() => goTo(idx + 1)} activeOpacity={0.9}>
-            <Text style={styles.nextBtnText}>Next</Text>
+            <Text style={styles.nextBtnText}>{t('onboarding_next')}</Text>
           </TouchableOpacity>
         ) : (
           <>
             <TouchableOpacity style={styles.ctaPrimary} onPress={() => finish('/auth/signup')} activeOpacity={0.9}>
-              <Text style={styles.ctaPrimaryText}>Get Started Free</Text>
+              <Text style={styles.ctaPrimaryText}>{t('onboarding_get_started')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.ctaSecondary} onPress={() => finish('/auth/login')} activeOpacity={0.85}>
-              <Text style={styles.ctaSecondaryText}>I already have an account</Text>
+              <Text style={styles.ctaSecondaryText}>{t('onboarding_have_account')}</Text>
             </TouchableOpacity>
           </>
         )}

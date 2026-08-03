@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const C = {
   bg2: '#0d0b22',
@@ -78,6 +79,7 @@ function VoiceTabIcon({ focused }: { focused: boolean }) {
 }
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
@@ -94,12 +96,12 @@ export default function TabLayout() {
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
       }}
     >
-      <Tabs.Screen name="index"   options={{ title: 'Home',    tabBarIcon: ({ color }) => <HomeIcon    color={color} /> }} />
-      <Tabs.Screen name="chat"    options={{ title: 'Chat',    tabBarIcon: ({ color }) => <ChatIcon    color={color} /> }} />
-      <Tabs.Screen name="voice"   options={{ title: 'Voice',   tabBarIcon: ({ focused }) => <VoiceTabIcon focused={focused} /> }} />
-      <Tabs.Screen name="learn"   options={{ title: 'Learn',   tabBarIcon: ({ color }) => <LearnIcon   color={color} /> }} />
-      <Tabs.Screen name="more"    options={{ title: 'More',    tabBarIcon: ({ color }) => <MoreIcon    color={color} /> }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color }) => <ProfileIcon color={color} /> }} />
+      <Tabs.Screen name="index"   options={{ title: t('nav_home'),    tabBarIcon: ({ color }) => <HomeIcon    color={color} /> }} />
+      <Tabs.Screen name="chat"    options={{ title: t('nav_chat'),    tabBarIcon: ({ color }) => <ChatIcon    color={color} /> }} />
+      <Tabs.Screen name="voice"   options={{ title: t('nav_voice'),   tabBarIcon: ({ focused }) => <VoiceTabIcon focused={focused} /> }} />
+      <Tabs.Screen name="learn"   options={{ title: t('nav_learn'),   tabBarIcon: ({ color }) => <LearnIcon   color={color} /> }} />
+      <Tabs.Screen name="more"    options={{ title: t('nav_more'),    tabBarIcon: ({ color }) => <MoreIcon    color={color} /> }} />
+      <Tabs.Screen name="profile" options={{ title: t('nav_profile'), tabBarIcon: ({ color }) => <ProfileIcon color={color} /> }} />
       <Tabs.Screen name="friends" options={{ href: null }} />
       <Tabs.Screen name="games"   options={{ href: null }} />
     </Tabs>

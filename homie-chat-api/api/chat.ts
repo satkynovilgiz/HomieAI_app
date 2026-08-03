@@ -32,12 +32,24 @@ const PERSONA = [
   'Celebrate wins hard. If they mess up, stay chill and encouraging — never condescending.',
 ].join('\n');
 
-function systemPrompt(subject: string, voice?: boolean): string {
+// Keyed to the same 'en'/'es'/'ru' codes the app's language switcher uses
+// (constants/translations.ts) — each one keeps Homie's Gen Z voice, just in
+// that language's own slang instead of translating the English slang literally.
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+  en: 'Respond in English. Use natural Gen Z slang like "bro", "fr", "no cap", "ngl", "lowkey".',
+  es: 'Responde siempre en español (nunca en inglés). Habla como un amigo real y casual, nunca formal ni como libro de texto — usa expresiones como "bro", "en serio", "sin mentiras", "literalmente" de forma natural.',
+  ru: 'Отвечай всегда на русском языке (никогда не на английском). Общайся неформально, как настоящий друг, никогда формально и не как учебник — используй такие слова как "брат", "серьёзно", "без шуток", "реально" естественно.',
+};
+
+function systemPrompt(subject: string, voice?: boolean, language?: string): string {
+  const langInstruction = LANGUAGE_INSTRUCTIONS[language || 'en'] || LANGUAGE_INSTRUCTIONS.en;
   const extra = SUBJECT_EXTRAS[subject];
   const subjectLine = extra ? `\n${extra}` : '';
 
   if (voice) {
     return [
+      langInstruction,
+      '',
       PERSONA + subjectLine,
       '',
       "You're talking out loud to the student over voice right now, not texting. Reply short and conversational, under 60 words — this gets spoken aloud, not read.",
@@ -46,10 +58,15 @@ function systemPrompt(subject: string, voice?: boolean): string {
   }
 
   return [
+    langInstruction,
+    '',
     PERSONA + subjectLine,
     'Keep it real: short, punchy, never a wall of text unless they clearly want depth. Under 200 words unless asked for more.',
     '',
     QUIZ_FORMAT,
+    language && language !== 'en'
+      ? 'Keep the labels QUIZ_START, Q:, A), B), C), D), CORRECT:, EXPLANATION:, QUIZ_END exactly as shown (in English) — but write the actual question, options, and explanation text in the language instructed above.'
+      : '',
   ].join('\n');
 }
 
@@ -84,10 +101,11 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { messages, subject, voice } = (req.body || {}) as {
+    const { messages, subject, voice, language } = (req.body || {}) as {
       messages?: IncomingMessage[];
       subject?: string;
       voice?: boolean;
+      language?: string;
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -96,7 +114,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const groqMessages = [
-      { role: 'system', content: systemPrompt(subject || 'General', voice) },
+      { role: 'system', content: systemPrompt(subject || 'General', voice, language) },
       ...messages.map((m) => ({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: toGroqText(m.content),

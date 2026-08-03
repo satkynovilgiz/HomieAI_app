@@ -7,6 +7,7 @@ import { RootState } from '../../store';
 import { updateUser } from '../../store/slices/userSlice';
 import { signOutUser, updateUser as updateUserRemote } from '../../lib/authService';
 import { useDeleteAccount } from '../../hooks/useDeleteAccount';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import { AVATARS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -65,6 +66,7 @@ const STAT_ITEMS = [
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
   const streak = useSelector((s: RootState) => s.streak);
   const gems = useSelector((s: RootState) => s.gems.count);
@@ -105,7 +107,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={styles.headerTitle}>{t('profile_title')}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => router.push('/settings')} style={styles.iconBtn}>
             <SettingsIcon />
@@ -135,7 +137,7 @@ export default function ProfileScreen() {
                   onSubmitEditing={saveName}
                 />
                 <TouchableOpacity onPress={saveName} style={styles.saveNameBtn}>
-                  <Text style={styles.saveNameText}>save</Text>
+                  <Text style={styles.saveNameText}>{t('profile_save')}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -145,7 +147,7 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
             <Text style={styles.profileEmail}>{user.email}</Text>
-            <Text style={styles.profileJoined}>Joined {new Date(user.createdAt).toLocaleDateString()}</Text>
+            <Text style={styles.profileJoined}>{t('profile_joined')} {new Date(user.createdAt).toLocaleDateString()}</Text>
           </View>
 
           <View style={styles.levelBlock}>
@@ -163,10 +165,10 @@ export default function ProfileScreen() {
         {/* Tabs */}
         <View style={styles.tabs}>
           <TouchableOpacity onPress={() => setTab('stats')} style={[styles.tabBtn, tab === 'stats' && styles.tabBtnActive]}>
-            <Text style={[styles.tabBtnText, tab === 'stats' && styles.tabBtnTextActive]}>Stats</Text>
+            <Text style={[styles.tabBtnText, tab === 'stats' && styles.tabBtnTextActive]}>{t('profile_stats')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setTab('avatar')} style={[styles.tabBtn, tab === 'avatar' && styles.tabBtnActive]}>
-            <Text style={[styles.tabBtnText, tab === 'avatar' && styles.tabBtnTextActive]}>Avatar</Text>
+            <Text style={[styles.tabBtnText, tab === 'avatar' && styles.tabBtnTextActive]}>{t('profile_avatar')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -174,12 +176,12 @@ export default function ProfileScreen() {
         {tab === 'stats' && (
           <View style={styles.statsGrid}>
             {[
-              { label: 'Sessions',  value: user.sessions || 0,                         color: Colors.purpleL },
-              { label: 'Correct',   value: user.correct || 0,                           color: Colors.green },
-              { label: 'Streak',    value: `${streak.current}d`,                        color: Colors.orange },
-              { label: 'Total XP',  value: user.xp,                                    color: Colors.blue },
-              { label: 'Messages',  value: user.msgsSent || 0,                          color: Colors.pink },
-              { label: 'Hours',     value: `${Math.round((user.studyHours||0)*10)/10}h`, color: Colors.yellow },
+              { label: t('profile_sessions'), value: user.sessions || 0,                         color: Colors.purpleL },
+              { label: t('profile_correct'),  value: user.correct || 0,                           color: Colors.green },
+              { label: t('profile_streak'),   value: `${streak.current}d`,                        color: Colors.orange },
+              { label: t('profile_xp'),       value: user.xp,                                    color: Colors.blue },
+              { label: t('profile_messages'), value: user.msgsSent || 0,                          color: Colors.pink },
+              { label: t('profile_hours'),    value: `${Math.round((user.studyHours||0)*10)/10}h`, color: Colors.yellow },
             ].map(({ label, value, color }) => (
               <View key={label} style={styles.statCard}>
                 <Text style={[styles.statValue, { color }]}>{value}</Text>
@@ -192,7 +194,7 @@ export default function ProfileScreen() {
         {/* Avatar tab */}
         {tab === 'avatar' && (
           <View style={styles.avatarPicker}>
-            <Text style={styles.avatarPickerTitle}>choose your avatar</Text>
+            <Text style={styles.avatarPickerTitle}>{t('profile_choose_avatar')}</Text>
             <View style={styles.avatarGrid}>
               {AVATARS.map(a => (
                 <TouchableOpacity
@@ -204,17 +206,17 @@ export default function ProfileScreen() {
               ))}
             </View>
             <TouchableOpacity onPress={saveAvatar} style={styles.saveAvatarBtn}>
-              <Text style={styles.saveAvatarText}>save avatar</Text>
+              <Text style={styles.saveAvatarText}>{t('profile_save_avatar')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Danger zone */}
         <View style={styles.dangerSection}>
-          <Text style={styles.dangerLabel}>DANGER ZONE</Text>
+          <Text style={styles.dangerLabel}>{t('profile_danger')}</Text>
           <TouchableOpacity style={styles.dangerBtn} onPress={openModal} activeOpacity={0.8}>
             <TrashIcon />
-            <Text style={styles.dangerBtnText}>Delete Account</Text>
+            <Text style={styles.dangerBtnText}>{t('profile_delete')}</Text>
             <Text style={styles.dangerArrow}>{'›'}</Text>
           </TouchableOpacity>
         </View>

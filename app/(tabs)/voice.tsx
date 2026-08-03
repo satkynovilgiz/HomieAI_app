@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import { callAI } from '../../lib/aiChat';
+import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
 
 // expo-speech-recognition's native module only exists in a custom EAS build, not Expo Go.
@@ -32,6 +33,7 @@ type Status = 'idle' | 'listening' | 'thinking' | 'speaking';
 
 export default function VoiceScreen() {
   const user = useSelector((s: RootState) => s.user.current);
+  const { language } = useTranslation();
   const [status, setStatus] = useState<Status>('idle');
   const [convo, setConvo] = useState<Array<{ role: string; text: string }>>([]);
   const [lastReply, setLastReply] = useState('');
@@ -79,7 +81,7 @@ export default function VoiceScreen() {
     try {
       const history = convoRef.current.map(c => ({ role: c.role === 'you' ? 'user' : 'assistant', content: c.text }));
       history.push({ role: 'user', content: text });
-      const reply = await callAI(history, 'General', true);
+      const reply = await callAI(history, 'General', true, language);
       const clean = reply.replace(/[*_`#]/g, '').trim();
       setLastReply(clean);
       setConvo(prev => [...prev, { role: 'homie', text: clean }]);

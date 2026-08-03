@@ -3,9 +3,12 @@ import { Stack } from 'expo-router';
 import { Provider, useDispatch } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import store from '../store';
 import { useStreakSync } from '../hooks/useStreakSync';
 import { loadSessions, loadChatHistoryFromStorage } from '../store/slices/chatHistorySlice';
+import { setLanguage } from '../store/slices/languageSlice';
+import { Language } from '../constants/translations';
 
 function StreakSync() {
   useStreakSync();
@@ -23,12 +26,23 @@ function ChatHistorySync() {
   return null;
 }
 
+function LanguageSync() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    AsyncStorage.getItem('hm_language').then(saved => {
+      if (saved) dispatch(setLanguage(saved as Language));
+    });
+  }, []);
+  return null;
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <StreakSync />
         <ChatHistorySync />
+        <LanguageSync />
         <StatusBar style="light" backgroundColor="#07070f" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#07070f' } }}>
           <Stack.Screen name="index" />

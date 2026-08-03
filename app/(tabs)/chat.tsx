@@ -21,6 +21,7 @@ import { callAI } from '../../lib/aiChat';
 import { parseQuiz } from '../../lib/utils';
 import { detectSearchIntent } from '../../lib/searchDetector';
 import { smartSearch, searchWeb, VideoResult, ArticleResult } from '../../lib/searchService';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import { SUBJECTS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -177,21 +178,22 @@ function DocIcon() {
 }
 
 function ResourceBar({ onWatchVideo, onSearchWeb, onArticle }: { onWatchVideo: () => void; onSearchWeb: () => void; onArticle: () => void }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.resourceBar}>
-      <Text style={styles.resourceBarTitle}>want to go deeper on this?</Text>
+      <Text style={styles.resourceBarTitle}>{t('chat_deeper')}</Text>
       <View style={styles.resourceBtnRow}>
         <TouchableOpacity onPress={onWatchVideo} style={[styles.resourceBtn, styles.resourceBtnVideo]}>
           <PlayIcon/>
-          <Text style={styles.resourceBtnTextVideo}>Watch Video</Text>
+          <Text style={styles.resourceBtnTextVideo}>{t('chat_watch')}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onSearchWeb} style={[styles.resourceBtn, styles.resourceBtnWeb]}>
           <SearchIcon/>
-          <Text style={styles.resourceBtnTextWeb}>Search Web</Text>
+          <Text style={styles.resourceBtnTextWeb}>{t('chat_search')}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onArticle} style={[styles.resourceBtn, styles.resourceBtnArticle]}>
           <DocIcon/>
-          <Text style={styles.resourceBtnTextArticle}>Article</Text>
+          <Text style={styles.resourceBtnTextArticle}>{t('chat_article')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -202,6 +204,7 @@ const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challeng
 
 export default function ChatScreen() {
   const dispatch = useDispatch();
+  const { t, language } = useTranslation();
   const { messages, loading, subject, mood, sessionXP } = useSelector((s: RootState) => s.chat);
   const { sessions: chatSessions, activeChatId, loaded: chatHistoryLoaded } = useSelector((s: RootState) => s.chatHistory);
   const user = useSelector((s: RootState) => s.user.current);
@@ -428,7 +431,7 @@ export default function ChatScreen() {
 
       try {
         const { videos, articles } = await smartSearch(searchQuery, searchType);
-        const resultContent = `here's what I found on ${topic}`;
+        const resultContent = `${t('chat_found')} ${topic}`;
         dispatch(updateMsg({
           id: loadingId, type: 'search_results', content: resultContent,
           videos, articles, query: topic,
@@ -444,7 +447,7 @@ export default function ChatScreen() {
         try {
           const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
           apiMsgs.push({ role: 'user', content: `Give me a brief 2 sentence summary about ${topic} so the student knows what they are looking at` });
-          const reply = await callAI(apiMsgs, subject);
+          const reply = await callAI(apiMsgs, subject, false, language);
           const summaryMsg = { id: (Date.now() + 1).toString(), role: 'assistant' as const, content: reply.trim(), timestamp: Date.now() };
           dispatch(addMsg(summaryMsg));
           dispatch(addMessageToSession({ chatId, message: toHistoryMessage(summaryMsg, 'text') }));
@@ -452,7 +455,7 @@ export default function ChatScreen() {
           // summary is a nice-to-have — the results are already shown, so a failure here is silent
         }
       } catch (err: any) {
-        dispatch(updateMsg({ id: loadingId, type: undefined, content: "couldn't search right now — try again" } as any));
+        dispatch(updateMsg({ id: loadingId, type: undefined, content: t('chat_couldnt_search') } as any));
         dispatch(setMood('sad'));
       } finally {
         dispatch(setLoading(false));
@@ -463,7 +466,7 @@ export default function ChatScreen() {
 
     try {
       const apiMsgs = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
-      const reply = await callAI(apiMsgs, subj);
+      const reply = await callAI(apiMsgs, subj, false, language);
       const quiz = parseQuiz(reply);
       const clean = reply.replace(/QUIZ_START[\s\S]+?QUIZ_END/, '').trim();
 
@@ -477,13 +480,13 @@ export default function ChatScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       dispatch(addMessageToSession({ chatId, message: toHistoryMessage(assistantMsg, quiz ? 'quiz' : 'text', xpEarned) }));
     } catch (err: any) {
-      dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: 'my bad bro 😅 — try again', timestamp: Date.now() }));
+      dispatch(addMsg({ id: (Date.now() + 1).toString(), role: 'assistant', content: t('chat_my_bad'), timestamp: Date.now() }));
       dispatch(setMood('sad'));
     } finally {
       dispatch(setLoading(false));
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic, activeChatId]);
+  }, [input, imgB64, messages, subject, dispatch, messageCount, shownResources, realTopic, activeChatId, language]);
 
   // "Ask Homie about this" (e.g. from the lecture notes screen) arrives with a
   // pre-written message and its own subject — reset to a clean session first,
@@ -559,7 +562,7 @@ export default function ChatScreen() {
             ))}
             {!item.videos?.length && !item.articles?.length && (
               <View style={[styles.bubble, styles.bubbleAI]}>
-                <Text style={styles.bubbleText}>couldn't find anything for that — try rephrasing</Text>
+                <Text style={styles.bubbleText}>{t('chat_couldnt_find')}</Text>
               </View>
             )}
           </View>
@@ -580,7 +583,7 @@ export default function ChatScreen() {
             <QuizCard quiz={item.quiz} onAnswer={(idx, correct) => handleQuizAnswer(item.id, idx, correct)}/>
           )}
           {!isUser && item.resourceLoading && (
-            <Text style={styles.resourceLoadingText}>looking that up...</Text>
+            <Text style={styles.resourceLoadingText}>{t('chat_looking_up')}</Text>
           )}
           {!isUser && (item.videos as VideoResult[] || []).map((v: VideoResult) => (
             <SearchVideoCard key={v.id} video={v} isSaved={isItemSaved(v.url)} onSave={() => handleSaveVideo(v, item.resourceQuery || '')}/>
@@ -620,7 +623,7 @@ export default function ChatScreen() {
         </TouchableOpacity>
         <HomieBot mood={mood as any} size={32}/>
         <View style={styles.topbarInfo}>
-          <Text style={styles.topbarTitle}>Homie</Text>
+          <Text style={styles.topbarTitle}>{t('chat_title')}</Text>
           <Text style={styles.topbarSub}>⭐{user?.xp} · Lv.{user?.level} · +{sessionXP}XP</Text>
         </View>
         <TouchableOpacity onPress={() => setShowSubjects(!showSubjects)} style={styles.subjBtn}>
@@ -651,8 +654,8 @@ export default function ChatScreen() {
         {messages.length === 0 ? (
           <View style={styles.welcome}>
             <HomieBot mood="happy" size={100}/>
-            <Text style={styles.welcomeTitle}>yo {user?.name?.split(' ')[0]}! what are we studying? 📚</Text>
-            <Text style={styles.welcomeSub}>ask anything, upload homework, or just talk</Text>
+            <Text style={styles.welcomeTitle}>{t('chat_yo')} {user?.name?.split(' ')[0]}! {t('chat_studying_q')}</Text>
+            <Text style={styles.welcomeSub}>{t('chat_welcome_sub')}</Text>
             <View style={styles.prompts}>
               {QUICK_PROMPTS.map(p => (
                 <TouchableOpacity key={p} onPress={() => send(p)} style={styles.promptBtn}>
@@ -669,7 +672,7 @@ export default function ChatScreen() {
               <View style={styles.typingRow}>
                 <HomieBot mood="thinking" size={28}/>
                 <View style={styles.typingBubble}>
-                  <Text style={styles.typingText}>thinking...</Text>
+                  <Text style={styles.typingText}>{t('chat_typing')}</Text>
                 </View>
               </View>
             ) : null}
@@ -680,7 +683,7 @@ export default function ChatScreen() {
         {imgPreview && (
           <View style={styles.imgPreview}>
             <Image source={{ uri: imgPreview }} style={styles.imgPreviewImg}/>
-            <Text style={styles.imgPreviewText}>📸 photo's in — ask something or just send</Text>
+            <Text style={styles.imgPreviewText}>📸 {t('chat_photo_in')}</Text>
             <TouchableOpacity onPress={() => { setImgPreview(null); setImgB64(null); }}>
               <Text style={styles.imgPreviewClose}>✕</Text>
             </TouchableOpacity>
@@ -695,7 +698,7 @@ export default function ChatScreen() {
           <TextInput
             style={styles.textInput}
             value={input} onChangeText={setInput}
-            placeholder={`Ask about ${subject}...`}
+            placeholder={`${t('chat_placeholder')} ${subject}...`}
             placeholderTextColor={Colors.muted}
             multiline maxLength={500}
             onSubmitEditing={() => send()}

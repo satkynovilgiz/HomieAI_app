@@ -9,6 +9,7 @@ import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import { addXP, setUser } from '../../store/slices/userSlice';
 import { unlock } from '../../store/slices/achievementsSlice';
+import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
 
 function StarIcon({ size = 12, color = '#fbbf24' }: { size?: number; color?: string }) {
@@ -81,6 +82,7 @@ function TypingDots() {
 
 export default function WelcomeScreen() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
   const [visibleMsgs, setVisibleMsgs] = useState(0);
   const [typing, setTyping] = useState(false);
@@ -103,11 +105,13 @@ export default function WelcomeScreen() {
   if (!user) return null;
 
   const firstName = user.name?.split(' ')[0] || 'there';
+  const heyWord = t('welcome_msg1_name');
+  const heyCapitalized = heyWord.charAt(0).toUpperCase() + heyWord.slice(1);
 
   const messages = [
-    `hey ${firstName}! welcome to Homie. i am your personal AI study buddy and i am built different fr 😤`,
-    'here is what i can help you with:\n\n— answer any question you have\n— quiz you on anything\n— find videos and articles\n— record your lectures in class\n— build your study plan\n— and way more',
-    'what subject are we starting with? just tell me and we will get into it right now. no cap 🔥',
+    `${heyWord} ${firstName}! ${t('welcome_msg1')} 😤`,
+    t('welcome_msg2'),
+    `${t('welcome_msg3')} 🔥`,
   ];
 
   const goToHome = async () => {
@@ -124,16 +128,16 @@ export default function WelcomeScreen() {
             <FloatingStar key={i} size={s.size} delay={s.delay} style={{ position: 'absolute', top: s.top, left: s.left as any }} />
           ))}
           <HomieBot mood="celebrating" size={120} />
-          <Text style={styles.title}>Welcome to Homie!</Text>
-          <Text style={styles.sub}>Hey {firstName}, you are in!</Text>
+          <Text style={styles.title}>{t('welcome_title')}</Text>
+          <Text style={styles.sub}>{heyCapitalized} {firstName}, {t('welcome_sub')}</Text>
 
           <View style={styles.pillRow}>
             <View style={styles.xpPill}>
-              <Text style={styles.xpPillText}>+20 XP</Text>
+              <Text style={styles.xpPillText}>{t('welcome_xp_badge')}</Text>
             </View>
             <View style={styles.badgePill}>
               <StarIcon size={12} color={Colors.purpleL} />
-              <Text style={styles.badgePillText}>First Step</Text>
+              <Text style={styles.badgePillText}>{t('welcome_first_step')}</Text>
             </View>
           </View>
         </View>
@@ -141,7 +145,7 @@ export default function WelcomeScreen() {
         <View style={styles.divider} />
 
         <View style={styles.chatSection}>
-          <Text style={styles.chatLabel}>A MESSAGE FROM HOMIE</Text>
+          <Text style={styles.chatLabel}>{t('welcome_message_label')}</Text>
 
           <View style={styles.msgGroup}>
             <HomieBot mood="happy" size={32} />
@@ -171,7 +175,7 @@ export default function WelcomeScreen() {
 
         {visibleMsgs >= 3 && (
           <TouchableOpacity style={styles.goBtn} onPress={goToHome} activeOpacity={0.9}>
-            <Text style={styles.goBtnText}>Let's go!</Text>
+            <Text style={styles.goBtnText}>{t('welcome_btn')}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Modal, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Colors } from '../../constants/theme';
+import { useTranslation } from '../../hooks/useTranslation';
+import { TranslationKey } from '../../constants/translations';
 import HomieBot from '../mascot/HomieBot';
 
 interface Props {
@@ -11,17 +13,13 @@ interface Props {
   userName: string;
 }
 
-const WARNINGS = [
-  'All your XP and progress',
-  'Your streak history',
-  'All saved chats',
-  'Your gems and achievements',
-  'All saved videos and notes',
-];
+const WARNING_KEYS: TranslationKey[] = ['delete_item1', 'delete_item2', 'delete_item3', 'delete_item4', 'delete_item5'];
 
 export default function DeleteAccountModal({ visible, onClose, onConfirm, loading }: Props) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
-  const canConfirm = input.trim() === 'DELETE';
+  const confirmWord = t('delete_word');
+  const canConfirm = input.trim() === confirmWord;
 
   const handleClose = () => {
     if (loading) return;
@@ -39,26 +37,26 @@ export default function DeleteAccountModal({ visible, onClose, onConfirm, loadin
       <View style={styles.overlay}>
         <View style={styles.card}>
           <HomieBot mood="sad" size={80} />
-          <Text style={styles.title}>Delete your account?</Text>
-          <Text style={styles.warnIntro}>This will permanently delete:</Text>
+          <Text style={styles.title}>{t('delete_title')}</Text>
+          <Text style={styles.warnIntro}>{t('delete_warning')}</Text>
 
           <View style={styles.warnList}>
-            {WARNINGS.map(w => (
-              <View key={w} style={styles.warnRow}>
+            {WARNING_KEYS.map(k => (
+              <View key={k} style={styles.warnRow}>
                 <View style={styles.bullet} />
-                <Text style={styles.warnText}>{w}</Text>
+                <Text style={styles.warnText}>{t(k)}</Text>
               </View>
             ))}
           </View>
 
-          <Text style={styles.cannotUndo}>This cannot be undone.</Text>
+          <Text style={styles.cannotUndo}>{t('delete_undone')}</Text>
 
-          <Text style={styles.confirmLabel}>Type DELETE to confirm:</Text>
+          <Text style={styles.confirmLabel}>{t('delete_type')}</Text>
           <TextInput
             value={input}
             onChangeText={setInput}
             style={styles.input}
-            placeholder="type DELETE here"
+            placeholder={t('delete_placeholder')}
             placeholderTextColor="#555577"
             autoCapitalize="characters"
             autoCorrect={false}
@@ -72,18 +70,18 @@ export default function DeleteAccountModal({ visible, onClose, onConfirm, loadin
             activeOpacity={0.85}
           >
             <Text style={canConfirm ? styles.confirmTextEnabled : styles.confirmTextDisabled}>
-              Yes, delete my account
+              {t('delete_confirm_btn')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleClose} disabled={loading} style={styles.cancelBtn} activeOpacity={0.85}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('delete_cancel')}</Text>
           </TouchableOpacity>
 
           {loading && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator color={Colors.white} size="large" />
-              <Text style={styles.loadingText}>Deleting your account...</Text>
+              <Text style={styles.loadingText}>{t('delete_loading')}</Text>
             </View>
           )}
         </View>

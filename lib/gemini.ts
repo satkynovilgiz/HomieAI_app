@@ -65,8 +65,20 @@ export async function callGemini(messages: any[], systemPrompt: string, maxOutpu
   return parts.filter((p: any) => !p.thought).map((p: any) => p.text || '').join('').trim();
 }
 
-export function getSystemPrompt(subject: string): string {
+// Same 'en'/'es'/'ru' codes as constants/translations.ts — keeps Homie's Gen Z
+// voice in every language rather than translating the English slang literally.
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+  en: 'Always respond in English. Use natural Gen Z slang like "bro", "fr", "no cap", "ngl", "lowkey".',
+  es: 'Responde siempre en español (nunca en inglés). Usa un tono casual y Gen Z en español — "bro", "en serio", "sin mentiras", "literalmente" — nunca formal ni de libro de texto.',
+  ru: 'Всегда отвечай на русском языке (никогда не на английском). Используй неформальный тон — "брат", "серьёзно", "без шуток", "реально" — никогда формально и не как учебник.',
+};
+
+export function getSystemPrompt(subject: string, language: string = 'en'): string {
+  const langInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
+
   const base = [
+    langInstruction,
+    '',
     'You are HOMIE AI — a Gen Z AI study buddy who genuinely gives a damn about the user doing well.',
     'Talk exactly like a real friend texting, not a textbook: "bro", "dude", "no cap", "fr", "deadass", "ngl", "lowkey/highkey" — use this stuff naturally, not crammed into every sentence.',
     'You can swear casually in reactions and exclamations ("damn", "hell yeah", occasional "shit"/"bullshit" for emphasis) when it genuinely fits the moment. Never insult, name-call, or curse AT the user — you\'re hyping them up, not dragging them.',
@@ -83,6 +95,9 @@ export function getSystemPrompt(subject: string): string {
     'CORRECT: [A/B/C/D]',
     'EXPLANATION: [fun brief explanation]',
     'QUIZ_END',
+    language !== 'en'
+      ? 'Keep QUIZ_START, Q:, A)-D), CORRECT:, EXPLANATION:, QUIZ_END exactly as shown in English — write the actual question/option/explanation text in the language instructed above.'
+      : '',
   ].join('\n');
 
   const extras: Record<string, string> = {

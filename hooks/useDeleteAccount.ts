@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { deleteAccount as deleteAccountRemote } from '../lib/authService';
+import { useTranslation } from './useTranslation';
 import { clearUser } from '../store/slices/userSlice';
 import { clearChat } from '../store/slices/chatSlice';
 import { clearStreak } from '../store/slices/streakSlice';
@@ -31,6 +32,7 @@ const KEYS_TO_CLEAR = [
 // place instead of two copies drifting apart.
 export function useDeleteAccount() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -40,7 +42,7 @@ export function useDeleteAccount() {
       const { err } = await deleteAccountRemote();
       if (err) {
         setDeleting(false);
-        Alert.alert('Error', err, [{ text: 'OK' }]);
+        Alert.alert(t('common_error'), err, [{ text: t('common_ok') }]);
         return;
       }
       await AsyncStorage.multiRemove(KEYS_TO_CLEAR);
@@ -57,17 +59,17 @@ export function useDeleteAccount() {
       router.replace('/onboarding');
     } catch {
       setDeleting(false);
-      Alert.alert('Error', 'Could not delete account. Please try again.', [{ text: 'OK' }]);
+      Alert.alert(t('common_error'), t('common_try_again'), [{ text: t('common_ok') }]);
     }
   };
 
   const confirmDelete = () => {
     Alert.alert(
-      'Last chance',
-      'Are you absolutely sure? This cannot be undone.',
+      t('delete_last_chance'),
+      t('delete_final'),
       [
-        { text: 'Keep my account', style: 'cancel' },
-        { text: 'Delete forever', style: 'destructive', onPress: runDelete },
+        { text: t('delete_keep'), style: 'cancel' },
+        { text: t('delete_forever'), style: 'destructive', onPress: runDelete },
       ]
     );
   };

@@ -8,6 +8,8 @@ import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import { xpProgress } from '../../lib/utils';
 import { checkInToday } from '../../store/slices/streakSlice';
+import { useTranslation } from '../../hooks/useTranslation';
+import { TranslationKey } from '../../constants/translations';
 import HomieBot from '../../components/mascot/HomieBot';
 import HeartsBar from '../../components/ui/HeartsBar';
 import AchievementPopup from '../../components/achievements/AchievementPopup';
@@ -45,29 +47,29 @@ type HomieMood = 'happy' | 'sad' | 'thinking' | 'shocked' | 'celebrating' | 'win
 // Note: HomieBot's own MOOD_IMAGES map has no 'cool' asset yet, so the
 // afternoon slot currently renders the same image as 'happy' until a
 // homie-cool.png is added — a pre-existing gap in that shared component.
-function getTimeContext(): { greeting: string; mood: HomieMood } {
+function getTimeContext(): { greetingKey: TranslationKey; mood: HomieMood } {
   const hour = new Date().getHours();
-  if (hour >= 6 && hour < 12) return { greeting: 'Good morning,', mood: 'happy' };
-  if (hour >= 12 && hour < 18) return { greeting: 'Hey,', mood: 'cool' };
-  if (hour >= 18 && hour < 22) return { greeting: 'Evening,', mood: 'thinking' };
-  return { greeting: 'Still up,', mood: 'sleepy' };
+  if (hour >= 6 && hour < 12) return { greetingKey: 'home_greeting_morning', mood: 'happy' };
+  if (hour >= 12 && hour < 18) return { greetingKey: 'home_greeting_afternoon', mood: 'cool' };
+  if (hour >= 18 && hour < 22) return { greetingKey: 'home_greeting_evening', mood: 'thinking' };
+  return { greetingKey: 'home_greeting_night', mood: 'sleepy' };
 }
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const QUICK_ACTIONS = [
-  { label: 'AI Chat',    route: '/chat',          color: '#7c3aed' },
-  { label: 'Lessons',    route: '/lessons',       color: '#3b82f6' },
-  { label: 'Videos',     route: '/videos',        color: '#f97316' },
-  { label: 'Games',      route: '/games',         color: '#10b981' },
-  { label: 'Pomodoro',   route: '/pomodoro',      color: '#ef4444' },
-  { label: 'AI Check',   route: '/detector',      color: '#fbbf24' },
-  { label: 'Shop',       route: '/shop',          color: '#3b82f6' },
-  { label: 'Badges',     route: '/achievements',  color: '#f59e0b' },
-  { label: 'Planner',    route: '/planner',       color: '#8b5cf6' },
-  { label: 'Essay',      route: '/essay',         color: '#84cc16' },
-  { label: 'Scan',       route: '/scanner',       color: '#f43f5e' },
-  { label: 'History',    route: '/history',       color: '#a855f7' },
+const QUICK_ACTIONS: { label: string; key: TranslationKey; route: string; color: string }[] = [
+  { label: 'AI Chat',    key: 'qa_ai_chat',       route: '/chat',          color: '#7c3aed' },
+  { label: 'Lessons',    key: 'qa_lessons',       route: '/lessons',       color: '#3b82f6' },
+  { label: 'Videos',     key: 'more_videos',      route: '/videos',        color: '#f97316' },
+  { label: 'Games',      key: 'more_games',       route: '/games',         color: '#10b981' },
+  { label: 'Pomodoro',   key: 'more_pomodoro',    route: '/pomodoro',      color: '#ef4444' },
+  { label: 'AI Check',   key: 'more_detector',    route: '/detector',      color: '#fbbf24' },
+  { label: 'Shop',       key: 'more_shop',        route: '/shop',          color: '#3b82f6' },
+  { label: 'Badges',     key: 'more_achievements', route: '/achievements',  color: '#f59e0b' },
+  { label: 'Planner',    key: 'more_planner',     route: '/planner',       color: '#8b5cf6' },
+  { label: 'Essay',      key: 'more_essay',       route: '/essay',         color: '#84cc16' },
+  { label: 'Scan',       key: 'more_scan',        route: '/scanner',       color: '#f43f5e' },
+  { label: 'History',    key: 'more_history',     route: '/history',       color: '#a855f7' },
 ];
 
 const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; size: number }>> = {
@@ -90,6 +92,7 @@ const CARD_SIZE = (SCREEN_WIDTH - 16 * 2 - 10 * 2) / 3;
 
 export default function HomeTab() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
   const streak = useSelector((s: RootState) => s.streak);
   const gems = useSelector((s: RootState) => s.gems.count);
@@ -103,7 +106,7 @@ export default function HomeTab() {
 
   if (!user) return null;
 
-  const { greeting, mood } = getTimeContext();
+  const { greetingKey, mood } = getTimeContext();
   const todayIdx = new Date().getDay();
   const firstName = user.name?.split(' ')[0];
   const xpPct = xpProgress(user.xp);
@@ -117,7 +120,7 @@ export default function HomeTab() {
       <View style={styles.topbar}>
         <TouchableOpacity onPress={() => router.push('/streak')} style={styles.streakPill}>
           <FlameIcon color={Colors.orange} size={14} />
-          <Text style={styles.streakPillText}>{streak.current} day streak</Text>
+          <Text style={styles.streakPillText}>{streak.current} {t('home_streak')}</Text>
         </TouchableOpacity>
 
         <HeartsBar onRefill={() => router.push('/shop')} />
@@ -150,13 +153,13 @@ export default function HomeTab() {
         >
           <HomieBot mood={mood} size={80} />
           <View style={styles.heroText}>
-            <Text style={styles.heroGreeting}>{greeting}</Text>
+            <Text style={styles.heroGreeting}>{t(greetingKey)}</Text>
             <Text style={styles.heroName}>{firstName}</Text>
             <Text style={styles.heroSub}>Lv.{user.level} · {user.xp} XP</Text>
             <View style={styles.heroXpTrack}>
               <View style={[styles.heroXpFill, { width: `${xpPct * 100}%` }]} />
             </View>
-            <Text style={styles.heroXpLabel}>{xpToNext} XP to Level {user.level + 1}</Text>
+            <Text style={styles.heroXpLabel}>{xpToNext} {t('home_xp_to')} {user.level + 1}</Text>
           </View>
         </LinearGradient>
 
@@ -166,19 +169,19 @@ export default function HomeTab() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: Colors.purpleL }]}>{user.sessions || 0}</Text>
-            <Text style={styles.statLabel}>SESSIONS</Text>
+            <Text style={styles.statLabel}>{t('home_sessions')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: Colors.green }]}>{user.correct || 0}</Text>
-            <Text style={styles.statLabel}>CORRECT</Text>
+            <Text style={styles.statLabel}>{t('home_correct')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: Colors.orange }]}>{streak.current}d</Text>
-            <Text style={styles.statLabel}>STREAK</Text>
+            <Text style={styles.statLabel}>{t('home_streak_label')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: Colors.blue }]}>{gems}</Text>
-            <Text style={styles.statLabel}>GEMS</Text>
+            <Text style={styles.statLabel}>{t('home_gems')}</Text>
           </View>
         </View>
 
@@ -189,9 +192,9 @@ export default function HomeTab() {
           <View style={styles.streakBannerTop}>
             <View style={styles.streakBannerLeft}>
               <FlameIcon color={Colors.orange} size={18} />
-              <Text style={styles.streakBannerTitle}>{streak.current} day streak</Text>
+              <Text style={styles.streakBannerTitle}>{streak.current} {t('home_streak')}</Text>
             </View>
-            <Text style={styles.streakBannerSub}>Keep it going!</Text>
+            <Text style={styles.streakBannerSub}>{t('home_keep_going')}</Text>
           </View>
           <View style={styles.weekRow}>
             {DAY_LABELS.map((d, i) => {
@@ -219,20 +222,20 @@ export default function HomeTab() {
         <View style={styles.questCard}>
           <View style={styles.questDot} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.questTitle}>Daily Quest</Text>
-            <Text style={styles.questSub}>one lesson keeps your streak alive</Text>
+            <Text style={styles.questTitle}>{t('home_daily_quest')}</Text>
+            <Text style={styles.questSub}>{t('home_daily_quest_sub')}</Text>
           </View>
           <TouchableOpacity style={styles.questBtn} onPress={() => router.push('/lessons')} activeOpacity={0.85}>
-            <Text style={styles.questBtnText}>Go</Text>
+            <Text style={styles.questBtnText}>{t('home_go')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={{ height: 12 }} />
 
         {/* Quick actions */}
-        <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
+        <Text style={styles.sectionTitle}>{t('home_quick_actions')}</Text>
         <View style={styles.grid}>
-          {QUICK_ACTIONS.map(({ label, route, color }) => {
+          {QUICK_ACTIONS.map(({ label, key, route, color }) => {
             const Icon = QUICK_ACTION_ICONS[label];
             return (
               <TouchableOpacity
@@ -244,7 +247,7 @@ export default function HomeTab() {
                 <View style={[styles.actionIconWrap, { backgroundColor: color + '26' }]}>
                   <Icon color={color} size={22} />
                 </View>
-                <Text style={styles.actionLabel}>{label}</Text>
+                <Text style={styles.actionLabel}>{t(key)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -256,8 +259,8 @@ export default function HomeTab() {
         <TouchableOpacity style={styles.ctaBanner} onPress={() => router.push('/chat')} activeOpacity={0.85}>
           <HomieBot mood="happy" size={52} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.ctaTitle}>Ready to study?</Text>
-            <Text style={styles.ctaSub}>Homie is waiting for you</Text>
+            <Text style={styles.ctaTitle}>{t('home_ready')}</Text>
+            <Text style={styles.ctaSub}>{t('home_waiting')}</Text>
           </View>
           <ArrowRightIcon color={Colors.purple} size={20} />
         </TouchableOpacity>

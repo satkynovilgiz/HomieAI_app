@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingV
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signInWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
@@ -12,6 +13,7 @@ import { GoogleIcon } from '../../components/icons';
 const GOOGLE_AVAILABLE = isGoogleSignInSupported();
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,14 +65,14 @@ export default function LoginScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <HomieBot mood={mood} size={80} />
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.sub}>Your streak is waiting</Text>
+          <Text style={styles.title}>{t('login_title')}</Text>
+          <Text style={styles.sub}>{t('login_sub')}</Text>
         </View>
 
         <View style={styles.card}>
           <TouchableOpacity onPress={googleSignIn} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? 'Signing in...' : 'Continue with Google'}</Text>
+            <Text style={styles.googleText}>{googleLoading ? '...' : t('login_google')}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -78,22 +80,22 @@ export default function LoginScreen() {
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
-            <Text style={styles.divText}>or use email</Text>
+            <Text style={styles.divText}>{t('login_or')}</Text>
             <View style={styles.divLine} />
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Input label="Email" placeholder="your@email.com" value={email}
+          <Input label={t('login_email')} placeholder="your@email.com" value={email}
             onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-          <Input label="Password" placeholder="your password" value={pass}
+          <Input label={t('login_password')} placeholder="your password" value={pass}
             onChangeText={setPass} secureTextEntry />
 
-          <Button title="Sign In" onPress={login} loading={loading} size="lg" style={styles.submitBtn} />
+          <Button title={t('login_btn')} onPress={login} loading={loading} size="lg" style={styles.submitBtn} />
 
           <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/auth/signup')}>
             <Text style={styles.signupText}>
-              No account? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>Sign up free</Text>
+              {t('login_no_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('login_signup_link')}</Text>
             </Text>
           </TouchableOpacity>
         </View>

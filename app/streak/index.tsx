@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import Svg, { Path } from 'react-native-svg';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
+import { useTranslation } from '../../hooks/useTranslation';
 import StreakFreeze from '../../components/streak/StreakFreeze';
 import { TrophyIcon } from '../../components/icons';
 
@@ -22,6 +23,7 @@ function Check({ size = 14, color = 'white' }: { size?: number; color?: string }
 }
 
 export default function StreakScreen() {
+  const { t } = useTranslation();
   const streak = useSelector((s: RootState) => s.streak);
   const user = useSelector((s: RootState) => s.user.current);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -43,19 +45,19 @@ export default function StreakScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Streak</Text>
+        <Text style={styles.title}>{t('streak_title')}</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <View style={styles.hero}>
           <Text style={styles.streakNum}>{streak.current}</Text>
-          <Text style={styles.streakLabel}>day streak</Text>
-          <Text style={styles.streakSub}>longest: {streak.longest} days</Text>
+          <Text style={styles.streakLabel}>{t('streak_day')}</Text>
+          <Text style={styles.streakSub}>{t('streak_longest')} {streak.longest} {t('streak_days')}</Text>
         </View>
 
         {/* Week view */}
         <View style={styles.weekCard}>
-          <Text style={styles.weekTitle}>This Week</Text>
+          <Text style={styles.weekTitle}>{t('streak_this_week')}</Text>
           <View style={styles.weekRow}>
             {DAYS.map((d, i) => {
               const studied = streak.weekActivity[i] === true;
@@ -123,22 +125,22 @@ export default function StreakScreen() {
                 ))}
               </View>
             ) : isSelectedToday ? (
-              <Text style={styles.sessionEmpty}>study today to add a session here</Text>
+              <Text style={styles.sessionEmpty}>{t('streak_study_today')}</Text>
             ) : (
-              <Text style={styles.sessionEmpty}>no study session on this day</Text>
+              <Text style={styles.sessionEmpty}>{t('streak_no_session')}</Text>
             )}
           </View>
         )}
 
         {/* Freeze */}
         <View style={{ padding:16 }}>
-          <Text style={styles.sectionTitle}>Streak Protectors</Text>
+          <Text style={styles.sectionTitle}>{t('streak_protectors')}</Text>
           <StreakFreeze/>
         </View>
 
         {/* Milestones */}
         <View style={{ padding:16 }}>
-          <Text style={styles.sectionTitle}>Milestones</Text>
+          <Text style={styles.sectionTitle}>{t('streak_milestones')}</Text>
           {[[3,'3 Day Streak',100],[7,'Week Warrior',250],[14,'2 Week Legend',500],[30,'Month Master',1000],[100,'Century Club',5000]].map(([days,label,xp]) => {
             const earned = streak.current >= Number(days);
             return (

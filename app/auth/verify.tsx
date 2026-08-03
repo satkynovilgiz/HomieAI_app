@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { checkEmailVerified, resendVerificationEmail } from '../../lib/authService';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 
@@ -11,6 +12,7 @@ const MAX_POLLS = 120; // 120 * 5s = 10 minutes
 const COOLDOWN_S = 60;
 
 export default function VerifyScreen() {
+  const { t } = useTranslation();
   const { email } = useLocalSearchParams<{ email?: string; name?: string }>();
   const [mood, setMood] = useState<'thinking' | 'sad'>('thinking');
   const [checking, setChecking] = useState(false);
@@ -32,14 +34,14 @@ export default function VerifyScreen() {
 
   useEffect(() => {
     if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown(c => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
   }, [cooldown]);
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(''), 2500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToast(''), 2500);
+    return () => clearTimeout(timer);
   }, [toast]);
 
   const checkVerification = async () => {
@@ -49,7 +51,7 @@ export default function VerifyScreen() {
       if (verified) {
         router.replace('/auth/welcome');
       } else {
-        setError('Email not verified yet. Check your inbox and try again.');
+        setError(t('verify_not_verified'));
         setMood('sad');
       }
     } catch {
@@ -65,7 +67,7 @@ export default function VerifyScreen() {
     setResending(true);
     try {
       const { err } = await resendVerificationEmail();
-      if (err) { setToast(err); } else { setToast('Email sent!'); setCooldown(COOLDOWN_S); }
+      if (err) { setToast(err); } else { setToast(t('verify_email_sent')); setCooldown(COOLDOWN_S); }
     } finally {
       setResending(false);
     }
@@ -73,35 +75,33 @@ export default function VerifyScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={styles.autoCheck}>Auto-checking...</Text>
+      <Text style={styles.autoCheck}>{t('verify_autochecking')}</Text>
 
       <View style={styles.content}>
         <HomieBot mood={mood} size={100} />
-        <Text style={styles.title}>Check your email</Text>
-        <Text style={styles.desc}>We sent a verification link to</Text>
+        <Text style={styles.title}>{t('verify_title')}</Text>
+        <Text style={styles.desc}>{t('verify_sent_to')}</Text>
 
         <View style={styles.emailCard}>
           <Text style={styles.emailText}>{email || 'your email'}</Text>
         </View>
 
-        <Text style={styles.desc}>
-          Open your email and tap the link to verify your account. Then come back here.
-        </Text>
+        <Text style={styles.desc}>{t('verify_sub')}</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <TouchableOpacity style={styles.primaryBtn} onPress={checkVerification} disabled={checking} activeOpacity={0.85}>
-          <Text style={styles.primaryBtnText}>{checking ? 'Checking...' : 'I verified my email'}</Text>
+          <Text style={styles.primaryBtnText}>{checking ? t('verify_checking') : t('verify_btn')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.secondaryBtn} onPress={resendEmail} disabled={cooldown > 0 || resending} activeOpacity={0.85}>
           <Text style={styles.secondaryBtnText}>
-            {cooldown > 0 ? `Resend in ${cooldown}s...` : resending ? 'Sending...' : 'Resend email'}
+            {cooldown > 0 ? `${t('verify_resend_in')} ${cooldown}s...` : resending ? t('verify_sending') : t('verify_resend')}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backLink} onPress={() => router.back()}>
-          <Text style={styles.backLinkText}>Wrong email? Go back</Text>
+          <Text style={styles.backLinkText}>{t('verify_wrong')}</Text>
         </TouchableOpacity>
       </View>
 

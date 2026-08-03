@@ -5,15 +5,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Svg, { Path } from 'react-native-svg';
 import { RootState } from '../../store';
 import { toggleTheme } from '../../store/slices/themeSlice';
+import { setLanguage } from '../../store/slices/languageSlice';
+import { Language } from '../../constants/translations';
 import { signOutUser } from '../../lib/authService';
 import { useDeleteAccount } from '../../hooks/useDeleteAccount';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
 
+const LANGUAGES: { code: Language; flag: string; name: string; native: string }[] = [
+  { code: 'en', flag: '🇺🇸', name: 'English', native: 'English' },
+  { code: 'es', flag: '🇪🇸', name: 'Spanish', native: 'Español' },
+  { code: 'ru', flag: '🇷🇺', name: 'Russian', native: 'Русский' },
+];
+
+function CheckIcon() {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 12l6 6L20 6" stroke={Colors.purple} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+  );
+}
+
 export default function SettingsScreen() {
   const dispatch = useDispatch();
+  const { t, language } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
   const theme = useSelector((s: RootState) => s.theme.mode);
   const [notifications, setNotifications] = useState(true);
@@ -31,6 +50,11 @@ export default function SettingsScreen() {
     Alert.alert('Onboarding reset', 'Restart the app to see the onboarding flow again.');
   };
 
+  const changeLanguage = async (lang: Language) => {
+    dispatch(setLanguage(lang));
+    await AsyncStorage.setItem('hm_language', lang);
+  };
+
   const S = ({ label, value, onChange }: { label:string; value:boolean; onChange:(v:boolean)=>void }) => (
     <View style={styles.toggleRow}>
       <Text style={styles.toggleLabel}>{label}</Text>
@@ -44,11 +68,11 @@ export default function SettingsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Settings ⚙️</Text>
+        <Text style={styles.title}>{t('settings_title')}</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
-        <Text style={styles.sectionLabel}>ACCOUNT</Text>
+        <Text style={styles.sectionLabel}>{t('settings_account')}</Text>
         <View style={styles.section}>
           <View style={styles.accountRow}>
             <Text style={styles.avatar}>{user?.avatar || '🧑'}</Text>
@@ -58,43 +82,57 @@ export default function SettingsScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.row} onPress={() => router.push('/profile')}>
-            <Text style={styles.rowLabel}>Edit Profile</Text>
+            <Text style={styles.rowLabel}>{t('settings_edit_profile')}</Text>
             <Text style={styles.rowArrow}>→</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.sectionLabel}>APPEARANCE</Text>
-        <View style={styles.section}>
-          <S label="Dark Mode" value={theme==='dark'} onChange={()=>dispatch(toggleTheme())}/>
+        <Text style={styles.sectionLabel}>{t('settings_language')}</Text>
+        <View style={styles.languageSection}>
+          {LANGUAGES.map(l => (
+            <TouchableOpacity key={l.code} style={styles.languageRow} onPress={() => changeLanguage(l.code)} activeOpacity={0.8}>
+              <Text style={styles.languageFlag}>{l.flag}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.languageName}>{l.name}</Text>
+                <Text style={styles.languageNative}>{l.native}</Text>
+              </View>
+              {language === l.code && <CheckIcon />}
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <Text style={styles.sectionLabel}>NOTIFICATIONS</Text>
+        <Text style={styles.sectionLabel}>{t('settings_appearance')}</Text>
         <View style={styles.section}>
-          <S label="Push Notifications" value={notifications} onChange={setNotifications}/>
-          <S label="Sound Effects" value={sound} onChange={setSound}/>
-          <S label="Haptic Feedback" value={haptics} onChange={setHaptics}/>
+          <S label={t('settings_dark_mode')} value={theme==='dark'} onChange={()=>dispatch(toggleTheme())}/>
         </View>
 
-        <Text style={styles.sectionLabel}>LEARNING</Text>
+        <Text style={styles.sectionLabel}>{t('settings_notifications')}</Text>
+        <View style={styles.section}>
+          <S label={t('settings_push')} value={notifications} onChange={setNotifications}/>
+          <S label={t('settings_sound')} value={sound} onChange={setSound}/>
+          <S label={t('settings_haptics')} value={haptics} onChange={setHaptics}/>
+        </View>
+
+        <Text style={styles.sectionLabel}>{t('settings_learning')}</Text>
         <View style={styles.section}>
           <TouchableOpacity style={styles.row}>
-            <Text style={styles.rowLabel}>Daily Goal</Text>
+            <Text style={styles.rowLabel}>{t('settings_daily_goal')}</Text>
             <Text style={styles.rowValue}>1 lesson/day →</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.row}>
-            <Text style={styles.rowLabel}>Reminder Time</Text>
+            <Text style={styles.rowLabel}>{t('settings_reminder_time')}</Text>
             <Text style={styles.rowValue}>7:00 PM →</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.sectionLabel}>ABOUT</Text>
+        <Text style={styles.sectionLabel}>{t('settings_about_section')}</Text>
         <View style={styles.section}>
           <TouchableOpacity style={styles.row} onPress={() => router.push('/about')}>
-            <Text style={styles.rowLabel}>About HOMIE AI</Text>
+            <Text style={styles.rowLabel}>{t('settings_about_app')}</Text>
             <Text style={styles.rowArrow}>→</Text>
           </TouchableOpacity>
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Version</Text>
+            <Text style={styles.rowLabel}>{t('settings_version')}</Text>
             <Text style={styles.rowValue}>1.0.0</Text>
           </View>
         </View>
@@ -111,18 +149,18 @@ export default function SettingsScreen() {
           </>
         )}
 
-        <Text style={styles.dangerLabel}>DANGER ZONE</Text>
+        <Text style={styles.dangerLabel}>{t('settings_danger_zone')}</Text>
         <View style={styles.dangerSection}>
           <TouchableOpacity style={styles.dangerRow} onPress={logout}>
-            <Text style={styles.dangerRowText}>Sign Out of all devices</Text>
+            <Text style={styles.dangerRowText}>{t('settings_signout_all')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dangerRow} onPress={openModal}>
-            <Text style={styles.dangerRowText}>Delete Account</Text>
+            <Text style={styles.dangerRowText}>{t('settings_delete')}</Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-          <Text style={styles.logoutText}>sign out</Text>
+          <Text style={styles.logoutText}>{t('settings_signout')}</Text>
         </TouchableOpacity>
         <View style={{ height:40 }}/>
       </ScrollView>
@@ -157,6 +195,11 @@ const styles = StyleSheet.create({
   rowValue: { fontSize:13, color:Colors.muted },
   toggleRow: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', padding:16, borderTopWidth:1, borderTopColor:Colors.border },
   toggleLabel: { fontSize:14, color:Colors.text },
+  languageSection: { gap: 8 },
+  languageRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#12102a', borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 },
+  languageFlag: { fontSize: 22 },
+  languageName: { fontSize: 15, fontWeight: '600', color: Colors.white },
+  languageNative: { fontSize: 12, color: '#9090c0', marginTop: 2 },
   logoutBtn: { marginTop:24, paddingVertical:14, backgroundColor:'rgba(239,68,68,0.1)', borderRadius:Radius.lg, alignItems:'center', borderWidth:1, borderColor:'rgba(239,68,68,0.3)' },
   logoutText: { fontSize:15, fontWeight:'700', color:Colors.red },
   dangerLabel: { fontSize:10, fontWeight:'700', color:Colors.red, letterSpacing:2, marginBottom:8, marginTop:16 },

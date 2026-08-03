@@ -6,9 +6,11 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors, Radius } from '../../constants/theme';
 import { callGemini, getSystemPrompt } from '../../lib/gemini';
+import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
 
 export default function ScannerScreen() {
+  const { language } = useTranslation();
   const [img, setImg] = useState<string | null>(null);
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
@@ -32,7 +34,7 @@ export default function ScannerScreen() {
         { type: 'image', media_type: 'image/jpeg', data: imgB64 },
         { type: 'text', text: q }
       ]}];
-      const out = await callGemini(messages, getSystemPrompt('General'));
+      const out = await callGemini(messages, getSystemPrompt('General', language));
       setResult(out);
     } catch(err: any) { setResult('something broke — try again'); }
     finally { setLoading(false); }

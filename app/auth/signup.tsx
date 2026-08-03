@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingV
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signUpWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
 import { AVATARS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -14,6 +15,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GOOGLE_AVAILABLE = isGoogleSignInSupported();
 
 export default function SignupScreen() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', email: '', pass: '', pass2: '' });
   const [avatar, setAvatar] = useState('🧑');
   const [loading, setLoading] = useState(false);
@@ -63,14 +65,14 @@ export default function SignupScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <HomieBot mood="wink" size={80} />
-          <Text style={styles.title}>Join Homie</Text>
-          <Text style={styles.sub}>Free forever. No credit card.</Text>
+          <Text style={styles.title}>{t('signup_title')}</Text>
+          <Text style={styles.sub}>{t('signup_sub')}</Text>
         </View>
 
         <View style={styles.card}>
           <TouchableOpacity onPress={googleSignUp} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? 'Signing in...' : 'Continue with Google'}</Text>
+            <Text style={styles.googleText}>{googleLoading ? '...' : t('signup_google')}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -78,17 +80,17 @@ export default function SignupScreen() {
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
-            <Text style={styles.divText}>or use email</Text>
+            <Text style={styles.divText}>{t('login_or')}</Text>
             <View style={styles.divLine} />
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Input label="Name" placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)} />
-          <Input label="Email" placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none" />
-          <Input label="Password" placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry />
-          <Input label="Confirm password" placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry />
+          <Input label={t('signup_name')} placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)} />
+          <Input label={t('signup_email')} placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none" />
+          <Input label={t('signup_password')} placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry />
+          <Input label={t('signup_confirm')} placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry />
 
-          <Text style={styles.avatarLabel}>Pick your avatar</Text>
+          <Text style={styles.avatarLabel}>{t('signup_avatar')}</Text>
           <View style={styles.avatarGrid}>
             {AVATARS.map(a => (
               <TouchableOpacity key={a} onPress={() => setAvatar(a)}
@@ -98,9 +100,9 @@ export default function SignupScreen() {
             ))}
           </View>
 
-          <Button title="Create Account" onPress={signup} loading={loading} size="lg" style={styles.submitBtn} />
+          <Button title={t('signup_btn')} onPress={signup} loading={loading} size="lg" style={styles.submitBtn} />
           <TouchableOpacity style={styles.loginLink} onPress={() => router.back()}>
-            <Text style={styles.loginText}>Already have an account? <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>Sign in</Text></Text>
+            <Text style={styles.loginText}>{t('signup_have_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('signup_login_link')}</Text></Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
