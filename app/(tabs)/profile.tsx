@@ -14,6 +14,7 @@ import HomieBot from '../../components/mascot/HomieBot';
 import XPBar from '../../components/ui/XPBar';
 import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { ShareIcon } from '../../components/icons';
 
 function TrashIcon() {
   return (
@@ -211,6 +212,20 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Invite friends */}
+        <View style={styles.inviteSection}>
+          <TouchableOpacity style={styles.inviteBtn} onPress={() => router.push('/invite' as any)} activeOpacity={0.8}>
+            <View style={styles.inviteIconBox}>
+              <ShareIcon color={Colors.green} size={20} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.inviteBtnTitle}>Invite Friends</Text>
+              <Text style={styles.inviteBtnDesc}>Share Homie, earn XP + gems</Text>
+            </View>
+            <Text style={styles.dangerArrow}>{'›'}</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Danger zone */}
         <View style={styles.dangerSection}>
           <Text style={styles.dangerLabel}>{t('profile_danger')}</Text>
@@ -275,6 +290,11 @@ const styles = StyleSheet.create({
   avatarOptText: { fontSize: 26 },
   saveAvatarBtn: { paddingVertical: 14, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
   saveAvatarText: { color: 'white', fontWeight: '700', fontSize: 15 },
+  inviteSection: { paddingHorizontal: 16, marginTop: 8 },
+  inviteBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)', borderRadius: 14, padding: 16 },
+  inviteIconBox: { width: 36, height: 36, borderRadius: Radius.sm, backgroundColor: 'rgba(16,185,129,0.15)', alignItems: 'center', justifyContent: 'center' },
+  inviteBtnTitle: { fontSize: 15, fontWeight: '800', color: Colors.text },
+  inviteBtnDesc: { fontSize: 12, color: Colors.muted, marginTop: 2 },
   dangerSection: { paddingHorizontal: 16, marginTop: 24 },
   dangerLabel: { fontSize: 11, fontWeight: '700', color: Colors.red, letterSpacing: 2, marginBottom: 8 },
   dangerBtn: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(239,68,68,0.06)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', borderRadius: 14, padding: 16 },

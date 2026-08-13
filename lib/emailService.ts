@@ -6,10 +6,13 @@ const EMAILJS_PUBLIC_KEY = 'gUKNwGJtBAzzbzG_';
 const EMAILJS_ENDPOINT = 'https://api.emailjs.com/api/v1.0/email/send';
 
 const VERIFY_CODE_KEY = 'hm_verify_code';
+const CODE_TTL_MS = 10 * 60 * 1000;
 
 function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+interface StoredCode { code: string; expiresAt: number; }
 
 // Standalone code-based verification utility, sent through EmailJS's REST API
 // directly (no SDK — the official @emailjs/browser package assumes a DOM and
@@ -32,18 +35,43 @@ export async function sendVerificationCode(userEmail: string, userName: string):
           to_name: userName,
           verification_code: code,
           app_name: 'Homie',
+          expiry: '10 minutes',
         },
       }),
     });
     if (!res.ok) return { ok: false, err: 'could not send the email — try again' };
-    await AsyncStorage.setItem(VERIFY_CODE_KEY, code);
+    const stored: StoredCode = { code, expiresAt: Date.now() + CODE_TTL_MS };
+    await AsyncStorage.setItem(VERIFY_CODE_KEY, JSON.stringify(stored));
     return { ok: true };
   } catch {
     return { ok: false, err: 'no connection — try again' };
   }
 }
 
+// Returns the code's expiry timestamp (ms epoch), or null if none is pending.
+export async function getCodeExpiry(): Promise<number | null> {
+  const saved = await AsyncStorage.getItem(VERIFY_CODE_KEY);
+  if (!saved) return null;
+  try {
+    const parsed: StoredCode = JSON.parse(saved);
+    return parsed.expiresAt;
+  } catch {
+    return null;
+  }
+}
+
 export async function verifyCode(input: string): Promise<boolean> {
   const saved = await AsyncStorage.getItem(VERIFY_CODE_KEY);
-  return !!saved && saved === input.trim();
+  if (!saved) return false;
+  try {
+    const parsed: StoredCode = JSON.parse(saved);
+    if (Date.now() > parsed.expiresAt) return false;
+    return parsed.code === input.trim();
+  } catch {
+    return false;
+  }
+}
+
+export async function clearVerificationCode(): Promise<void> {
+  await AsyncStorage.removeItem(VERIFY_CODE_KEY);
 }

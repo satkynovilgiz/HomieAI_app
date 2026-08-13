@@ -6,7 +6,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signInWithCredential, GoogleAuthProvider, onAuthStateChanged,
-  signOut as firebaseSignOut, updateProfile, sendEmailVerification,
+  signOut as firebaseSignOut, updateProfile,
   deleteUser as deleteFirebaseUser,
 } from 'firebase/auth';
 import { auth } from './firebaseConfig';
@@ -47,6 +47,8 @@ export interface User {
   gems: number;
   hearts: number;
   freezesLeft: number;
+  friendsInvited: number;
+  inviteXP: number;
   goals: string[];
   achievements: string[];
   history: Array<{ id: string; subject: string; preview: string; xp_earned: number; duration_mins: number; date: string }>;
@@ -61,7 +63,7 @@ function defaultUserData(overrides: Pick<User, 'name' | 'email' | 'avatar' | 'pr
     ...overrides,
     xp: 0, level: 1, streak: 0, longestStreak: 0, lastStudyDate: null, studiedDates: [],
     correct: 0, sessions: 0, msgsSent: 0, studyHours: 0,
-    gems: 500, hearts: 5, freezesLeft: 2,
+    gems: 500, hearts: 5, freezesLeft: 2, friendsInvited: 0, inviteXP: 0,
     goals: [], achievements: [], history: [], notifications: true,
     createdAt: now, updatedAt: now,
   };
@@ -88,31 +90,10 @@ export async function signUpWithEmail(name: string, email: string, password: str
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    // Best-effort — a send failure here shouldn't block account creation, the
-    // user can always hit "Resend email" on the verify screen.
-    try { await sendEmailVerification(cred.user); } catch {}
     const user = await firestoreService.createUser(cred.user.uid, defaultUserData({ name, email, avatar, provider: 'email' }));
     await cacheSession(user);
     store.dispatch(setUser(user as any));
     return { user };
-  } catch (e: any) {
-    return { err: mapFirebaseError(e) };
-  }
-}
-
-// Re-checks Firebase's live emailVerified flag (reload() is required — the
-// cached currentUser object doesn't update on its own after the user clicks
-// the link in a different tab/app).
-export async function checkEmailVerified(): Promise<boolean> {
-  await auth.currentUser?.reload();
-  return !!auth.currentUser?.emailVerified;
-}
-
-export async function resendVerificationEmail(): Promise<{ err?: string }> {
-  try {
-    if (!auth.currentUser) return { err: 'not signed in' };
-    await sendEmailVerification(auth.currentUser);
-    return {};
   } catch (e: any) {
     return { err: mapFirebaseError(e) };
   }

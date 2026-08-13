@@ -8,7 +8,7 @@ import {
   TimerIcon, CalendarIcon, GameIcon, VideoIcon, CameraIcon,
   DetectorIcon, PenIcon, MicIcon,
   HistoryIcon, ChartIcon, TrophyIcon, FlameIcon, ShopIcon,
-  PeopleIcon, MessageIcon, InfoIcon, ChevronRightIcon,
+  PeopleIcon, MessageIcon, InfoIcon, ChevronRightIcon, ShareIcon,
 } from '../../components/icons';
 
 const SECTIONS: { titleKey: TranslationKey; items: { labelKey: TranslationKey; desc: string; route: string; color: string; Icon: any }[] }[] = [
@@ -45,6 +45,7 @@ const SECTIONS: { titleKey: TranslationKey; items: { labelKey: TranslationKey; d
     items: [
       { labelKey: 'more_friends',  desc: 'Squad & battles',   route: '/friends',  color: '#06b6d4', Icon: PeopleIcon },
       { labelKey: 'more_messages', desc: 'Chat with friends', route: '/messages', color: '#7c3aed', Icon: MessageIcon },
+      { labelKey: 'more_invite',   desc: 'Share Homie, earn rewards', route: '/invite', color: '#10b981', Icon: ShareIcon },
       { labelKey: 'more_about',    desc: 'About Homie',       route: '/about',    color: '#64748b', Icon: InfoIcon },
     ],
   },

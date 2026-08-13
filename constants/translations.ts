@@ -156,6 +156,7 @@ export const translations = {
     more_achievements: 'Achievements',
     more_streak: 'Streak',
     more_friends: 'Friends',
+    more_invite: 'Invite Friends',
     more_about: 'About',
     more_recorder: 'Lecture Recorder',
 
@@ -426,6 +427,7 @@ export const translations = {
     more_achievements: 'Logros',
     more_streak: 'Racha',
     more_friends: 'Amigos',
+    more_invite: 'Invitar Amigos',
     more_about: 'Acerca de',
     more_recorder: 'Grabador de Clases',
 
@@ -696,6 +698,7 @@ export const translations = {
     more_achievements: 'Достижения',
     more_streak: 'Стрик',
     more_friends: 'Друзья',
+    more_invite: 'Пригласить друзей',
     more_about: 'О приложении',
     more_recorder: 'Запись лекций',
 

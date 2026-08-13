@@ -1,35 +1,62 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { checkEmailVerified, resendVerificationEmail } from '../../lib/authService';
-import { useTranslation } from '../../hooks/useTranslation';
+import Svg, { Path } from 'react-native-svg';
+import { sendVerificationCode, verifyCode, getCodeExpiry, clearVerificationCode } from '../../lib/emailService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 
-const POLL_MS = 5000;
-const MAX_POLLS = 120; // 120 * 5s = 10 minutes
+const CODE_LENGTH = 6;
+const CODE_TTL_MS = 10 * 60 * 1000;
 const COOLDOWN_S = 60;
 
+function BackArrowIcon() {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Path d="M19 12H5" stroke={Colors.white} strokeWidth="2" strokeLinecap="round"/>
+      <Path d="M11 6L5 12L11 18" stroke={Colors.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </Svg>
+  );
+}
+
+function formatMMSS(ms: number): string {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export default function VerifyScreen() {
-  const { t } = useTranslation();
-  const { email } = useLocalSearchParams<{ email?: string; name?: string }>();
-  const [mood, setMood] = useState<'thinking' | 'sad'>('thinking');
-  const [checking, setChecking] = useState(false);
+  const { email, name } = useLocalSearchParams<{ email?: string; name?: string }>();
+  const [mood, setMood] = useState<'thinking' | 'sad' | 'celebrating'>('thinking');
+  const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
+  const [status, setStatus] = useState<'idle' | 'wrong' | 'success'>('idle');
+  const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
-  const [toast, setToast] = useState('');
   const [cooldown, setCooldown] = useState(0);
-  const pollCountRef = useRef(0);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  const inputRefs = useRef<(TextInput | null)[]>([]);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  const sendCode = async () => {
+    if (!email) return;
+    const { err } = await sendVerificationCode(email, name || 'there');
+    if (err) { setError(err); return; }
+    setError('');
+    setCooldown(COOLDOWN_S);
+    const exp = await getCodeExpiry();
+    setExpiresAt(exp);
+  };
+
+  useEffect(() => { sendCode(); }, []);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      pollCountRef.current += 1;
-      if (pollCountRef.current > MAX_POLLS) { clearInterval(interval); return; }
-      const verified = await checkEmailVerified();
-      if (verified) { clearInterval(interval); router.replace('/auth/welcome'); }
-    }, POLL_MS);
-    return () => clearInterval(interval);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -38,97 +65,187 @@ export default function VerifyScreen() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(''), 2500);
-    return () => clearTimeout(timer);
-  }, [toast]);
+  const remainingMs = expiresAt ? expiresAt - now : CODE_TTL_MS;
+  const expired = expiresAt !== null && remainingMs <= 0;
+  const progress = Math.max(0, Math.min(1, remainingMs / CODE_TTL_MS));
 
-  const checkVerification = async () => {
-    setChecking(true); setError('');
-    try {
-      const verified = await checkEmailVerified();
-      if (verified) {
-        router.replace('/auth/welcome');
-      } else {
-        setError(t('verify_not_verified'));
-        setMood('sad');
-      }
-    } catch {
-      setError('something broke — try again');
-      setMood('sad');
-    } finally {
-      setChecking(false);
+  const runShake = () => {
+    shakeAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const handleInput = (text: string, index: number) => {
+    const digit = text.slice(-1).replace(/[^0-9]/g, '');
+    const next = [...code];
+    next[index] = digit;
+    setCode(next);
+    setStatus('idle');
+    setError('');
+    if (digit && index < CODE_LENGTH - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    if (digit && index === CODE_LENGTH - 1 && next.every(d => d)) {
+      verify(next.join(''));
     }
   };
 
-  const resendEmail = async () => {
-    if (cooldown > 0 || resending) return;
+  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const verify = async (entered: string) => {
+    if (verifying || expired) return;
+    setVerifying(true);
+    try {
+      const ok = await verifyCode(entered);
+      if (ok) {
+        setMood('celebrating');
+        setStatus('success');
+        await clearVerificationCode();
+        setTimeout(() => router.replace('/auth/welcome'), 900);
+      } else {
+        setMood('sad');
+        setStatus('wrong');
+        setError(expired ? 'Code expired.' : 'Wrong code. Try again.');
+        runShake();
+        setCode(Array(CODE_LENGTH).fill(''));
+        inputRefs.current[0]?.focus();
+      }
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const resend = async () => {
+    if (resending) return;
     setResending(true);
     try {
-      const { err } = await resendVerificationEmail();
-      if (err) { setToast(err); } else { setToast(t('verify_email_sent')); setCooldown(COOLDOWN_S); }
+      setMood('thinking');
+      setStatus('idle');
+      setError('');
+      setCode(Array(CODE_LENGTH).fill(''));
+      await sendCode();
+      inputRefs.current[0]?.focus();
     } finally {
       setResending(false);
     }
   };
 
+  const canVerify = code.every(d => d) && !verifying && !expired;
+
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={styles.autoCheck}>{t('verify_autochecking')}</Text>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <BackArrowIcon />
+      </TouchableOpacity>
 
       <View style={styles.content}>
-        <HomieBot mood={mood} size={100} />
-        <Text style={styles.title}>{t('verify_title')}</Text>
-        <Text style={styles.desc}>{t('verify_sent_to')}</Text>
+        <HomieBot mood={mood} size={90} />
+        <Text style={styles.title}>Check your Gmail</Text>
+        <Text style={styles.desc}>We sent a 6-digit code to</Text>
 
         <View style={styles.emailCard}>
           <Text style={styles.emailText}>{email || 'your email'}</Text>
         </View>
 
-        <Text style={styles.desc}>{t('verify_sub')}</Text>
+        <Text style={styles.enterLabel}>Enter the code below:</Text>
+
+        <Animated.View style={[styles.codeRow, { transform: [{ translateX: shakeAnim.interpolate({ inputRange: [-1, 1], outputRange: [-8, 8] }) }] }]}>
+          {code.map((digit, i) => (
+            <TextInput
+              key={i}
+              ref={r => { inputRefs.current[i] = r; }}
+              value={digit}
+              onChangeText={t => handleInput(t, i)}
+              onKeyPress={e => handleKeyPress(e, i)}
+              keyboardType="number-pad"
+              maxLength={1}
+              style={[
+                styles.codeBox,
+                digit && styles.codeBoxFilled,
+                status === 'wrong' && styles.codeBoxWrong,
+                status === 'success' && styles.codeBoxSuccess,
+              ]}
+            />
+          ))}
+        </Animated.View>
+
+        {expired ? (
+          <Text style={styles.expiredText}>Code expired</Text>
+        ) : (
+          <View style={styles.progressRow}>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+            </View>
+            <Text style={styles.expiryText}>Expires in {formatMMSS(remainingMs)}</Text>
+          </View>
+        )}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.primaryBtn} onPress={checkVerification} disabled={checking} activeOpacity={0.85}>
-          <Text style={styles.primaryBtnText}>{checking ? t('verify_checking') : t('verify_btn')}</Text>
-        </TouchableOpacity>
+        {expired ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={resend} disabled={resending} activeOpacity={0.85}>
+            <Text style={styles.primaryBtnText}>{resending ? 'Sending...' : 'Get new code'}</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[styles.primaryBtn, !canVerify && styles.primaryBtnDisabled]}
+            onPress={() => verify(code.join(''))}
+            disabled={!canVerify}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.primaryBtnText}>{verifying ? 'Verifying...' : 'Verify Code'}</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.secondaryBtn} onPress={resendEmail} disabled={cooldown > 0 || resending} activeOpacity={0.85}>
-          <Text style={styles.secondaryBtnText}>
-            {cooldown > 0 ? `${t('verify_resend_in')} ${cooldown}s...` : resending ? t('verify_sending') : t('verify_resend')}
+        <Text style={styles.resendPrompt}>Did not get the code?</Text>
+        <TouchableOpacity onPress={resend} disabled={cooldown > 0 || resending || expired}>
+          <Text style={[styles.resendText, (cooldown > 0 || expired) && styles.resendTextDisabled]}>
+            {cooldown > 0 ? `Resend in ${cooldown}s` : resending ? 'Sending...' : 'Resend code'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backLink} onPress={() => router.back()}>
-          <Text style={styles.backLinkText}>{t('verify_wrong')}</Text>
+          <Text style={styles.backLinkText}>Wrong email? Go back</Text>
         </TouchableOpacity>
       </View>
-
-      {toast ? (
-        <View style={styles.toast}>
-          <Text style={styles.toastText}>{toast}</Text>
-        </View>
-      ) : null}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  autoCheck: { position: 'absolute', top: 16, right: 20, fontSize: 11, color: Colors.muted },
+  backBtn: { position: 'absolute', top: 16, left: 16, zIndex: 1, padding: 4 },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
-  title: { fontSize: 28, fontWeight: '900', color: Colors.white, marginTop: 20, textAlign: 'center' },
-  desc: { fontSize: 14, color: '#9090c0', textAlign: 'center', lineHeight: 22, marginTop: 12 },
-  emailCard: { backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, paddingVertical: 14, paddingHorizontal: 20, marginVertical: 16, alignSelf: 'stretch' },
-  emailText: { color: '#a78bfa', fontSize: 15, fontWeight: '700', textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: '900', color: Colors.white, marginTop: 16, textAlign: 'center' },
+  desc: { fontSize: 14, color: '#9090c0', textAlign: 'center', marginTop: 6 },
+  emailCard: { backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, marginVertical: 16, alignSelf: 'stretch' },
+  emailText: { color: '#a78bfa', fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  enterLabel: { fontSize: 13, color: '#9090c0', marginBottom: 16, alignSelf: 'flex-start' },
+  codeRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
+  codeBox: { width: 48, height: 58, backgroundColor: '#12102a', borderWidth: 1.5, borderColor: '#2a2060', borderRadius: 12, fontSize: 24, fontWeight: '700', color: Colors.white, textAlign: 'center' },
+  codeBoxFilled: { borderColor: '#a78bfa' },
+  codeBoxWrong: { borderColor: Colors.red },
+  codeBoxSuccess: { borderColor: Colors.green, backgroundColor: 'rgba(16,185,129,0.08)' },
+  progressRow: { alignSelf: 'stretch', marginTop: 16, alignItems: 'center', gap: 6 },
+  progressTrack: { alignSelf: 'stretch', height: 4, borderRadius: 2, backgroundColor: 'rgba(167,139,250,0.15)', overflow: 'hidden' },
+  progressFill: { height: 4, backgroundColor: '#7c3aed', borderRadius: 2 },
+  expiryText: { fontSize: 12, color: '#9090c0' },
+  expiredText: { fontSize: 13, color: Colors.red, fontWeight: '700', marginTop: 16 },
   error: { color: Colors.red, fontSize: 13, textAlign: 'center', marginTop: 14 },
-  primaryBtn: { width: '100%', height: 54, borderRadius: 14, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', marginTop: 24 },
+  primaryBtn: { width: '100%', height: 54, borderRadius: 14, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', marginTop: 20 },
+  primaryBtnDisabled: { backgroundColor: '#1a1a2e' },
   primaryBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
-  secondaryBtn: { width: '100%', height: 48, borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
-  secondaryBtnText: { color: '#a78bfa', fontSize: 14, fontWeight: '600' },
+  resendPrompt: { fontSize: 13, color: '#9090c0', marginTop: 22, textAlign: 'center' },
+  resendText: { fontSize: 13, color: '#a78bfa', fontWeight: '600', marginTop: 6 },
+  resendTextDisabled: { color: '#9090c0' },
   backLink: { marginTop: 20 },
   backLinkText: { fontSize: 13, color: '#9090c0' },
-  toast: { position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, paddingHorizontal: 18, paddingVertical: 10 },
-  toastText: { color: Colors.text, fontSize: 13, fontWeight: '600' },
 });
