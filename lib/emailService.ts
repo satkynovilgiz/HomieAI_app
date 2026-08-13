@@ -39,7 +39,10 @@ export async function sendVerificationCode(userEmail: string, userName: string):
         },
       }),
     });
-    if (!res.ok) return { ok: false, err: 'could not send the email — try again' };
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      return { ok: false, err: detail || 'could not send the email — try again' };
+    }
     const stored: StoredCode = { code, expiresAt: Date.now() + CODE_TTL_MS };
     await AsyncStorage.setItem(VERIFY_CODE_KEY, JSON.stringify(stored));
     return { ok: true };
