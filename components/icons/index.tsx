@@ -206,6 +206,16 @@ export function ChevronRightIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps
   );
 }
 
+export function LockFocusIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="5" y="11" width="14" height="10" rx="2" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Path d="M8 11V7C8 4.8 9.8 3 12 3C14.2 3 16 4.8 16 7V11" stroke={color} strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <Circle cx="12" cy="16" r="1.6" fill={color}/>
+    </Svg>
+  );
+}
+
 export function ShareIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

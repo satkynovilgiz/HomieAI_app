@@ -16,6 +16,7 @@ import videosReducer from './slices/videosSlice';
 import chatHistoryReducer from './slices/chatHistorySlice';
 import recorderReducer from './slices/recorderSlice';
 import languageReducer from './slices/languageSlice';
+import focusReducer from './slices/focusSlice';
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
     notifications: notificationsReducer,
     videos: videosReducer,
     language: languageReducer,
+    focus: focusReducer,
   },
   middleware: g => g({ serializableCheck: false }),
 });

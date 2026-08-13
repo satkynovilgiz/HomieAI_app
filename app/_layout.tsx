@@ -77,6 +77,7 @@ export default function RootLayout() {
           <Stack.Screen name="messages/index" />
           <Stack.Screen name="messages/conversation" />
           <Stack.Screen name="invite/index" />
+          <Stack.Screen name="focus/index" />
           <Stack.Screen name="lessons/index" />
           <Stack.Screen name="lessons/play" options={{ gestureEnabled: false }} />
           <Stack.Screen name="streak/index" />

@@ -8,7 +8,7 @@ import {
   TimerIcon, CalendarIcon, GameIcon, VideoIcon, CameraIcon,
   DetectorIcon, PenIcon, MicIcon,
   HistoryIcon, ChartIcon, TrophyIcon, FlameIcon, ShopIcon,
-  PeopleIcon, MessageIcon, InfoIcon, ChevronRightIcon, ShareIcon,
+  PeopleIcon, MessageIcon, InfoIcon, ChevronRightIcon, ShareIcon, LockFocusIcon,
 } from '../../components/icons';
 
 const SECTIONS: { titleKey: TranslationKey; items: { labelKey: TranslationKey; desc: string; route: string; color: string; Icon: any }[] }[] = [
@@ -21,6 +21,7 @@ const SECTIONS: { titleKey: TranslationKey; items: { labelKey: TranslationKey; d
       { labelKey: 'more_videos',   desc: 'Watch & learn',        route: '/videos',  color: '#f97316', Icon: VideoIcon },
       { labelKey: 'more_scan',     desc: 'Scan homework',        route: '/scanner', color: '#f43f5e', Icon: CameraIcon },
       { labelKey: 'more_recorder', desc: 'Record & get AI notes', route: '/recorder', color: '#7c3aed', Icon: MicIcon },
+      { labelKey: 'more_focus',    desc: 'Lock in. No distractions.', route: '/focus', color: '#6366f1', Icon: LockFocusIcon },
     ],
   },
   {

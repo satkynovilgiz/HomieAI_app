@@ -49,6 +49,9 @@ export interface User {
   freezesLeft: number;
   friendsInvited: number;
   inviteXP: number;
+  bestFocusSessionMins: number;
+  focusMinutesToday: number;
+  focusMinutesDate: string | null;
   goals: string[];
   achievements: string[];
   history: Array<{ id: string; subject: string; preview: string; xp_earned: number; duration_mins: number; date: string }>;
@@ -64,6 +67,7 @@ function defaultUserData(overrides: Pick<User, 'name' | 'email' | 'avatar' | 'pr
     xp: 0, level: 1, streak: 0, longestStreak: 0, lastStudyDate: null, studiedDates: [],
     correct: 0, sessions: 0, msgsSent: 0, studyHours: 0,
     gems: 500, hearts: 5, freezesLeft: 2, friendsInvited: 0, inviteXP: 0,
+    bestFocusSessionMins: 0, focusMinutesToday: 0, focusMinutesDate: null,
     goals: [], achievements: [], history: [], notifications: true,
     createdAt: now, updatedAt: now,
   };

@@ -16,8 +16,8 @@ import AchievementPopup from '../../components/achievements/AchievementPopup';
 import { useAchievements } from '../../hooks/useAchievements';
 import {
   ChatBubbleIcon, BookIcon, VideoIcon, GameIcon, TimerIcon,
-  DetectorIcon, ShopIcon, TrophyIcon, CalendarIcon, PenIcon, CameraIcon, HistoryIcon,
-  FlameIcon, GemIcon, ArrowRightIcon,
+  DetectorIcon, ShopIcon, TrophyIcon, CalendarIcon, PenIcon, CameraIcon,
+  FlameIcon, GemIcon, ArrowRightIcon, LockFocusIcon,
 } from '../../components/icons';
 import Svg, { Path, Circle } from 'react-native-svg';
 
@@ -69,7 +69,7 @@ const QUICK_ACTIONS: { label: string; key: TranslationKey; route: string; color:
   { label: 'Planner',    key: 'more_planner',     route: '/planner',       color: '#8b5cf6' },
   { label: 'Essay',      key: 'more_essay',       route: '/essay',         color: '#84cc16' },
   { label: 'Scan',       key: 'more_scan',        route: '/scanner',       color: '#f43f5e' },
-  { label: 'History',    key: 'more_history',     route: '/history',       color: '#a855f7' },
+  { label: 'Deep Study', key: 'more_focus',       route: '/focus',         color: '#6366f1' },
 ];
 
 const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; size: number }>> = {
@@ -84,7 +84,7 @@ const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; si
   'Planner': CalendarIcon,
   'Essay': PenIcon,
   'Scan': CameraIcon,
-  'History': HistoryIcon,
+  'Deep Study': LockFocusIcon,
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
