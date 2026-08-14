@@ -1,106 +1,159 @@
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/theme';
 import { callGemini, getSystemPrompt } from '../../lib/gemini';
 import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
+import { CameraIcon } from '../../components/icons';
+
+function GalleryIcon({ color, size = 20 }: { color: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="3" width="18" height="18" rx="2" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Circle cx="8.5" cy="8.5" r="1.5" fill={color}/>
+      <Path d="M21 15L16 10L5 21" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+type Mood = 'happy' | 'sad' | 'thinking';
 
 export default function ScannerScreen() {
   const { language } = useTranslation();
-  const [img, setImg] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
   const [imgB64, setImgB64] = useState<string | null>(null);
-  const [question, setQuestion] = useState('');
-  const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [answer, setAnswer] = useState('');
+  const [mood, setMood] = useState<Mood>('thinking');
 
-  const pickImg = async (camera = false) => {
-    const res = camera
-      ? await ImagePicker.launchCameraAsync({ base64: true, quality: 0.7 })
-      : await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.7 });
-    if (!res.canceled && res.assets[0].base64) {
-      setImg(res.assets[0].uri); setImgB64(res.assets[0].base64); setResult('');
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Homie needs camera access to scan your homework.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({ quality: 0.7, base64: true });
+      if (!result.canceled && result.assets[0]?.base64) {
+        setImage(result.assets[0].uri);
+        setImgB64(result.assets[0].base64);
+        setAnswer('');
+      }
+    } catch {
+      Alert.alert('Something went wrong', 'Could not open the camera. Try again.');
     }
   };
 
-  const solve = async () => {
-    if (!imgB64) return; setLoading(true);
+  const choosePhoto = async () => {
     try {
-      const q = question.trim() || 'Please explain and solve this homework problem step by step.';
-      const messages = [{ role: 'user', content: [
-        { type: 'image', media_type: 'image/jpeg', data: imgB64 },
-        { type: 'text', text: q }
-      ]}];
-      const out = await callGemini(messages, getSystemPrompt('General', language));
-      setResult(out);
-    } catch(err: any) { setResult('something broke — try again'); }
-    finally { setLoading(false); }
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Homie needs photo library access to scan your homework.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7, base64: true });
+      if (!result.canceled && result.assets[0]?.base64) {
+        setImage(result.assets[0].uri);
+        setImgB64(result.assets[0].base64);
+        setAnswer('');
+      }
+    } catch {
+      Alert.alert('Something went wrong', 'Could not open your photos. Try again.');
+    }
+  };
+
+  const solveHomework = async () => {
+    if (!imgB64) {
+      Alert.alert('No image', 'Take or choose a photo first!');
+      return;
+    }
+    setLoading(true);
+    setMood('thinking');
+    setAnswer('');
+    try {
+      const messages = [{
+        role: 'user',
+        content: [
+          { type: 'image', media_type: 'image/jpeg', data: imgB64 },
+          {
+            type: 'text',
+            text: 'Solve this homework problem step by step. If it is math, show all the work. If it is science, explain the concepts. If it is writing, give feedback and suggestions. Help me understand, not just get the answer.',
+          },
+        ],
+      }];
+      const reply = await callGemini(messages, getSystemPrompt('General', language));
+      if (reply) {
+        setAnswer(reply);
+        setMood('happy');
+      } else {
+        setAnswer("could not read the image. try taking a clearer photo bro");
+        setMood('sad');
+      }
+    } catch {
+      setAnswer('something went wrong. try again bro');
+      setMood('sad');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>←</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Scan Homework</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <HomieBot mood={mood} size={80}/>
+        <Text style={styles.title}>Take a photo of your homework</Text>
+        <Text style={styles.sub}>and Homie will solve it for you</Text>
+
+        {image ? (
+          <Image source={{ uri: image }} style={styles.preview} resizeMode="contain"/>
+        ) : (
+          <View style={styles.emptyImage}>
+            <CameraIcon color={Colors.muted} size={32}/>
+            <Text style={styles.emptyText}>no photo yet</Text>
+          </View>
+        )}
+
+        <View style={styles.btnRow}>
+          <TouchableOpacity style={[styles.photoBtn, { borderColor: Colors.purple }]} onPress={takePhoto} activeOpacity={0.8}>
+            <CameraIcon color={Colors.purpleL} size={20}/>
+            <Text style={[styles.photoBtnText, { color: Colors.purpleL }]}>Take Photo</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Homework Scanner 📸</Text>
+          <TouchableOpacity style={[styles.photoBtn, { borderColor: Colors.blue }]} onPress={choosePhoto} activeOpacity={0.8}>
+            <GalleryIcon color={Colors.blue} size={20}/>
+            <Text style={[styles.photoBtnText, { color: Colors.blue }]}>Choose Photo</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={{ padding: 16 }}>
-          {!img ? (
-            <View style={styles.uploadBox}>
-              <Text style={styles.uploadIcon}>📸</Text>
-              <Text style={styles.uploadTitle}>Upload Homework Photo</Text>
-              <Text style={styles.uploadSub}>Take a photo or upload from your gallery</Text>
-              <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-                <TouchableOpacity onPress={() => pickImg(true)} style={styles.uploadBtn}>
-                  <Text style={styles.uploadBtnText}>📷 take photo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => pickImg(false)} style={[styles.uploadBtn, styles.uploadBtnSecondary]}>
-                  <Text style={[styles.uploadBtnText, { color: Colors.text }]}>⬆ upload</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <>
-              <Image source={{ uri: img }} style={styles.preview} resizeMode="contain"/>
-              <TextInput
-                value={question} onChangeText={setQuestion}
-                placeholder="ask a specific question (optional)..."
-                placeholderTextColor={Colors.muted} style={styles.questionInput}
-              />
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity onPress={() => { setImg(null); setImgB64(null); setResult(''); setQuestion(''); }}
-                  style={styles.newPhotoBtn}>
-                  <Text style={styles.newPhotoBtnText}>← new photo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={solve} disabled={loading} style={[styles.solveBtn, loading && { opacity: 0.6 }]}>
-                  <Text style={styles.solveBtnText}>{loading ? 'hold on...' : '🔍 solve this'}</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
+        <TouchableOpacity
+          style={[styles.solveBtn, !image && styles.solveBtnDisabled]}
+          onPress={solveHomework}
+          disabled={!image || loading}
+          activeOpacity={0.85}
+        >
+          {loading ? <ActivityIndicator color="white"/> : <Text style={styles.solveBtnText}>Solve with Homie AI</Text>}
+        </TouchableOpacity>
 
-          {result !== '' && (
-            <View style={styles.resultCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <HomieBot mood="happy" size={48}/>
-                <View>
-                  <Text style={styles.resultTitle}>HOMIE's Explanation 📚</Text>
-                  <Text style={{ fontSize: 12, color: Colors.muted }}>Step-by-step solution</Text>
-                </View>
-              </View>
-              <Text style={styles.resultText}>{result}</Text>
-              <View style={styles.warningBox}>
-                <Text style={styles.warningText}>⚠️ always verify solutions and understand each step</Text>
-              </View>
-            </View>
-          )}
-        </View>
+        {answer !== '' && (
+          <View style={styles.answerCard}>
+            <Text style={styles.answerLabel}>HOMIE'S ANSWER</Text>
+            <Text style={styles.answerText}>{answer}</Text>
+          </View>
+        )}
+
+        <View style={{ height: 40 }}/>
       </ScrollView>
     </SafeAreaView>
   );
@@ -108,26 +161,75 @@ export default function ScannerScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingBottom: 8, gap: 12 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
   backBtn: { padding: 4 },
   backArrow: { fontSize: 24, color: Colors.text },
-  title: { fontSize: 20, fontWeight: '900', color: Colors.text },
-  uploadBox: { padding: 32, backgroundColor: Colors.bg3, borderRadius: Radius.xl, borderWidth: 2, borderColor: Colors.border, alignItems: 'center' },
-  uploadIcon: { fontSize: 64, marginBottom: 14 },
-  uploadTitle: { fontSize: 20, fontWeight: '800', color: Colors.text, marginBottom: 6 },
-  uploadSub: { fontSize: 13, color: Colors.muted, textAlign: 'center' },
-  uploadBtn: { flex: 1, paddingVertical: 12, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
-  uploadBtnSecondary: { backgroundColor: Colors.bg2, borderWidth: 1, borderColor: Colors.border },
-  uploadBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
-  preview: { width: '100%', height: 250, backgroundColor: Colors.bg3, borderRadius: Radius.md, marginBottom: 14 },
-  questionInput: { backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, color: Colors.text, padding: 13, fontSize: 14, marginBottom: 12 },
-  newPhotoBtn: { paddingHorizontal: 18, paddingVertical: 13, backgroundColor: Colors.bg3, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border },
-  newPhotoBtnText: { color: Colors.text, fontWeight: '600' },
-  solveBtn: { flex: 1, paddingVertical: 13, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
-  solveBtnText: { color: Colors.white, fontWeight: '800', fontSize: 14 },
-  resultCard: { marginTop: 16, padding: 18, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' },
-  resultTitle: { fontSize: 17, fontWeight: '800', color: Colors.text },
-  resultText: { fontSize: 14, color: Colors.text2, lineHeight: 22 },
-  warningBox: { marginTop: 14, padding: 11, backgroundColor: 'rgba(251,191,36,0.08)', borderRadius: Radius.sm },
-  warningText: { fontSize: 12, color: Colors.yellow },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
+  content: { alignItems: 'center', padding: 20 },
+  title: { fontSize: 22, fontWeight: '900', color: Colors.text, marginTop: 12, textAlign: 'center' },
+  sub: { fontSize: 14, color: Colors.muted, marginTop: 6, marginBottom: 20, textAlign: 'center' },
+  preview: {
+    width: '100%',
+    height: 240,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.bg3,
+    marginBottom: 16,
+  },
+  emptyImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.bg3,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    gap: 10,
+  },
+  emptyText: { fontSize: 14, color: Colors.muted },
+  btnRow: { flexDirection: 'row', gap: 12, width: '100%', marginBottom: 14 },
+  photoBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 14,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    backgroundColor: Colors.bg2,
+  },
+  photoBtnText: { fontSize: 14, fontWeight: '700' },
+  solveBtn: {
+    width: '100%',
+    height: 54,
+    backgroundColor: Colors.purple,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  solveBtnDisabled: { backgroundColor: Colors.bg3 },
+  solveBtnText: { color: 'white', fontSize: 16, fontWeight: '700' },
+  answerCard: {
+    width: '100%',
+    backgroundColor: Colors.bg2,
+    borderRadius: Radius.lg,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.purple,
+  },
+  answerLabel: { fontSize: 10, fontWeight: '700', color: Colors.purpleL, letterSpacing: 2, marginBottom: 10 },
+  answerText: { fontSize: 14, color: Colors.text, lineHeight: 22 },
 });

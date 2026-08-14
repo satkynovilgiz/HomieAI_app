@@ -3,7 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
@@ -200,7 +200,13 @@ function ResourceBar({ onWatchVideo, onSearchWeb, onArticle }: { onWatchVideo: (
   );
 }
 
-const QUICK_PROMPTS = ['quiz me', 'explain simply', 'give an example', 'challenge me', 'real world use?'];
+const QUICK_PROMPTS: { label: string; text?: string; route?: '/planner' | '/scanner' }[] = [
+  { label: 'Quiz me', text: 'quiz me' },
+  { label: 'Explain', text: 'explain this simply' },
+  { label: 'Find video', text: 'find video about this' },
+  { label: 'Study plan', route: '/planner' },
+  { label: 'Scan homework', route: '/scanner' },
+];
 
 export default function ChatScreen() {
   const dispatch = useDispatch();
@@ -221,7 +227,6 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList>(null);
   const sessionStartRef = useRef(Date.now());
   const latestRef = useRef({ sessionXP, subject, messages, user });
-  const restoredRef = useRef(false);
   const prefillHandledRef = useRef(false);
   const [pendingPrefill, setPendingPrefill] = useState<string | null>(null);
 
@@ -229,22 +234,29 @@ export default function ChatScreen() {
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
   useEffect(() => { loadSavedItemsFromStorage().then(items => dispatch(loadItems(items))); }, []);
 
-  // Sessions themselves are loaded from AsyncStorage once, app-wide, by
-  // ChatHistorySync in the root layout (so History/sidebar have them no matter
-  // which screen opens first). Once that load lands, resume the previously
-  // active session's messages here — but only if this chat is still empty, so
-  // it doesn't clobber a conversation already in progress.
-  useEffect(() => {
-    if (!chatHistoryLoaded || restoredRef.current || messages.length > 0) return;
-    restoredRef.current = true;
-    const active = activeChatId && chatSessions.find(s => s.id === activeChatId);
-    if (active) {
-      dispatch(setSubject(active.subject));
-      dispatch(loadMessages(active.messages.map(m => ({
-        id: m.id, role: m.role, content: m.content, timestamp: new Date(m.timestamp).getTime(),
-      }))));
-    }
-  }, [chatHistoryLoaded]);
+  // Chat always opens fresh: every time this tab gains focus (including the
+  // first mount), drop back to an empty conversation instead of resuming
+  // whatever was last active. The previous conversation isn't lost — every
+  // message was already persisted into its own chatHistory session as it was
+  // sent (see addMessageToSession calls in send()), so it's still there in
+  // the sidebar/History screen. Skipped when arriving via a deep link
+  // (?chatId=... from "Continue Chat", ?prefill=... from "Ask Homie about
+  // this") since those effects below are responsible for loading that state.
+  useFocusEffect(
+    useCallback(() => {
+      if (chatIdParam || prefillParam) return;
+      dispatch(setActiveChat(null));
+      dispatch(clearMsgs());
+      setInput('');
+      setImgB64(null);
+      setImgPreview(null);
+      setShowSubjects(false);
+      setShowSidebar(false);
+      setMessageCount(0);
+      setRealTopic('');
+      setShownResources(false);
+    }, [chatIdParam, prefillParam])
+  );
 
   // Persist sessions/activeChatId on every change — same fire-and-forget pattern
   // as saved videos/articles. Skipped until the initial load lands so we don't
@@ -658,8 +670,12 @@ export default function ChatScreen() {
             <Text style={styles.welcomeSub}>{t('chat_welcome_sub')}</Text>
             <View style={styles.prompts}>
               {QUICK_PROMPTS.map(p => (
-                <TouchableOpacity key={p} onPress={() => send(p)} style={styles.promptBtn}>
-                  <Text style={styles.promptText}>{p}</Text>
+                <TouchableOpacity
+                  key={p.label}
+                  onPress={() => p.route ? router.push(p.route) : send(p.text)}
+                  style={styles.promptBtn}
+                >
+                  <Text style={styles.promptText}>{p.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -736,8 +752,8 @@ const styles = StyleSheet.create({
   welcomeTitle: { fontSize: 18, fontWeight: '800', color: Colors.text, marginTop: 16, textAlign: 'center' },
   welcomeSub: { fontSize: 13, color: Colors.muted, marginTop: 6, textAlign: 'center' },
   prompts: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 },
-  promptBtn: { paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Colors.bg3, borderRadius: 50, borderWidth: 1, borderColor: Colors.border },
-  promptText: { fontSize: 13, color: Colors.text2 },
+  promptBtn: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: Colors.bg3, borderRadius: 50, borderWidth: 1, borderColor: Colors.border2 },
+  promptText: { fontSize: 13, color: Colors.purpleL, fontWeight: '600' },
   msgList: { padding: 14, gap: 12 },
   msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   msgRowUser: { flexDirection: 'row-reverse' },
