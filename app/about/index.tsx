@@ -69,6 +69,13 @@ export default function AboutScreen() {
           <TouchableOpacity onPress={() => Linking.openURL('https://homieai-steel.vercel.app')} style={styles.webBtn}>
             <Text style={styles.webBtnText}>🌐 Visit homieai-steel.vercel.app</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/legal/privacy')} style={styles.legalBtn}>
+            <Text style={styles.legalBtnText}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/legal/terms')} style={styles.legalBtn}>
+            <Text style={styles.legalBtnText}>Terms of Service</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -102,4 +109,6 @@ const styles = StyleSheet.create({
   linkBtnTextSecondary: { fontSize: 12, fontWeight: '700', color: Colors.text },
   webBtn: { paddingVertical: 14, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
   webBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
+  legalBtn: { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, padding: 14, alignItems: 'center', width: '100%', marginTop: 10 },
+  legalBtnText: { color: '#a78bfa', fontWeight: '600', fontSize: 14 },
 });

@@ -110,6 +110,17 @@ export default function SignupScreen() {
             ))}
           </View>
 
+          <View style={styles.legalWrap}>
+            <Text style={styles.legalText}>By signing up you agree to our{' '}</Text>
+            <TouchableOpacity onPress={() => router.push('/legal/terms')}>
+              <Text style={styles.legalLink}>Terms of Service</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalText}> and </Text>
+            <TouchableOpacity onPress={() => router.push('/legal/privacy')}>
+              <Text style={styles.legalLink}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
+
           <Button title={t('signup_btn')} onPress={signup} loading={loading} size="lg" style={styles.submitBtn} />
           <TouchableOpacity style={styles.loginLink} onPress={() => router.back()}>
             <Text style={styles.loginText}>{t('signup_have_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('signup_login_link')}</Text></Text>
@@ -148,4 +159,7 @@ const styles = StyleSheet.create({
   loginText: { fontSize: 13, color: Colors.muted },
   clearLink: { alignItems: 'center', marginTop: 12 },
   clearText: { fontSize: 11, color: Colors.muted, textDecorationLine: 'underline' },
+  legalWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', marginBottom: 16, paddingHorizontal: 16, gap: 2 },
+  legalText: { fontSize: 12, color: '#555577' },
+  legalLink: { fontSize: 12, color: '#a78bfa', textDecorationLine: 'underline', fontWeight: '600' },
 });

@@ -86,6 +86,8 @@ export default function RootLayout() {
           <Stack.Screen name="notifications/index" />
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="friends/add" />
+          <Stack.Screen name="legal/privacy" />
+          <Stack.Screen name="legal/terms" />
         </Stack>
       </Provider>
     </GestureHandlerRootView>
