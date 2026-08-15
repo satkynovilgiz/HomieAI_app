@@ -224,7 +224,7 @@ export async function updateUser(uid: string, updates: Partial<User>): Promise<U
 
 function mapFirebaseError(e: any): string {
   const code = e?.code || '';
-  if (code.includes('email-already-in-use')) return "that email's taken";
+  if (code.includes('email-already-in-use')) return "that email's already registered — try signing in, or use a different email";
   if (code.includes('invalid-email')) return 'invalid email';
   if (code.includes('weak-password')) return 'needs 6+ characters';
   if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'wrong email or password';

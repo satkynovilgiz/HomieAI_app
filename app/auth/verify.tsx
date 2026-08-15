@@ -164,6 +164,18 @@ export default function VerifyScreen() {
           </View>
         ) : null}
 
+        {devCode ? (
+          <TouchableOpacity
+            style={styles.autoFillBtn}
+            onPress={() => {
+              const digits = devCode.split('');
+              setCode(Array.from({ length: CODE_LENGTH }, (_, i) => digits[i] || ''));
+            }}
+          >
+            <Text style={styles.autoFillText}>Auto-fill code</Text>
+          </TouchableOpacity>
+        ) : null}
+
         <Text style={styles.enterLabel}>Enter the code below:</Text>
 
         <Animated.View style={[styles.codeRow, { transform: [{ translateX: shakeAnim.interpolate({ inputRange: [-1, 1], outputRange: [-8, 8] }) }] }]}>
@@ -240,6 +252,8 @@ const styles = StyleSheet.create({
   devCodeBox: { backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1, borderColor: Colors.green, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, marginBottom: 16, alignSelf: 'stretch', alignItems: 'center' },
   devCodeLabel: { fontSize: 11, color: '#9090c0', textAlign: 'center', marginBottom: 4 },
   devCodeText: { fontSize: 22, fontWeight: '900', color: Colors.green, textAlign: 'center', letterSpacing: 1 },
+  autoFillBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20, marginBottom: 16 },
+  autoFillText: { color: Colors.white, fontSize: 13, fontWeight: '700' },
   enterLabel: { fontSize: 13, color: '#9090c0', marginBottom: 16, alignSelf: 'flex-start' },
   codeRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
   codeBox: { width: 48, height: 58, backgroundColor: '#12102a', borderWidth: 1.5, borderColor: '#2a2060', borderRadius: 12, fontSize: 24, fontWeight: '700', color: Colors.white, textAlign: 'center' },

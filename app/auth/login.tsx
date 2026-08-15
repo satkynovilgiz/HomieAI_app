@@ -45,6 +45,17 @@ export default function LoginScreen() {
     }
   };
 
+  const clearAppData = async () => {
+    await AsyncStorage.multiRemove([
+      'hm_session', 'hm_user_cache', 'hm_chat_history', 'hm_saved_items',
+      'hm_saved_videos', 'hm_study_plan', 'hm_lectures', 'hm_verify_code',
+      'hm_welcome_shown', 'hm_onboarding_done',
+    ]);
+    setEmail('');
+    setPass('');
+    setError('local data cleared — sign in again, or sign up fresh');
+  };
+
   const googleSignIn = async () => {
     setGoogleLoading(true);
     setError('');
@@ -98,6 +109,9 @@ export default function LoginScreen() {
               {t('login_no_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('login_signup_link')}</Text>
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.clearLink} onPress={clearAppData}>
+            <Text style={styles.clearText}>Trouble signing in? Reset app data</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -122,4 +136,6 @@ const styles = StyleSheet.create({
   submitBtn: { height: 52, borderRadius: 14, marginTop: 8 },
   signupLink: { alignItems: 'center', marginTop: 16 },
   signupText: { fontSize: 14, color: Colors.muted },
+  clearLink: { alignItems: 'center', marginTop: 12 },
+  clearText: { fontSize: 11, color: Colors.muted, textDecorationLine: 'underline' },
 });

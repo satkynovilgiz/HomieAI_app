@@ -42,7 +42,13 @@ export default function SignupScreen() {
   };
 
   const clearAppData = async () => {
-    await AsyncStorage.multiRemove(['hm_users', 'hm_session']);
+    await AsyncStorage.multiRemove([
+      'hm_session', 'hm_user_cache', 'hm_chat_history', 'hm_saved_items',
+      'hm_saved_videos', 'hm_study_plan', 'hm_lectures', 'hm_verify_code',
+      'hm_welcome_shown', 'hm_onboarding_done',
+    ]);
+    setForm({ name: '', email: '', pass: '', pass2: '' });
+    setError("local data cleared. if an email still says taken, it's genuinely registered — sign in instead or use a different one");
   };
 
   const signup = async () => {
@@ -109,7 +115,7 @@ export default function SignupScreen() {
             <Text style={styles.loginText}>{t('signup_have_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('signup_login_link')}</Text></Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.clearLink} onPress={clearAppData}>
-            <Text style={styles.clearText}>Clear app data</Text>
+            <Text style={styles.clearText}>Having issues signing up? Reset app data</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
