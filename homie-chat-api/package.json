@@ -2,8 +2,11 @@
   "name": "homie-chat-api",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "nodemailer": "^9.0.5"
+  },
   "devDependencies": {
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.16"
   }
 }

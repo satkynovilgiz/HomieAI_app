@@ -1,4 +1,19 @@
-const RESEND_URL = 'https://api.resend.com/emails';
+import nodemailer from 'nodemailer';
+
+// Not a secret — the app password (GMAIL_APP_PASSWORD, a Vercel env var) is
+// what actually authenticates.
+const GMAIL_USER = 'satkynovilgiz2008@gmail.com';
+
+let transporter: nodemailer.Transporter | null = null;
+function getTransporter(): nodemailer.Transporter {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+    });
+  }
+  return transporter;
+}
 
 interface SendCodeBody {
   toEmail?: string;
@@ -88,10 +103,12 @@ function emailHtml(toName: string, code: string): string {
   `;
 }
 
-// Proxies Resend so the API key stays server-side — a direct client fetch()
-// to api.resend.com is blocked by CORS from a browser anyway, and would ship
-// the secret key inside the app bundle for native builds. Same pattern as
-// api/chat.ts proxying Groq.
+// Sends via Gmail SMTP (app password stays server-side) instead of Resend —
+// Resend's sandbox mode blocks sending to anyone but the account owner until
+// a custom domain is verified, which Gmail SMTP doesn't require. A direct
+// client-side SMTP/fetch call was ruled out: it would ship the Gmail app
+// password inside the app bundle for anyone to extract. Same proxy pattern
+// as api/chat.ts holding GROQ_API_KEY.
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -112,25 +129,12 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const resendRes = await fetch(RESEND_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Homie <onboarding@resend.dev>',
-        to: [toEmail],
-        subject: 'Your Homie verification code',
-        html: emailHtml(toName || 'there', code),
-      }),
+    await getTransporter().sendMail({
+      from: `Homie <${GMAIL_USER}>`,
+      to: toEmail,
+      subject: 'Your Homie verification code',
+      html: emailHtml(toName || 'there', code),
     });
-
-    if (!resendRes.ok) {
-      const errBody = await resendRes.json().catch(() => ({}));
-      res.status(500).json({ success: false, error: errBody?.message || `Resend error ${resendRes.status}` });
-      return;
-    }
 
     res.status(200).json({ success: true });
   } catch (err: any) {
