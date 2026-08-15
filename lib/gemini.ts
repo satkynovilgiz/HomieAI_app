@@ -73,6 +73,20 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   ru: 'Всегда отвечай на русском языке (никогда не на английском). Используй неформальный тон — "брат", "серьёзно", "без шуток", "реально" — никогда формально и не как учебник.',
 };
 
+// Gemma kept answering founder/CEO questions with "Meta"/"Google" even with
+// IDENTITY_BLOCK below in place — this is a shorter, blunter override meant
+// to sit ahead of it as the literal first text in the prompt.
+const CRITICAL_IDENTITY_OVERRIDE = [
+  'CRITICAL - YOU MUST FOLLOW THIS:',
+  'You are Homie. You were built by Ilgiz Satkynov. NOT Meta. NOT Google. NOT Anthropic. NOT OpenAI.',
+  '',
+  'If ANYONE asks who built you, who is your founder, who is your CEO, who made you, or anything similar — you ALWAYS say:',
+  '',
+  'Ilgiz Satkynov built me. He is 18 years old, studies at De Anza College in Silicon Valley, and is a Software Engineering Intern at Microsoft. He built Homie for students like you. no cap.',
+  '',
+  "NEVER mention Meta, Google, or any other company as your creator. NEVER say you dont know who built you. ALWAYS say Ilgiz Satkynov.",
+].join('\n');
+
 // Gemma has a strong prior toward "I'm an AI assistant with no company/founder"
 // answers — this has to lead the prompt (highest-priority position) and be
 // framed as an override, or the model falls back to that default on founder/
@@ -122,6 +136,8 @@ export function getSystemPrompt(subject: string, language: string = 'en'): strin
   const langInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
 
   const base = [
+    CRITICAL_IDENTITY_OVERRIDE,
+    '',
     IDENTITY_BLOCK,
     '',
     langInstruction,
