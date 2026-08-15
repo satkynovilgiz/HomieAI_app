@@ -2,33 +2,43 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const VERIFY_CODE_KEY = 'hm_verify_code';
 const CODE_TTL_MS = 10 * 60 * 1000;
-
-function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+const SEND_CODE_URL = 'https://homie-chat-api.vercel.app/api/send-code';
 
 interface StoredCode { code: string; expiresAt: number; }
 
-// EmailJS can't be reached from Expo Go (it requires a real browser Origin,
-// which a React Native fetch never has) — that only works once the app is
-// built with `eas build`. Until then we generate the code locally and hand
-// it back so the verify screen can display it on-device.
-export async function sendVerificationCode(_userEmail: string, _userName: string): Promise<{ ok: boolean; code?: string; err?: string }> {
-  const code = generateCode();
-  const stored: StoredCode = { code, expiresAt: Date.now() + CODE_TTL_MS };
-  await AsyncStorage.setItem(VERIFY_CODE_KEY, JSON.stringify(stored));
-  return { ok: true, code };
+export function generateCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Returns the code's expiry timestamp (ms epoch), or null if none is pending.
-export async function getCodeExpiry(): Promise<number | null> {
-  const saved = await AsyncStorage.getItem(VERIFY_CODE_KEY);
-  if (!saved) return null;
+// Stores the code locally so verifyCode() can check it without a round trip,
+// and returns its expiry so callers can drive the countdown UI without a
+// separate getCodeExpiry() read right after writing.
+export async function storeCode(code: string): Promise<number> {
+  const expiresAt = Date.now() + CODE_TTL_MS;
+  const stored: StoredCode = { code, expiresAt };
+  await AsyncStorage.setItem(VERIFY_CODE_KEY, JSON.stringify(stored));
+  return expiresAt;
+}
+
+// Sends the code through homie-chat-api's /api/send-code proxy rather than
+// calling Resend directly — Resend blocks browser fetch() via CORS by design,
+// and a direct call would ship the API key inside the app bundle. The proxy
+// holds RESEND_API_KEY server-side, same pattern as the chat endpoint holding
+// GROQ_API_KEY.
+export async function sendVerificationEmail(toEmail: string, toName: string, code: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const parsed: StoredCode = JSON.parse(saved);
-    return parsed.expiresAt;
-  } catch {
-    return null;
+    const res = await fetch(SEND_CODE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toEmail, toName, code }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      return { success: false, error: data.error || 'Failed to send email' };
+    }
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message || 'Network error' };
   }
 }
 

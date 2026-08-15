@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, ActivityIndicator, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
-import { sendVerificationCode, verifyCode, getCodeExpiry, clearVerificationCode } from '../../lib/emailService';
+import { generateCode, storeCode, sendVerificationEmail, verifyCode, clearVerificationCode } from '../../lib/emailService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 
@@ -38,20 +38,32 @@ export default function VerifyScreen() {
   const [cooldown, setCooldown] = useState(0);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
-  const [devCode, setDevCode] = useState('');
+  const [sending, setSending] = useState(true);
+  const [sendError, setSendError] = useState('');
+  const [fallbackCode, setFallbackCode] = useState('');
 
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
   const sendCode = async () => {
-    if (!email) return;
-    const { err, code } = await sendVerificationCode(email, name || 'there');
-    if (err) { setError(err); return; }
-    setError('');
-    setDevCode(code || '');
-    setCooldown(COOLDOWN_S);
-    const exp = await getCodeExpiry();
+    if (!email) {
+      setSending(false);
+      setSendError('No email found. Go back.');
+      return;
+    }
+    setSending(true);
+    setSendError('');
+    setFallbackCode('');
+    const code = generateCode();
+    const exp = await storeCode(code);
     setExpiresAt(exp);
+    const result = await sendVerificationEmail(email, name || 'there', code);
+    setSending(false);
+    if (!result.success) {
+      setFallbackCode(code);
+      setSendError(result.error ? `Could not send email: ${result.error}` : 'Could not send email. Use the code below:');
+    }
+    setCooldown(COOLDOWN_S);
   };
 
   useEffect(() => { sendCode(); }, []);
@@ -157,24 +169,35 @@ export default function VerifyScreen() {
           <Text style={styles.emailText}>{email || 'your email'}</Text>
         </View>
 
-        {devCode ? (
-          <View style={styles.devCodeBox}>
-            <Text style={styles.devCodeLabel}>Testing mode — email sending needs the built app</Text>
-            <Text style={styles.devCodeText}>Your code: {devCode}</Text>
+        {sending ? (
+          <View style={styles.sendingWrap}>
+            <ActivityIndicator color={Colors.purpleL} />
+            <Text style={styles.sendingText}>Sending code to your email...</Text>
           </View>
-        ) : null}
-
-        {devCode ? (
-          <TouchableOpacity
-            style={styles.autoFillBtn}
-            onPress={() => {
-              const digits = devCode.split('');
-              setCode(Array.from({ length: CODE_LENGTH }, (_, i) => digits[i] || ''));
-            }}
-          >
-            <Text style={styles.autoFillText}>Auto-fill code</Text>
-          </TouchableOpacity>
-        ) : null}
+        ) : sendError ? (
+          <View style={styles.fallbackCard}>
+            <Text style={styles.fallbackError}>{sendError}</Text>
+            {fallbackCode ? (
+              <>
+                <Text style={styles.fallbackCode}>{fallbackCode}</Text>
+                <TouchableOpacity
+                  style={styles.autoFillBtn}
+                  onPress={() => {
+                    const digits = fallbackCode.split('');
+                    setCode(Array.from({ length: CODE_LENGTH }, (_, i) => digits[i] || ''));
+                  }}
+                >
+                  <Text style={styles.autoFillText}>Auto-fill code</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+        ) : (
+          <View style={styles.sentCard}>
+            <Text style={styles.sentText}>Code sent to your email!</Text>
+            <Text style={styles.sentSub}>Check your inbox and spam folder</Text>
+          </View>
+        )}
 
         <Text style={styles.enterLabel}>Enter the code below:</Text>
 
@@ -249,10 +272,15 @@ const styles = StyleSheet.create({
   desc: { fontSize: 14, color: '#9090c0', textAlign: 'center', marginTop: 6 },
   emailCard: { backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, marginVertical: 16, alignSelf: 'stretch' },
   emailText: { color: '#a78bfa', fontSize: 14, fontWeight: '700', textAlign: 'center' },
-  devCodeBox: { backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1, borderColor: Colors.green, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, marginBottom: 16, alignSelf: 'stretch', alignItems: 'center' },
-  devCodeLabel: { fontSize: 11, color: '#9090c0', textAlign: 'center', marginBottom: 4 },
-  devCodeText: { fontSize: 22, fontWeight: '900', color: Colors.green, textAlign: 'center', letterSpacing: 1 },
-  autoFillBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20, marginBottom: 16 },
+  sendingWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  sendingText: { fontSize: 13, color: Colors.muted },
+  sentCard: { width: '100%', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.25)', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 16 },
+  sentText: { fontSize: 14, fontWeight: '700', color: Colors.green },
+  sentSub: { fontSize: 12, color: Colors.muted, marginTop: 4 },
+  fallbackCard: { width: '100%', backgroundColor: 'rgba(124,58,237,0.08)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 16 },
+  fallbackError: { fontSize: 13, color: Colors.muted, textAlign: 'center', marginBottom: 12 },
+  fallbackCode: { fontSize: 42, fontWeight: '900', color: Colors.purpleL, letterSpacing: 8, marginBottom: 12 },
+  autoFillBtn: { backgroundColor: Colors.purple, paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20 },
   autoFillText: { color: Colors.white, fontSize: 13, fontWeight: '700' },
   enterLabel: { fontSize: 13, color: '#9090c0', marginBottom: 16, alignSelf: 'flex-start' },
   codeRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },

@@ -1,5 +1,6 @@
 {
   "functions": {
-    "api/chat.ts": { "maxDuration": 30 }
+    "api/chat.ts": { "maxDuration": 30 },
+    "api/send-code.ts": { "maxDuration": 30 }
   }
 }
