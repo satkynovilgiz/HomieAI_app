@@ -2,7 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EMAILJS_SERVICE_ID = 'service_asarm0b';
 const EMAILJS_TEMPLATE_ID = 'template_i5q05bu';
-const EMAILJS_PUBLIC_KEY = 'gUKNwGJtBAzzbzG_';
+const EMAILJS_PUBLIC_KEY = 'gUKNwGJtBAzzbzG_O';
+// EmailJS's Strict Origin Check rejects requests with no matching browser Origin
+// header, which a React Native fetch call never has — the private key as
+// accessToken is EmailJS's documented way to authenticate non-browser clients.
+const EMAILJS_PRIVATE_KEY = '7dZSgKOzQIbNBrUXG1hZD';
 const EMAILJS_ENDPOINT = 'https://api.emailjs.com/api/v1.0/email/send';
 
 const VERIFY_CODE_KEY = 'hm_verify_code';
@@ -16,10 +20,8 @@ interface StoredCode { code: string; expiresAt: number; }
 
 // Standalone code-based verification utility, sent through EmailJS's REST API
 // directly (no SDK — the official @emailjs/browser package assumes a DOM and
-// doesn't work in React Native). This app's actual signup flow verifies
-// through Firebase's own email-link flow instead (see lib/authService.ts) —
-// this exists for any screen that wants a 6-digit-code flow rather than a
-// link, e.g. a future non-Firebase account path.
+// doesn't work in React Native). This IS the live verification step in the
+// signup flow — app/auth/verify.tsx calls this on mount.
 export async function sendVerificationCode(userEmail: string, userName: string): Promise<{ ok: boolean; err?: string }> {
   const code = generateCode();
   try {
@@ -30,6 +32,7 @@ export async function sendVerificationCode(userEmail: string, userName: string):
         service_id: EMAILJS_SERVICE_ID,
         template_id: EMAILJS_TEMPLATE_ID,
         user_id: EMAILJS_PUBLIC_KEY,
+        accessToken: EMAILJS_PRIVATE_KEY,
         template_params: {
           to_email: userEmail,
           to_name: userName,
