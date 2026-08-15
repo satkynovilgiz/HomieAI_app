@@ -27,6 +27,14 @@ function formatMMSS(ms: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function getEmailProvider(email: string): string {
+  if (email.includes('gmail')) return 'Check your Gmail';
+  if (email.includes('hotmail') || email.includes('outlook') || email.includes('live')) return 'Check your Outlook';
+  if (email.includes('yahoo')) return 'Check your Yahoo Mail';
+  if (email.includes('icloud') || email.includes('me.com') || email.includes('mac.com')) return 'Check your iCloud Mail';
+  return 'Check your Email';
+}
+
 export default function VerifyScreen() {
   const { email, name } = useLocalSearchParams<{ email?: string; name?: string }>();
   const [mood, setMood] = useState<'thinking' | 'sad' | 'celebrating'>('thinking');
@@ -162,7 +170,7 @@ export default function VerifyScreen() {
 
       <View style={styles.content}>
         <HomieBot mood={mood} size={90} />
-        <Text style={styles.title}>Check your Gmail</Text>
+        <Text style={styles.title}>{getEmailProvider(email || '')}</Text>
         <Text style={styles.desc}>We sent a 6-digit code to</Text>
 
         <View style={styles.emailCard}>
