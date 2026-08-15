@@ -38,15 +38,17 @@ export default function VerifyScreen() {
   const [cooldown, setCooldown] = useState(0);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [devCode, setDevCode] = useState('');
 
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
   const sendCode = async () => {
     if (!email) return;
-    const { err } = await sendVerificationCode(email, name || 'there');
+    const { err, code } = await sendVerificationCode(email, name || 'there');
     if (err) { setError(err); return; }
     setError('');
+    setDevCode(code || '');
     setCooldown(COOLDOWN_S);
     const exp = await getCodeExpiry();
     setExpiresAt(exp);
@@ -155,6 +157,13 @@ export default function VerifyScreen() {
           <Text style={styles.emailText}>{email || 'your email'}</Text>
         </View>
 
+        {devCode ? (
+          <View style={styles.devCodeBox}>
+            <Text style={styles.devCodeLabel}>Testing mode — email sending needs the built app</Text>
+            <Text style={styles.devCodeText}>Your code: {devCode}</Text>
+          </View>
+        ) : null}
+
         <Text style={styles.enterLabel}>Enter the code below:</Text>
 
         <Animated.View style={[styles.codeRow, { transform: [{ translateX: shakeAnim.interpolate({ inputRange: [-1, 1], outputRange: [-8, 8] }) }] }]}>
@@ -228,6 +237,9 @@ const styles = StyleSheet.create({
   desc: { fontSize: 14, color: '#9090c0', textAlign: 'center', marginTop: 6 },
   emailCard: { backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, marginVertical: 16, alignSelf: 'stretch' },
   emailText: { color: '#a78bfa', fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  devCodeBox: { backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1, borderColor: Colors.green, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, marginBottom: 16, alignSelf: 'stretch', alignItems: 'center' },
+  devCodeLabel: { fontSize: 11, color: '#9090c0', textAlign: 'center', marginBottom: 4 },
+  devCodeText: { fontSize: 22, fontWeight: '900', color: Colors.green, textAlign: 'center', letterSpacing: 1 },
   enterLabel: { fontSize: 13, color: '#9090c0', marginBottom: 16, alignSelf: 'flex-start' },
   codeRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
   codeBox: { width: 48, height: 58, backgroundColor: '#12102a', borderWidth: 1.5, borderColor: '#2a2060', borderRadius: 12, fontSize: 24, fontWeight: '700', color: Colors.white, textAlign: 'center' },

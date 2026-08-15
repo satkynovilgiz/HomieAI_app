@@ -41,6 +41,10 @@ export default function SignupScreen() {
     }
   };
 
+  const clearAppData = async () => {
+    await AsyncStorage.multiRemove(['hm_users', 'hm_session']);
+  };
+
   const signup = async () => {
     if (!form.name || !form.email || !form.pass) { setError('fill in your info'); return; }
     if (!EMAIL_RE.test(form.email)) { setError('that email looks off'); return; }
@@ -104,6 +108,9 @@ export default function SignupScreen() {
           <TouchableOpacity style={styles.loginLink} onPress={() => router.back()}>
             <Text style={styles.loginText}>{t('signup_have_account')} <Text style={{ color: Colors.purpleL, fontWeight: '700' }}>{t('signup_login_link')}</Text></Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.clearLink} onPress={clearAppData}>
+            <Text style={styles.clearText}>Clear app data</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -133,4 +140,6 @@ const styles = StyleSheet.create({
   submitBtn: { height: 52, borderRadius: 14, marginTop: 16 },
   loginLink: { alignItems: 'center', marginTop: 16 },
   loginText: { fontSize: 13, color: Colors.muted },
+  clearLink: { alignItems: 'center', marginTop: 12 },
+  clearText: { fontSize: 11, color: Colors.muted, textDecorationLine: 'underline' },
 });
