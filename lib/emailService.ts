@@ -20,11 +20,10 @@ export async function storeCode(code: string): Promise<number> {
   return expiresAt;
 }
 
-// Sends the code through homie-chat-api's /api/send-code proxy rather than
-// calling Resend directly — Resend blocks browser fetch() via CORS by design,
-// and a direct call would ship the API key inside the app bundle. The proxy
-// holds RESEND_API_KEY server-side, same pattern as the chat endpoint holding
-// GROQ_API_KEY.
+// Sends the code through homie-chat-api's /api/send-code proxy (Gmail SMTP
+// server-side) rather than sending directly from the client — a direct call
+// would ship the Gmail app password inside the app bundle. Same pattern as
+// the chat endpoint holding GROQ_API_KEY server-side.
 export async function sendVerificationEmail(toEmail: string, toName: string, code: string): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await fetch(SEND_CODE_URL, {
