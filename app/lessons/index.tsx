@@ -41,7 +41,7 @@ export default function LessonsScreen() {
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.unitTitle}>{unit.emoji} {unit.title}</Text>
+            <Text style={styles.unitTitle}>{unit.title}</Text>
             <Text style={styles.unitDesc}>{unit.description}</Text>
           </View>
         </View>
@@ -69,7 +69,6 @@ export default function LessonsScreen() {
           </View>
           {unitProgress?.lessons.every(l => l.completed) && (
             <View style={styles.completeBanner}>
-              <Text style={styles.completeBannerIcon}>👑</Text>
               <Text style={styles.completeBannerTitle}>unit complete</Text>
               <Text style={styles.completeBannerSub}>you crushed it</Text>
             </View>

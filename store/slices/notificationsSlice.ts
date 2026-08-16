@@ -7,10 +7,10 @@ export interface AppNotification {
 }
 
 const demoNotifs: AppNotification[] = [
-  { id:'n1', type:'streak', title:'🔥 Streak reminder!', body:"Don't lose your 7 day streak bro — study now!", timestamp:Date.now()-3600000, read:false, icon:'🔥' },
-  { id:'n2', type:'challenge', title:'⚔️ Challenge received!', body:'Marcus T. challenged you to an XP race!', timestamp:Date.now()-7200000, read:false, icon:'⚔️' },
-  { id:'n3', type:'achievement', title:'🏆 Achievement unlocked!', body:'You earned: 3 Day Streak!', timestamp:Date.now()-86400000, read:true, icon:'🏆' },
-  { id:'n4', type:'friend', title:'👥 New friend request!', body:'Priya R. wants to study with you!', timestamp:Date.now()-172800000, read:true, icon:'👥' },
+  { id:'n1', type:'streak', title:'Streak reminder!', body:"Don't lose your 7 day streak bro — study now!", timestamp:Date.now()-3600000, read:false, icon:'' },
+  { id:'n2', type:'challenge', title:'Challenge received!', body:'Marcus T. challenged you to an XP race!', timestamp:Date.now()-7200000, read:false, icon:'' },
+  { id:'n3', type:'achievement', title:'Achievement unlocked!', body:'You earned: 3 Day Streak!', timestamp:Date.now()-86400000, read:true, icon:'' },
+  { id:'n4', type:'friend', title:'New friend request!', body:'Priya R. wants to study with you!', timestamp:Date.now()-172800000, read:true, icon:'' },
 ];
 
 const notificationsSlice = createSlice({

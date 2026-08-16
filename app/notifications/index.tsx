@@ -25,13 +25,11 @@ export default function NotificationsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {notifications.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🔔</Text>
             <Text style={styles.emptyTitle}>no notifications</Text>
             <Text style={styles.emptySub}>you're all caught up bro</Text>
           </View>
         ) : notifications.map(n => (
           <TouchableOpacity key={n.id} onPress={() => mark(n.id)} style={[styles.notif, !n.read && styles.notifUnread]} activeOpacity={0.8}>
-            <View style={styles.notifIcon}><Text style={styles.notifIconText}>{n.icon}</Text></View>
             <View style={styles.notifInfo}>
               <Text style={styles.notifTitle}>{n.title}</Text>
               <Text style={styles.notifBody}>{n.body}</Text>

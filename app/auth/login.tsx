@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signInWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
@@ -75,7 +76,7 @@ export default function LoginScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <HomieBot mood={mood} size={80} />
+          <HomieBot mood={mood} size={responsive.mascotSize.sm} />
           <Text style={styles.title}>{t('login_title')}</Text>
           <Text style={styles.sub}>{t('login_sub')}</Text>
         </View>
@@ -120,11 +121,11 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  content: { padding: 24, paddingTop: 60, alignItems: 'center' },
+  content: { padding: responsive.padding, paddingTop: 60, alignItems: 'center' },
   header: { alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 28, fontWeight: '900', color: Colors.text, marginTop: 16 },
-  sub: { fontSize: 14, color: Colors.muted, marginTop: 6 },
-  card: { width: '100%', backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
+  title: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.text, marginTop: 16 },
+  sub: { fontSize: responsive.fontSize.md, color: Colors.muted, marginTop: 6 },
+  card: { width: '100%', maxWidth: responsive.maxWidth, backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
   googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', height: 52, borderRadius: 14, marginBottom: 20 },
   googleBtnDisabled: { opacity: 0.55, marginBottom: 8 },
   googleText: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },

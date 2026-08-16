@@ -9,7 +9,6 @@ interface Props { item: ShopItem; canAfford: boolean; onBuy: () => void; onUse?:
 export default function ShopItemCard({ item, canAfford, onBuy, onUse }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.icon}>{item.icon}</Text>
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.desc}>{item.desc}</Text>
@@ -23,8 +22,7 @@ export default function ShopItemCard({ item, canAfford, onBuy, onUse }: Props) {
         ) : (
           <TouchableOpacity onPress={onBuy} disabled={!canAfford}
             style={[styles.buyBtn, !canAfford && styles.buyBtnDisabled]}>
-            <Text style={styles.gemIcon}>💎</Text>
-            <Text style={[styles.price, !canAfford && styles.priceDisabled]}>{item.price}</Text>
+            <Text style={[styles.price, !canAfford && styles.priceDisabled]}>{item.price} gems</Text>
           </TouchableOpacity>
         )}
       </View>

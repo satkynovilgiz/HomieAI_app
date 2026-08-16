@@ -3,11 +3,11 @@ import { Unit } from './mathLessons';
 
 export const SCIENCE_UNITS: Unit[] = [
   {
-    id: 'science-basics', title: 'Science Basics', emoji: '🔬', color: '#f97316',
+    id: 'science-basics', title: 'Science Basics', color: '#f97316',
     description: 'How the world actually works bro!',
     lessons: [
       {
-        id: 'ls1', title: 'Chemistry Fundamentals', emoji: '⚗️', xp: 50,
+        id: 'ls1', title: 'Chemistry Fundamentals', xp: 50,
         description: 'Atoms, molecules and reactions',
         questions: [
           { id:'sq1', type:'multiple_choice', question:'What is H₂O?', options:['Salt','Water','Sugar','Acid'], answer:1, explanation:'H₂O is water — 2 hydrogen atoms + 1 oxygen!', xp:10 },
@@ -18,7 +18,7 @@ export const SCIENCE_UNITS: Unit[] = [
         ]
       },
       {
-        id: 'ls2', title: 'Physics Forces', emoji: '⚡', xp: 60,
+        id: 'ls2', title: 'Physics Forces', xp: 60,
         description: 'Forces, motion and energy',
         questions: [
           { id:'sq6', type:'multiple_choice', question:'What is the speed of light?', options:['200,000 km/s','300,000 km/s','400,000 km/s','500,000 km/s'], answer:1, explanation:'~299,792 km/s — basically 300,000 km/s bro!', xp:12 },

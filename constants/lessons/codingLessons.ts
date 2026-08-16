@@ -3,11 +3,11 @@ import { Unit } from './mathLessons';
 
 export const CODING_UNITS: Unit[] = [
   {
-    id: 'coding-intro', title: 'Coding Basics', emoji: '💻', color: '#10b981',
+    id: 'coding-intro', title: 'Coding Basics', color: '#10b981',
     description: 'Start your coding journey!',
     lessons: [
       {
-        id: 'l9', title: 'What is Code?', emoji: '🤔', xp: 40,
+        id: 'l9', title: 'What is Code?', xp: 40,
         description: 'Understand what coding actually is',
         questions: [
           { id:'cq1', type:'multiple_choice', question:'What is a variable in programming?', options:['A math term','A container for data','A type of loop','A function'], answer:1, explanation:'Variables store data! Like a labeled box for your stuff.', xp:8 },
@@ -18,7 +18,7 @@ export const CODING_UNITS: Unit[] = [
         ]
       },
       {
-        id: 'l10', title: 'Python Basics', emoji: '🐍', xp: 60,
+        id: 'l10', title: 'Python Basics', xp: 60,
         description: 'Learn Python fundamentals',
         questions: [
           { id:'cq6', type:'multiple_choice', question:'How do you print "Hello" in Python?', options:['echo "Hello"','console.log("Hello")','print("Hello")','System.out.println("Hello")'], answer:2, explanation:'print("Hello") is the Python way! Simple and clean.', xp:12 },

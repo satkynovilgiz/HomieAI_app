@@ -11,6 +11,7 @@ import { Colors, Radius } from '../../constants/theme';
 import { callAI } from '../../lib/aiChat';
 import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 // expo-speech-recognition's native module only exists in a custom EAS build, not Expo Go.
 // Importing it directly throws at module-evaluation time (before render), crashing the
@@ -70,7 +71,7 @@ export default function VoiceScreen() {
     handsFreeRef.current = false;
     setLiveTranscript('');
     if (event?.error !== 'no-speech' && event?.error !== 'aborted') {
-      setLastReply("couldn't hear you — check mic permissions and try again 🎤");
+      setLastReply("couldn't hear you — check mic permissions and try again");
     }
     setStatus('idle');
   });
@@ -93,7 +94,7 @@ export default function VoiceScreen() {
         onError: () => setStatus('idle'),
       });
     } catch (err: any) {
-      const failMsg = "my bad bro, couldn't reach homie — try again 😅";
+      const failMsg = "my bad bro, couldn't reach homie — try again";
       setLastReply(failMsg);
       setConvo(prev => [...prev, { role: 'homie', text: failMsg }]);
       handsFreeRef.current = false;
@@ -103,14 +104,14 @@ export default function VoiceScreen() {
 
   const startListening = async () => {
     if (!SPEECH_RECOGNITION_AVAILABLE) {
-      setLastReply("voice needs the full app, not Expo Go — ask for that build link 🎤");
+      setLastReply("voice needs the full app, not Expo Go — ask for that build link");
       handsFreeRef.current = false;
       setStatus('idle');
       return;
     }
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!perm.granted) {
-      setLastReply('enable microphone + speech recognition permissions to use voice mode 🎤');
+      setLastReply('enable microphone + speech recognition permissions to use voice mode');
       handsFreeRef.current = false;
       setStatus('idle');
       return;
@@ -135,7 +136,7 @@ export default function VoiceScreen() {
   };
 
   const btnColor = status === 'listening' ? Colors.red : status === 'speaking' ? Colors.green : Colors.purple;
-  const btnLabel = status === 'listening' ? '⏹' : status === 'thinking' ? '⏳' : status === 'speaking' ? '⏹' : '🎤';
+  const btnLabel = status === 'listening' ? '⏹' : status === 'thinking' ? '⏳' : status === 'speaking' ? '⏹' : 'mic';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -146,7 +147,7 @@ export default function VoiceScreen() {
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {!SPEECH_RECOGNITION_AVAILABLE && (
           <View style={styles.unavailableBanner}>
-            <Text style={styles.unavailableText}>voice needs the full app build, not Expo Go — ask for that build link 🎤</Text>
+            <Text style={styles.unavailableText}>voice needs the full app build, not Expo Go — ask for that build link</Text>
           </View>
         )}
 
@@ -159,9 +160,9 @@ export default function VoiceScreen() {
         <View style={styles.statusBox}>
           <Text style={styles.statusText}>
             {status === 'idle' ? 'tap the mic to start talking' :
-             status === 'listening' ? '🎤 listening...' :
-             status === 'thinking' ? '🤔 homie is thinking...' :
-             '🔊 homie is talking...'}
+             status === 'listening' ? 'listening...' :
+             status === 'thinking' ? 'homie is thinking...' :
+             'homie is talking...'}
           </Text>
           {status === 'listening' && liveTranscript !== '' && (
             <Text style={styles.liveText} numberOfLines={3}>"{liveTranscript}"</Text>
@@ -195,7 +196,7 @@ export default function VoiceScreen() {
             <Text style={styles.convoTitle}>CONVERSATION</Text>
             {convo.slice(-6).map((m, i) => (
               <View key={i} style={[styles.convoMsg, { alignSelf: m.role === 'you' ? 'flex-end' : 'flex-start' }]}>
-                <Text style={styles.convoRole}>{m.role === 'you' ? user?.avatar || '🧑' : '🤖'}</Text>
+                <AvatarCircle name={m.role === 'you' ? (user?.name || '?') : 'Homie'} color={m.role === 'you' ? user?.avatar : Colors.purple} size={20} />
                 <Text style={styles.convoText}>{m.text}</Text>
               </View>
             ))}

@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Radius } from '../../constants/theme';
 import { Challenge } from '../../store/slices/challengesSlice';
+import AvatarCircle from '../ui/AvatarCircle';
 
 interface Props { challenge: Challenge; onAccept?: () => void; }
 
@@ -14,18 +15,18 @@ export default function ChallengeCard({ challenge: c, onAccept }: Props) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.type}>{c.type === 'xp_race' ? '⭐ XP Race' : c.type === 'quiz_battle' ? '🎯 Quiz Battle' : '🔥 Streak Challenge'}</Text>
-        <Text style={styles.timer}>⏰ {timeLeft}h left</Text>
+        <Text style={styles.type}>{c.type === 'xp_race' ? 'XP Race' : c.type === 'quiz_battle' ? 'Quiz Battle' : 'Streak Challenge'}</Text>
+        <Text style={styles.timer}>{timeLeft}h left</Text>
       </View>
       <View style={styles.vs}>
         <View style={styles.player}>
-          <Text style={styles.playerAvatar}>🧑</Text>
+          <AvatarCircle name="You" size={36} />
           <Text style={styles.playerName}>You</Text>
           <Text style={styles.playerScore}>{c.myProgress}/{c.target}</Text>
         </View>
         <Text style={styles.vsText}>VS</Text>
         <View style={styles.player}>
-          <Text style={styles.playerAvatar}>{c.fromAvatar}</Text>
+          <AvatarCircle name={c.fromName} color={c.fromAvatar} size={36} />
           <Text style={styles.playerName}>{c.fromName}</Text>
           <Text style={styles.playerScore}>{c.theirProgress}/{c.target}</Text>
         </View>
@@ -40,11 +41,11 @@ export default function ChallengeCard({ challenge: c, onAccept }: Props) {
       </View>
       {c.status === 'pending' && onAccept && (
         <TouchableOpacity onPress={onAccept} style={styles.acceptBtn}>
-          <Text style={styles.acceptBtnText}>⚔️ accept challenge</Text>
+          <Text style={styles.acceptBtnText}>accept challenge</Text>
         </TouchableOpacity>
       )}
-      {c.status === 'won' && <Text style={styles.resultWon}>🏆 you won — +{c.xpReward} XP</Text>}
-      {c.status === 'lost' && <Text style={styles.resultLost}>😢 lost this one</Text>}
+      {c.status === 'won' && <Text style={styles.resultWon}>you won — +{c.xpReward} XP</Text>}
+      {c.status === 'lost' && <Text style={styles.resultLost}>lost this one</Text>}
     </View>
   );
 }

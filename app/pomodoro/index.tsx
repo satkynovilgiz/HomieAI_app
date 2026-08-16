@@ -13,9 +13,9 @@ import { formatTime } from '../../lib/utils';
 import HomieBot from '../../components/mascot/HomieBot';
 
 const MODES = [
-  { label: 'Focus', emoji: '🎯', time: 25 * 60, color: Colors.purple },
-  { label: 'Short Break', emoji: '☕', time: 5 * 60, color: Colors.green },
-  { label: 'Long Break', emoji: '😴', time: 15 * 60, color: Colors.blue },
+  { label: 'Focus', time: 25 * 60, color: Colors.purple },
+  { label: 'Short Break', time: 5 * 60, color: Colors.green },
+  { label: 'Long Break', time: 15 * 60, color: Colors.blue },
 ];
 
 const SIZE = 240;
@@ -67,7 +67,7 @@ export default function PomodoroScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Pomodoro Timer 🍅</Text>
+          <Text style={styles.title}>Pomodoro Timer</Text>
         </View>
 
         {/* Mode tabs */}
@@ -75,7 +75,6 @@ export default function PomodoroScreen() {
           {MODES.map((m, i) => (
             <TouchableOpacity key={i} onPress={() => switchMode(i)}
               style={[styles.tab, modeIdx === i && { backgroundColor: m.color + '2a', borderColor: m.color }]}>
-              <Text style={styles.tabEmoji}>{m.emoji}</Text>
               <Text style={[styles.tabText, modeIdx === i && { color: m.color }]}>{m.label}</Text>
             </TouchableOpacity>
           ))}
@@ -100,7 +99,7 @@ export default function PomodoroScreen() {
           </Svg>
           <View style={styles.timerCenter}>
             <Text style={[styles.timerText, { color: mode.color }]}>{formatTime(timeLeft)}</Text>
-            <Text style={styles.timerMode}>{mode.emoji} {mode.label}</Text>
+            <Text style={styles.timerMode}>{mode.label}</Text>
           </View>
         </View>
 
@@ -108,7 +107,7 @@ export default function PomodoroScreen() {
         <TextInput
           style={styles.taskInput}
           value={task} onChangeText={setTask}
-          placeholder="what are you working on? 📝"
+          placeholder="what are you working on?"
           placeholderTextColor={Colors.muted}
         />
 
@@ -138,10 +137,10 @@ export default function PomodoroScreen() {
           <HomieBot mood={running ? 'happy' : 'thinking'} size={56}/>
           <Text style={styles.tipText}>
             {running && modeIdx === 0
-              ? "you're locked in bro, phone down, let's crush it 💪"
+              ? "you're locked in bro, phone down, let's crush it"
               : running
-              ? "real break: stretch, water, rest your eyes 🌿"
-              : "commit to 25 mins of pure focus. you got this 🎯"}
+              ? "real break: stretch, water, rest your eyes"
+              : "commit to 25 mins of pure focus. you got this"}
           </Text>
         </View>
       </ScrollView>

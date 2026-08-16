@@ -7,7 +7,9 @@ import { Achievement } from '../../store/slices/achievementsSlice';
 export default function AchievementCard({ achievement }: { achievement: Achievement }) {
   return (
     <View style={[styles.card, !achievement.earned && styles.cardLocked]}>
-      <Text style={[styles.icon, !achievement.earned && styles.iconLocked]}>{achievement.earned ? achievement.icon : '🔒'}</Text>
+      <View style={[styles.badge, !achievement.earned && styles.badgeLocked]}>
+        <Text style={styles.badgeText}>{achievement.title.charAt(0)}</Text>
+      </View>
       <View style={styles.info}>
         <Text style={[styles.title, !achievement.earned && styles.textLocked]}>{achievement.title}</Text>
         <Text style={styles.desc}>{achievement.desc}</Text>
@@ -25,8 +27,9 @@ export default function AchievementCard({ achievement }: { achievement: Achievem
 const styles = StyleSheet.create({
   card: { flexDirection:'row', alignItems:'center', gap:14, padding:16, backgroundColor:Colors.bg3, borderRadius:Radius.md, borderWidth:1, borderColor:Colors.border },
   cardLocked: { opacity:0.55 },
-  icon: { fontSize:32 },
-  iconLocked: { opacity:0.4 },
+  badge: { width:44, height:44, borderRadius:22, backgroundColor:'rgba(251,191,36,0.15)', alignItems:'center', justifyContent:'center', borderWidth:1, borderColor:'rgba(251,191,36,0.4)' },
+  badgeLocked: { backgroundColor:Colors.bg4, borderColor:Colors.border },
+  badgeText: { fontSize:18, fontWeight:'900', color:Colors.yellow },
   info: { flex:1 },
   title: { fontSize:14, fontWeight:'800', color:Colors.text },
   textLocked: { color:Colors.muted },

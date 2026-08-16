@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TranslationKey } from '../../constants/translations';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -104,7 +105,7 @@ function Slide1() {
       <View style={styles.confettiWrap} pointerEvents="none">
         {CONFETTI.map((c, i) => <ConfettiPiece key={i} {...c} />)}
       </View>
-      <HomieBot mood="celebrating" size={160} />
+      <HomieBot mood="celebrating" size={responsive.mascotSize.xl} />
     </View>
   );
 }
@@ -112,7 +113,7 @@ function Slide1() {
 function Slide2() {
   return (
     <View style={[styles.topHalf, styles.slide2Row]}>
-      <HomieBot mood="happy" size={100} />
+      <HomieBot mood="happy" size={responsive.mascotSize.md} />
       <View style={styles.bubbleCol}>
         <View style={[styles.bubble, styles.bubbleDark]}>
           <Text style={styles.bubbleTextDark}>explain derivatives bro</Text>
@@ -211,7 +212,7 @@ function Slide5() {
         <PulsingStar style={styles.starTR} />
         <PulsingStar style={styles.starBL} />
         <PulsingStar style={styles.starBR} />
-        <HomieBot mood="celebrating" size={140} />
+        <HomieBot mood="celebrating" size={responsive.mascotSize.lg} />
       </View>
       <View style={styles.statsFinalRow}>
         <View style={styles.statFinal}>
@@ -335,9 +336,9 @@ const styles = StyleSheet.create({
   counterText: { fontSize: 13, color: '#9090c0' },
 
   topHalf: { flex: 1.2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
-  bottomHalf: { paddingHorizontal: 28, paddingBottom: 8, alignItems: 'center' },
-  slideTitle: { fontSize: 36, fontWeight: '900', color: Colors.white, textAlign: 'center' },
-  slideSub: { fontSize: 16, color: '#9090c0', textAlign: 'center', lineHeight: 24, marginTop: 10 },
+  bottomHalf: { paddingHorizontal: 28, paddingBottom: 8, alignItems: 'center', width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
+  slideTitle: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.white, textAlign: 'center' },
+  slideSub: { fontSize: responsive.fontSize.lg, color: '#9090c0', textAlign: 'center', lineHeight: 24, marginTop: 10 },
 
   purpleGlow: { position: 'absolute', width: 260, height: 260, borderRadius: 130, backgroundColor: 'rgba(124,58,237,0.15)' },
   confettiWrap: { position: 'absolute', width: '100%', height: 200, top: -20 },
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
 
   featureGridWrap: { paddingHorizontal: 8 },
   featureGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
-  featureBox: { width: (SCREEN_WIDTH - 48 - 10) / 2, backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: 12, padding: 14, alignItems: 'center', gap: 8 },
+  featureBox: { width: (Math.min(SCREEN_WIDTH, responsive.maxWidth) - 48 - 10) / 2, backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: 12, padding: 14, alignItems: 'center', gap: 8 },
   featureLabel: { fontSize: 12, fontWeight: '700', color: Colors.white, textAlign: 'center' },
 
   mascotStarsWrap: { alignItems: 'center', justifyContent: 'center', width: 200, height: 180 },
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
   pageDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#333' },
   pageDotActive: { width: 24, height: 8, borderRadius: 4, backgroundColor: '#7c3aed' },
 
-  bottomBtnArea: { paddingHorizontal: 24, paddingBottom: 16, alignItems: 'center' },
+  bottomBtnArea: { paddingHorizontal: 24, paddingBottom: 16, alignItems: 'center', width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
   nextBtn: { width: 160, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },
   nextBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
   ctaPrimary: { width: '100%', height: 56, borderRadius: 28, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center' },

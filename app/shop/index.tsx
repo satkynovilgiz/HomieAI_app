@@ -19,15 +19,15 @@ export default function ShopScreen() {
   const [mood, setMood] = useState<'happy'|'celebrating'|'sad'>('happy');
 
   const filtered = cat === 'All' ? items : items.filter(i => i.category === cat);
-  const catLabels: Record<string, string> = { All:'All', powerup:'⚡ Powers', boost:'🚀 Boosts', freeze:'🧊 Freezes', cosmetic:'🎨 Skins' };
+  const catLabels: Record<string, string> = { All:'All', powerup:'Powers', boost:'Boosts', freeze:'Freezes', cosmetic:'Skins' };
 
   const handleBuy = (id: string, price: number, name: string) => {
     if (gems < price) {
-      Alert.alert('not enough gems 💎', `you need ${price - gems} more gems for ${name}`);
+      Alert.alert('not enough gems', `you need ${price - gems} more gems for ${name}`);
       setMood('sad');
       return;
     }
-    Alert.alert(`buy ${name}?`, `${price} 💎 · you've got ${gems} 💎`, [
+    Alert.alert(`buy ${name}?`, `${price} gems · you've got ${gems} gems`, [
       { text:'nvm', style:'cancel' },
       { text:'buy', onPress:() => { buy(id); setMood('celebrating'); setTimeout(()=>setMood('happy'),2000); }},
     ]);
@@ -39,7 +39,7 @@ export default function ShopScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>HOMIE Shop 💎</Text>
+        <Text style={styles.title}>HOMIE Shop</Text>
         <GemsCounter/>
       </View>
 

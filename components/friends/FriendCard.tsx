@@ -3,35 +3,36 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Radius } from '../../constants/theme';
 import { Friend } from '../../store/slices/friendsSlice';
+import AvatarCircle from '../ui/AvatarCircle';
 
 interface Props { friend: Friend; onMessage?: () => void; onChallenge?: () => void; }
 
 export default function FriendCard({ friend: f, onMessage, onChallenge }: Props) {
   const statusColor = f.status === 'online' ? Colors.green : f.status === 'studying' ? Colors.purple : Colors.muted;
-  const statusLabel = f.status === 'online' ? '🟢 online' : f.status === 'studying' ? '📚 studying' : '⚫ offline';
+  const statusLabel = f.status === 'online' ? 'online' : f.status === 'studying' ? 'studying' : 'offline';
 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.avatar}>{f.avatar}</Text>
+        <AvatarCircle name={f.name} color={f.avatar} size={38} />
         <View style={styles.info}>
           <Text style={styles.name}>{f.name}</Text>
           <Text style={[styles.status, { color: statusColor }]}>{statusLabel}</Text>
         </View>
         <View style={styles.stats}>
           <Text style={styles.level}>Lv.{f.level}</Text>
-          <Text style={styles.xp}>⭐{f.xp}</Text>
+          <Text style={styles.xp}>{f.xp}</Text>
         </View>
       </View>
       <View style={styles.streakRow}>
-        <Text style={styles.streakText}>🔥 {f.streak} day streak</Text>
+        <Text style={styles.streakText}>{f.streak} day streak</Text>
         <View style={styles.actions}>
           <TouchableOpacity onPress={onMessage} style={styles.msgBtn}>
-            <Text style={styles.msgBtnText}>💬</Text>
+            <Text style={styles.msgBtnText}>msg</Text>
           </TouchableOpacity>
           {f.isChallengeable && (
             <TouchableOpacity onPress={onChallenge} style={styles.challengeBtn}>
-              <Text style={styles.challengeBtnText}>⚔️ challenge</Text>
+              <Text style={styles.challengeBtnText}>challenge</Text>
             </TouchableOpacity>
           )}
         </View>

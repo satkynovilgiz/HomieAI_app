@@ -12,7 +12,6 @@ export default function StreakFreeze() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>🧊</Text>
       <View style={styles.info}>
         <Text style={styles.title}>Streak Freeze</Text>
         <Text style={styles.sub}>you've got {freezesLeft} freeze{freezesLeft !== 1 ? 's' : ''} left</Text>

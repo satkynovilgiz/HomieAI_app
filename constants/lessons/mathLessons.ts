@@ -6,22 +6,22 @@ export interface Question {
 }
 
 export interface Lesson {
-  id: string; title: string; emoji: string; xp: number;
+  id: string; title: string; xp: number;
   description: string; questions: Question[];
 }
 
 export interface Unit {
-  id: string; title: string; emoji: string; color: string;
+  id: string; title: string; color: string;
   description: string; lessons: Lesson[];
 }
 
 export const MATH_UNITS: Unit[] = [
   {
-    id: 'math-basics', title: 'Math Basics', emoji: '➗', color: '#7c3aed',
+    id: 'math-basics', title: 'Math Basics', color: '#7c3aed',
     description: 'Start with the fundamentals bro!',
     lessons: [
       {
-        id: 'l1', title: 'Addition & Subtraction', emoji: '➕', xp: 50,
+        id: 'l1', title: 'Addition & Subtraction', xp: 50,
         description: 'Master the basics fr',
         questions: [
           { id:'q1', type:'multiple_choice', question:'What is 7 + 8?', options:['13','14','15','16'], answer:2, explanation:'7 + 8 = 15. Count up from 7 eight times!', xp:10 },
@@ -32,7 +32,7 @@ export const MATH_UNITS: Unit[] = [
         ]
       },
       {
-        id: 'l2', title: 'Multiplication', emoji: '✖️', xp: 60,
+        id: 'l2', title: 'Multiplication', xp: 60,
         description: 'Times tables got you? Not anymore!',
         questions: [
           { id:'q6', type:'multiple_choice', question:'What is 7 × 8?', options:['54','56','58','60'], answer:1, explanation:'7 × 8 = 56. This is one of the trickiest ones fr!', xp:12 },
@@ -43,7 +43,7 @@ export const MATH_UNITS: Unit[] = [
         ]
       },
       {
-        id: 'l3', title: 'Division', emoji: '÷', xp: 60,
+        id: 'l3', title: 'Division', xp: 60,
         description: 'Split it up bro!',
         questions: [
           { id:'q11', type:'multiple_choice', question:'What is 48 ÷ 6?', options:['6','7','8','9'], answer:2, explanation:'48 ÷ 6 = 8. Think: 6 × ? = 48', xp:12 },
@@ -56,11 +56,11 @@ export const MATH_UNITS: Unit[] = [
     ]
   },
   {
-    id: 'algebra', title: 'Algebra', emoji: '🔣', color: '#3b82f6',
+    id: 'algebra', title: 'Algebra', color: '#3b82f6',
     description: 'Variables and equations — not scary bro!',
     lessons: [
       {
-        id: 'l6', title: 'Variables & Expressions', emoji: 'x', xp: 70,
+        id: 'l6', title: 'Variables & Expressions', xp: 70,
         description: 'x marks the spot!',
         questions: [
           { id:'q21', type:'multiple_choice', question:'If x = 5, what is x + 3?', options:['6','7','8','9'], answer:2, explanation:'Just substitute: 5 + 3 = 8!', xp:14 },

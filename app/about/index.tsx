@@ -4,12 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 const VALUES = [
-  { icon: '🎯', title: 'The Mission', text: 'Make high-quality AI tutoring free for every student. Education is a right.' },
-  { icon: '💡', title: 'The Idea', text: 'HOMIE shows up like a real friend — not just answers, but presence.' },
-  { icon: '🚀', title: 'The Vision', text: 'A world where every student has a brilliant AI friend who wants them to win.' },
-  { icon: '❤️', title: 'The Promise', text: 'Free forever. No ads. No data selling. Built by a student for students.' },
+  { title: 'The Mission', text: 'Make high-quality AI tutoring free for every student. Education is a right.' },
+  { title: 'The Idea', text: 'HOMIE shows up like a real friend — not just answers, but presence.' },
+  { title: 'The Vision', text: 'A world where every student has a brilliant AI friend who wants them to win.' },
+  { title: 'The Promise', text: 'Free forever. No ads. No data selling. Built by a student for students.' },
 ];
 
 export default function AboutScreen() {
@@ -25,7 +26,7 @@ export default function AboutScreen() {
 
         <View style={styles.hero}>
           <HomieBot mood="celebrating" size={120}/>
-          <Text style={styles.heroTitle}>HOMIE AI 🤖</Text>
+          <Text style={styles.heroTitle}>HOMIE AI</Text>
           <Text style={styles.heroSub}>Not a tutor. Not a chatbot. Your actual AI best friend who explains anything and wants you to win.</Text>
           <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
             {[['100%','Free forever'],['12+','Features'],['∞','Questions'],['0','Boring lectures']].map(([n,l]) => (
@@ -38,9 +39,8 @@ export default function AboutScreen() {
         </View>
 
         <View style={{ padding: 16, gap: 12 }}>
-          {VALUES.map(({ icon, title, text }) => (
+          {VALUES.map(({ title, text }) => (
             <View key={title} style={styles.valueCard}>
-              <Text style={styles.valueIcon}>{icon}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={styles.valueTitle}>{title}</Text>
                 <Text style={styles.valueText}>{text}</Text>
@@ -50,24 +50,24 @@ export default function AboutScreen() {
 
           {/* Founder */}
           <View style={styles.founderCard}>
-            <Text style={styles.founderAvatar}>👨‍💻</Text>
+            <AvatarCircle name="Ilgiz Satkynov" color={Colors.purple} size={50} />
             <View style={{ flex: 1 }}>
               <Text style={styles.founderName}>Ilgiz Satkynov</Text>
               <Text style={styles.founderRole}>Founder & CEO</Text>
               <Text style={styles.founderBio}>18 y/o · De Anza College, Silicon Valley · SWE Intern @ Microsoft. Built HOMIE AI solo because every student deserves a brilliant study buddy.</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity onPress={() => Linking.openURL('https://www.linkedin.com/in/ilgizsatkynov/')} style={styles.linkBtn}>
-                  <Text style={styles.linkBtnText}>LinkedIn 💼</Text>
+                  <Text style={styles.linkBtnText}>LinkedIn</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => Linking.openURL('https://github.com/satkynovilgiz/HOMIE.AI')} style={styles.linkBtnSecondary}>
-                  <Text style={styles.linkBtnTextSecondary}>GitHub 🐙</Text>
+                  <Text style={styles.linkBtnTextSecondary}>GitHub</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
 
           <TouchableOpacity onPress={() => Linking.openURL('https://homieai-steel.vercel.app')} style={styles.webBtn}>
-            <Text style={styles.webBtnText}>🌐 Visit homieai-steel.vercel.app</Text>
+            <Text style={styles.webBtnText}>Visit homieai-steel.vercel.app</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.push('/legal/privacy')} style={styles.legalBtn}>
@@ -95,11 +95,9 @@ const styles = StyleSheet.create({
   statNum: { fontSize: 24, fontWeight: '900', color: Colors.purpleL },
   statLabel: { fontSize: 11, color: Colors.muted, marginTop: 2 },
   valueCard: { flexDirection: 'row', gap: 14, padding: 18, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border },
-  valueIcon: { fontSize: 32 },
   valueTitle: { fontSize: 15, fontWeight: '800', color: Colors.text, marginBottom: 5 },
   valueText: { fontSize: 13, color: Colors.muted, lineHeight: 20 },
   founderCard: { flexDirection: 'row', gap: 14, padding: 20, backgroundColor: Colors.bg3, borderRadius: Radius.xl, borderWidth: 1, borderColor: Colors.border },
-  founderAvatar: { fontSize: 50 },
   founderName: { fontSize: 18, fontWeight: '900', color: Colors.text },
   founderRole: { fontSize: 13, color: Colors.purpleL, fontWeight: '600', marginTop: 2, marginBottom: 8 },
   founderBio: { fontSize: 13, color: Colors.muted, lineHeight: 19 },

@@ -8,11 +8,13 @@ import { updateUser } from '../../store/slices/userSlice';
 import { signOutUser, updateUser as updateUserRemote } from '../../lib/authService';
 import { useDeleteAccount } from '../../hooks/useDeleteAccount';
 import { useTranslation } from '../../hooks/useTranslation';
-import { Colors, Radius } from '../../constants/theme';
-import { AVATARS } from '../../constants/subjects';
+import { Colors, Radius, AVATAR_COLORS } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import HomieBot from '../../components/mascot/HomieBot';
 import XPBar from '../../components/ui/XPBar';
 import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { ShareIcon } from '../../components/icons';
 
@@ -72,7 +74,7 @@ export default function ProfileScreen() {
   const streak = useSelector((s: RootState) => s.streak);
   const gems = useSelector((s: RootState) => s.gems.count);
   const [tab, setTab] = useState<'stats' | 'avatar'>('stats');
-  const [selAvatar, setSelAvatar] = useState(user?.avatar || '');
+  const [selAvatar, setSelAvatar] = useState(user?.avatar || AVATAR_COLORS[0].bg);
   const [editName, setEditName] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const { modalVisible, openModal, closeModal, confirmDelete, deleting } = useDeleteAccount();
@@ -120,12 +122,13 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         {/* Profile card */}
         <View style={styles.profileCard}>
           <View style={styles.avatarWrap}>
-            <HomieBot mood="happy" size={70} />
+            <HomieBot mood="happy" size={responsive.mascotSize.sm} />
             <View style={styles.avatarBadge}>
-              <Text style={styles.avatarEmoji}>{user.avatar || '?'}</Text>
+              <AvatarCircle name={user.name || '?'} color={user.avatar} size={24} />
             </View>
           </View>
 
@@ -196,14 +199,15 @@ export default function ProfileScreen() {
         {tab === 'avatar' && (
           <View style={styles.avatarPicker}>
             <Text style={styles.avatarPickerTitle}>{t('profile_choose_avatar')}</Text>
+            <View style={styles.avatarPreviewWrap}>
+              <AvatarCircle name={user.name || '?'} color={selAvatar} size={90} />
+            </View>
             <View style={styles.avatarGrid}>
-              {AVATARS.map(a => (
+              {AVATAR_COLORS.map(c => (
                 <TouchableOpacity
-                  key={a} onPress={() => setSelAvatar(a)}
-                  style={[styles.avatarOpt, selAvatar === a && styles.avatarOptSel]}
-                >
-                  <Text style={styles.avatarOptText}>{a}</Text>
-                </TouchableOpacity>
+                  key={c.id} onPress={() => setSelAvatar(c.bg)}
+                  style={[styles.colorBtn, { backgroundColor: c.bg }, selAvatar === c.bg && styles.colorSelected]}
+                />
               ))}
             </View>
             <TouchableOpacity onPress={saveAvatar} style={styles.saveAvatarBtn}>
@@ -237,6 +241,7 @@ export default function ProfileScreen() {
         </View>
 
         <View style={{ height: 40 }} />
+       </ContentWrapper>
       </ScrollView>
 
       <DeleteAccountModal
@@ -252,14 +257,13 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  headerTitle: { fontSize: 26, fontWeight: '900', color: Colors.text, flex: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: responsive.padding, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  headerTitle: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.text, flex: 1 },
   headerActions: { flexDirection: 'row', gap: 12 },
   iconBtn: { padding: 6 },
   profileCard: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 18, backgroundColor: Colors.bg2, borderRadius: Radius.xl, borderWidth: 1, borderColor: Colors.border, gap: 14 },
-  avatarWrap: { position: 'relative', width: 72, height: 80 },
-  avatarBadge: { position: 'absolute', bottom: 0, right: -4, width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.bg3, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
-  avatarEmoji: { fontSize: 16 },
+  avatarWrap: { position: 'relative', width: responsive.mascotSize.sm + 2, height: responsive.mascotSize.sm + 10 },
+  avatarBadge: { position: 'absolute', bottom: 0, right: -4, width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.bg3, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   profileInfo: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   profileName: { fontSize: 17, fontWeight: '900', color: Colors.text },
@@ -283,11 +287,11 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 22, fontWeight: '900', marginBottom: 4 },
   statLabel: { fontSize: 10, color: Colors.muted, textTransform: 'uppercase', letterSpacing: 0.5 },
   avatarPicker: { padding: 16 },
-  avatarPickerTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 14 },
-  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  avatarOpt: { width: 52, height: 52, borderRadius: 14, borderWidth: 2, borderColor: Colors.border, backgroundColor: Colors.bg3, alignItems: 'center', justifyContent: 'center' },
-  avatarOptSel: { borderColor: Colors.purpleL, backgroundColor: 'rgba(124,58,237,0.15)' },
-  avatarOptText: { fontSize: 26 },
+  avatarPickerTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 14, textAlign: 'center' },
+  avatarPreviewWrap: { alignItems: 'center', marginBottom: 20 },
+  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 20 },
+  colorBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: 'transparent' },
+  colorSelected: { borderColor: Colors.white, transform: [{ scale: 1.1 }] },
   saveAvatarBtn: { paddingVertical: 14, backgroundColor: Colors.purple, borderRadius: Radius.md, alignItems: 'center' },
   saveAvatarText: { color: 'white', fontWeight: '700', fontSize: 15 },
   inviteSection: { paddingHorizontal: 16, marginTop: 8 },

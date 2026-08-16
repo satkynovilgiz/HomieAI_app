@@ -16,7 +16,7 @@ export default function AchievementsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Achievements 🏆</Text>
+        <Text style={styles.title}>Achievements</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.progress}>
@@ -27,9 +27,9 @@ export default function AchievementsScreen() {
           <Text style={styles.progressPct}>{pct}%</Text>
         </View>
         <View style={{ padding:16, gap:10 }}>
-          <Text style={styles.sectionLabel}>✅ EARNED ({earned.length})</Text>
+          <Text style={styles.sectionLabel}>EARNED ({earned.length})</Text>
           {earned.map(a => <AchievementCard key={a.id} achievement={a}/>)}
-          <Text style={[styles.sectionLabel, { marginTop:16 }]}>🔒 LOCKED ({achievements.length - earned.length})</Text>
+          <Text style={[styles.sectionLabel, { marginTop:16 }]}>LOCKED ({achievements.length - earned.length})</Text>
           {achievements.filter(a => !a.earned).map(a => <AchievementCard key={a.id} achievement={a}/>)}
         </View>
       </ScrollView>

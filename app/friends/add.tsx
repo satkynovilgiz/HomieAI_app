@@ -6,12 +6,13 @@ import { router } from 'expo-router';
 import { useFriends } from '../../hooks/useFriends';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 const SUGGESTIONS = [
-  { id:'s1', name:'Alex P.', avatar:'🧑‍💻', xp:840, level:8, streak:5 },
-  { id:'s2', name:'Emma W.', avatar:'👩‍🎓', xp:1100, level:11, streak:12 },
-  { id:'s3', name:'Ryan M.', avatar:'🧑', xp:320, level:3, streak:1 },
-  { id:'s4', name:'Zoe K.', avatar:'👩', xp:590, level:5, streak:8 },
+  { id:'s1', name:'Alex P.', xp:840, level:8, streak:5 },
+  { id:'s2', name:'Emma W.', xp:1100, level:11, streak:12 },
+  { id:'s3', name:'Ryan M.', xp:320, level:3, streak:1 },
+  { id:'s4', name:'Zoe K.', xp:590, level:5, streak:8 },
 ];
 
 export default function AddFriendsScreen() {
@@ -30,7 +31,7 @@ export default function AddFriendsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Add Friends 👥</Text>
+        <Text style={styles.title}>Add Friends</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <TextInput
@@ -42,15 +43,15 @@ export default function AddFriendsScreen() {
         <Text style={styles.sectionLabel}>SUGGESTED FRIENDS</Text>
         {SUGGESTIONS.filter(s => s.name.toLowerCase().includes(search.toLowerCase())).map(s => (
           <View key={s.id} style={styles.suggestionCard}>
-            <Text style={styles.suggestionAvatar}>{s.avatar}</Text>
+            <AvatarCircle name={s.name} size={36} />
             <View style={{ flex:1 }}>
               <Text style={styles.suggestionName}>{s.name}</Text>
-              <Text style={styles.suggestionStats}>Lv.{s.level} · 🔥{s.streak} streak · ⭐{s.xp} XP</Text>
+              <Text style={styles.suggestionStats}>Lv.{s.level} · {s.streak} streak · {s.xp} XP</Text>
             </View>
             <TouchableOpacity
               onPress={() => handleAdd(s)} disabled={added.includes(s.id)}
               style={[styles.addBtn, added.includes(s.id) && styles.addBtnDone]}>
-              <Text style={styles.addBtnText}>{added.includes(s.id) ? '✓ added' : '+ add'}</Text>
+              <Text style={styles.addBtnText}>{added.includes(s.id) ? 'added' : '+ add'}</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -59,7 +60,7 @@ export default function AddFriendsScreen() {
           <Text style={styles.shareTitle}>invite your friends</Text>
           <Text style={styles.shareSub}>Share your code and study together</Text>
           <TouchableOpacity style={styles.shareBtn}>
-            <Text style={styles.shareBtnText}>📤 Share HOMIE AI</Text>
+            <Text style={styles.shareBtnText}>Share HOMIE AI</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

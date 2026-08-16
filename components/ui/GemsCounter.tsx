@@ -9,8 +9,7 @@ export default function GemsCounter({ onPress }: { onPress?: () => void }) {
   const { count } = useSelector((s: RootState) => s.gems);
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Text style={styles.icon}>💎</Text>
-      <Text style={styles.count}>{count.toLocaleString()}</Text>
+      <Text style={styles.count}>{count.toLocaleString()} gems</Text>
     </TouchableOpacity>
   );
 }

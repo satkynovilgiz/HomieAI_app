@@ -20,6 +20,19 @@ export const Colors = {
   white:   '#ffffff',
 };
 
+export const AVATAR_COLORS = [
+  { id: 'purple',  bg: '#7c3aed', label: 'Purple'  },
+  { id: 'blue',    bg: '#3b82f6', label: 'Blue'    },
+  { id: 'green',   bg: '#10b981', label: 'Green'   },
+  { id: 'orange',  bg: '#f97316', label: 'Orange'  },
+  { id: 'red',     bg: '#ef4444', label: 'Red'     },
+  { id: 'pink',    bg: '#ec4899', label: 'Pink'    },
+  { id: 'yellow',  bg: '#fbbf24', label: 'Yellow'  },
+  { id: 'teal',    bg: '#06b6d4', label: 'Teal'    },
+  { id: 'indigo',  bg: '#6366f1', label: 'Indigo'  },
+  { id: 'rose',    bg: '#f43f5e', label: 'Rose'    },
+];
+
 export const Fonts = {
   regular:   'Inter-Regular',
   medium:    'Inter-Medium',

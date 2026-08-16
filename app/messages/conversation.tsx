@@ -9,8 +9,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
 import MessageBubble from '../../components/messages/MessageBubble';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
-const QUICK_REPLIES = ['yo! 👋', 'fr fr 🔥', "let's study bro!", '💀', 'gg', 'nice streak!'];
+const QUICK_REPLIES = ['yo!', 'fr fr', "let's study bro!", 'lol', 'gg', 'nice streak!'];
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getConv, send, read } = useMessages();
@@ -34,7 +35,7 @@ export default function ConversationScreen() {
 
   const shareStreak = () => {
     const streak = user?.streak || 0;
-    send(id, `🔥 ${streak} day streak bro! Study with me!`, 'streak_share');
+    send(id, `${streak} day streak bro! Study with me!`, 'streak_share');
   };
 
   return (
@@ -44,13 +45,13 @@ export default function ConversationScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.avatar}>{conv.friendAvatar}</Text>
+        <AvatarCircle name={conv.friendName} size={34} />
         <View style={styles.headerInfo}>
           <Text style={styles.name}>{conv.friendName}</Text>
-          <Text style={styles.status}>🟢 online</Text>
+          <Text style={styles.status}>online</Text>
         </View>
         <TouchableOpacity onPress={shareStreak} style={styles.shareBtn}>
-          <Text style={styles.shareBtnText}>🔥 share</Text>
+          <Text style={styles.shareBtnText}>share</Text>
         </TouchableOpacity>
       </View>
 
@@ -63,7 +64,7 @@ export default function ConversationScreen() {
             <MessageBubble
               message={item}
               isMe={item.senderId === 'me'}
-              senderAvatar={item.senderId !== 'me' ? conv.friendAvatar : undefined}
+              senderName={item.senderId !== 'me' ? conv.friendName : undefined}
             />
           )}
           keyExtractor={m => m.id}

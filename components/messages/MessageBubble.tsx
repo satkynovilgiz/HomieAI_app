@@ -3,29 +3,27 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Radius } from '../../constants/theme';
 import { ChatMessage } from '../../store/slices/messagesSlice';
+import AvatarCircle from '../ui/AvatarCircle';
 
-interface Props { message: ChatMessage; isMe: boolean; senderAvatar?: string; }
+interface Props { message: ChatMessage; isMe: boolean; senderName?: string; }
 
-export default function MessageBubble({ message: m, isMe, senderAvatar }: Props) {
+export default function MessageBubble({ message: m, isMe, senderName }: Props) {
   const isSpecial = m.type !== 'text';
 
   if (isSpecial) {
     return (
       <View style={[styles.row, isMe && styles.rowMe]}>
-        {!isMe && <Text style={styles.avatar}>{senderAvatar || '🧑'}</Text>}
+        {!isMe && <AvatarCircle name={senderName || '?'} size={24} />}
         <View style={styles.specialCard}>
           {m.type === 'streak_share' && <>
-            <Text style={styles.specialIcon}>🔥</Text>
             <Text style={styles.specialTitle}>{m.payload?.streak} day streak!</Text>
             <Text style={styles.specialSub}>they're on fire bro</Text>
           </>}
           {m.type === 'xp_share' && <>
-            <Text style={styles.specialIcon}>⭐</Text>
             <Text style={styles.specialTitle}>+{m.payload?.xp} XP earned!</Text>
             <Text style={styles.specialSub}>challenge them back</Text>
           </>}
           {m.type === 'challenge' && <>
-            <Text style={styles.specialIcon}>⚔️</Text>
             <Text style={styles.specialTitle}>Study Challenge!</Text>
             <Text style={styles.specialSub}>{m.text}</Text>
           </>}
@@ -36,7 +34,7 @@ export default function MessageBubble({ message: m, isMe, senderAvatar }: Props)
 
   return (
     <View style={[styles.row, isMe && styles.rowMe]}>
-      {!isMe && <Text style={styles.avatar}>{senderAvatar || '🧑'}</Text>}
+      {!isMe && <AvatarCircle name={senderName || '?'} size={24} />}
       <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
         <Text style={[styles.text, isMe && styles.textMe]}>{m.text}</Text>
         <Text style={styles.time}>{new Date(m.timestamp).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</Text>

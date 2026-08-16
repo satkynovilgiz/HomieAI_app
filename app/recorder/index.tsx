@@ -268,7 +268,7 @@ export default function RecorderScreen() {
         <Text style={styles.title}>Lecture Recorder</Text>
         {screenState === 'idle' ? (
           <TouchableOpacity onPress={() => setShowSubjects(!showSubjects)} style={styles.subjBtn}>
-            <Text style={styles.subjBtnText}>{SUBJECTS.find(s => s.s === subject)?.e} {subject} ▾</Text>
+            <Text style={styles.subjBtnText}>{subject} ▾</Text>
           </TouchableOpacity>
         ) : screenState === 'recording' ? (
           <View style={styles.recordingBadge}>
@@ -285,7 +285,7 @@ export default function RecorderScreen() {
           {SUBJECTS.map(s => (
             <TouchableOpacity key={s.s} onPress={() => { setSubject(s.s); setShowSubjects(false); }}
               style={[styles.subjectChip, subject === s.s && styles.subjectChipActive]}>
-              <Text style={styles.subjectChipText}>{s.e} {s.s}</Text>
+              <Text style={styles.subjectChipText}>{s.s}</Text>
             </TouchableOpacity>
           ))}
         </View>

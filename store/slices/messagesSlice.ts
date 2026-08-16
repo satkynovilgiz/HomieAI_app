@@ -14,13 +14,13 @@ export interface Conversation {
 }
 
 const demoConvos: Conversation[] = [
-  { id:'u2', friendId:'u2', friendName:'Sarah K.', friendAvatar:'👩', lastMessage:'bro I got a 7 day streak!', lastTimestamp: Date.now()-300000, unread:2, messages:[
+  { id:'u2', friendId:'u2', friendName:'Sarah K.', friendAvatar:'#ec4899', lastMessage:'bro I got a 7 day streak!', lastTimestamp: Date.now()-300000, unread:2, messages:[
     { id:'m1', senderId:'u2', text:'yo did u do the math quiz?', timestamp:Date.now()-600000, read:true, type:'text' },
-    { id:'m2', senderId:'me', text:'yeah it was hard ngl 😅', timestamp:Date.now()-500000, read:true, type:'text' },
+    { id:'m2', senderId:'me', text:'yeah it was hard ngl', timestamp:Date.now()-500000, read:true, type:'text' },
     { id:'m3', senderId:'u2', text:'bro I got a 7 day streak!', timestamp:Date.now()-300000, read:false, type:'text' },
-    { id:'m4', senderId:'u2', text:'🔥🔥🔥', timestamp:Date.now()-280000, read:false, type:'streak_share', payload:{ streak:7 } },
+    { id:'m4', senderId:'u2', text:'7 day streak!', timestamp:Date.now()-280000, read:false, type:'streak_share', payload:{ streak:7 } },
   ]},
-  { id:'u3', friendId:'u3', friendName:'Marcus T.', friendAvatar:'🧑', lastMessage:'+50 XP challenge!', lastTimestamp: Date.now()-3600000, unread:1, messages:[
+  { id:'u3', friendId:'u3', friendName:'Marcus T.', friendAvatar:'#3b82f6', lastMessage:'+50 XP challenge!', lastTimestamp: Date.now()-3600000, unread:1, messages:[
     { id:'m5', senderId:'u3', text:'study battle? first to 500 XP wins', timestamp:Date.now()-7200000, read:true, type:'text' },
     { id:'m6', senderId:'me', text:'LETS GO', timestamp:Date.now()-7000000, read:true, type:'text' },
     { id:'m7', senderId:'u3', text:'+50 XP challenge!', timestamp:Date.now()-3600000, read:false, type:'xp_share', payload:{ xp:50 } },

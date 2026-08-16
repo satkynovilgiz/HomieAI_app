@@ -4,7 +4,7 @@ import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Colors, Radius } from '../../constants/theme';
 
 interface Props {
-  lesson: { id:string; title:string; emoji:string };
+  lesson: { id:string; title:string };
   progress: { completed:boolean; stars:number };
   onPress: () => void; index: number;
 }
@@ -15,7 +15,7 @@ export default function LessonNode({ lesson, progress, onPress, index }: Props) 
   return (
     <View style={[styles.wrapper, { marginLeft: 120 + offset }]}>
       <TouchableOpacity onPress={onPress} style={[styles.node, progress.completed && styles.nodeComplete]} activeOpacity={0.8}>
-        <Text style={styles.emoji}>{progress.completed ? lesson.emoji : '📖'}</Text>
+        <Text style={styles.emoji}>{progress.completed ? '✓' : lesson.title.charAt(0).toUpperCase()}</Text>
       </TouchableOpacity>
       {progress.completed && (
         <View style={styles.stars}>

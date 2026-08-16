@@ -8,6 +8,7 @@ import { RootState } from '../../store';
 import { getLeaderboard } from '../../lib/firestoreService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 export default function LeaderboardScreen() {
   const user = useSelector((s: RootState) => s.user.current);
@@ -15,7 +16,6 @@ export default function LeaderboardScreen() {
 
   useEffect(() => { getLeaderboard().then(setBoard); }, []);
 
-  const medals = ['🥇','🥈','🥉'];
   const myRank = board.findIndex(u => u.name === user?.name) + 1;
 
   return (
@@ -24,7 +24,7 @@ export default function LeaderboardScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Leaderboard 🏆</Text>
+        <Text style={styles.title}>Leaderboard</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{ alignItems: 'center', padding: 20, paddingBottom: 10 }}>
@@ -32,7 +32,7 @@ export default function LeaderboardScreen() {
           <Text style={styles.sub}>Top students by XP. Study more, climb higher!</Text>
           {myRank > 0 && (
             <View style={styles.rankBadge}>
-              <Text style={styles.rankText}>you're #{myRank} 🔥</Text>
+              <Text style={styles.rankText}>you're #{myRank}</Text>
             </View>
           )}
         </View>
@@ -42,15 +42,15 @@ export default function LeaderboardScreen() {
             <View style={{ alignItems: 'center', paddingVertical: 30 }}>
               <HomieBot mood="sad" size={80}/>
               <Text style={{ color: Colors.text, fontWeight: '700', fontSize: 16, marginTop: 12 }}>no students yet</Text>
-              <Text style={{ color: Colors.muted, marginTop: 6 }}>be the first to earn XP 🎯</Text>
+              <Text style={{ color: Colors.muted, marginTop: 6 }}>be the first to earn XP</Text>
             </View>
           ) : board.map((u, i) => (
             <View key={i} style={[styles.row, u.name === user?.name && styles.rowMe]}>
-              <Text style={styles.rank}>{i < 3 ? medals[i] : `#${i + 1}`}</Text>
-              <Text style={styles.avatar}>{u.avatar || '🧑'}</Text>
+              <Text style={styles.rank}>#{i + 1}</Text>
+              <AvatarCircle name={u.name || '?'} color={u.avatar} size={26} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{u.name}{u.name === user?.name ? ' (you)' : ''}</Text>
-                <Text style={styles.level}>Level {u.level} · 🔥{u.streak || 0} streak</Text>
+                <Text style={styles.level}>Level {u.level} · {u.streak || 0} day streak</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={styles.xp}>{u.xp}</Text>
@@ -61,7 +61,7 @@ export default function LeaderboardScreen() {
         </View>
 
         <View style={styles.tipBox}>
-          <Text style={styles.tipText}>💡 Earn XP by chatting, answering quizzes, and completing Pomodoro sessions!</Text>
+          <Text style={styles.tipText}>Earn XP by chatting, answering quizzes, and completing Pomodoro sessions!</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

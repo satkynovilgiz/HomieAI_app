@@ -16,14 +16,14 @@ import InAppBrowser from '../../components/ui/InAppBrowser';
 const YOUTUBE_API_KEY = 'AIzaSyCbq92JLyP5TGtI9bidgOaqOBtwHv-vXdg';
 
 const STUDY_SEARCHES = [
-  { label: 'Math', query: 'math tutorial for students', color: '#7c3aed', emoji: '📐' },
-  { label: 'Coding', query: 'learn programming beginners', color: '#10b981', emoji: '💻' },
-  { label: 'Science', query: 'science explained simply', color: '#f97316', emoji: '🔭' },
-  { label: 'History', query: 'world history explained', color: '#3b82f6', emoji: '🏛️' },
-  { label: 'Physics', query: 'physics concepts explained', color: '#8b5cf6', emoji: '⚛️' },
-  { label: 'Chemistry', query: 'chemistry basics tutorial', color: '#fbbf24', emoji: '🧪' },
-  { label: 'Biology', query: 'biology explained easy', color: '#34d399', emoji: '🧬' },
-  { label: 'Study Tips', query: 'how to study effectively', color: '#ec4899', emoji: '💡' },
+  { label: 'Math', query: 'math tutorial for students', color: '#7c3aed' },
+  { label: 'Coding', query: 'learn programming beginners', color: '#10b981' },
+  { label: 'Science', query: 'science explained simply', color: '#f97316' },
+  { label: 'History', query: 'world history explained', color: '#3b82f6' },
+  { label: 'Physics', query: 'physics concepts explained', color: '#8b5cf6' },
+  { label: 'Chemistry', query: 'chemistry basics tutorial', color: '#fbbf24' },
+  { label: 'Biology', query: 'biology explained easy', color: '#34d399' },
+  { label: 'Study Tips', query: 'how to study effectively', color: '#ec4899' },
 ];
 
 interface Video {
@@ -123,7 +123,7 @@ export default function VideosScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Video Library 🎬</Text>
+        <Text style={styles.title}>Video Library</Text>
       </View>
 
       <View style={styles.tabs}>
@@ -140,7 +140,6 @@ export default function VideosScreen() {
           {/* Search */}
           <View style={styles.searchRow}>
             <View style={styles.searchInputWrap}>
-              <Text style={styles.searchIcon}>🔍</Text>
               <TextInput
                 value={search} onChangeText={setSearch}
                 placeholder="search any topic..."
@@ -166,7 +165,6 @@ export default function VideosScreen() {
               <TouchableOpacity
                 onPress={() => { setCat(item); setSearch(''); }}
                 style={[styles.catChip, cat.label === item.label && { backgroundColor: item.color + '22', borderColor: item.color }]}>
-                <Text style={styles.catEmoji}>{item.emoji}</Text>
                 <Text style={[styles.catText, cat.label === item.label && { color: item.color, fontWeight: '700' }]}>{item.label}</Text>
               </TouchableOpacity>
             )}

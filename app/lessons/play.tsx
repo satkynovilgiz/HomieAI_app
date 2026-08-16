@@ -113,10 +113,10 @@ export default function LessonPlayScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.completeScreen}>
           <HomieBot mood="sad" size={140}/>
-          <Text style={styles.completeTitle}>out of hearts 💔</Text>
+          <Text style={styles.completeTitle}>out of hearts</Text>
           <Text style={styles.completeSub}>refill your hearts to keep going</Text>
           <TouchableOpacity onPress={() => router.push('/shop')} style={styles.doneBtn}>
-            <Text style={styles.doneBtnText}>go to shop 💎</Text>
+            <Text style={styles.doneBtnText}>go to shop</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.back()} style={[styles.doneBtn, { backgroundColor: Colors.bg3 }]}>
             <Text style={styles.doneBtnText}>back to lessons</Text>
@@ -132,18 +132,18 @@ export default function LessonPlayScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.completeScreen}>
           <HomieBot mood={stars===3?'celebrating':'happy'} size={140}/>
-          <Text style={styles.completeTitle}>{stars===3?'nailed it 🎉':stars===2?'solid 🔥':'you got through it 💪'}</Text>
+          <Text style={styles.completeTitle}>{stars===3?'nailed it':stars===2?'solid':'you got through it'}</Text>
           <Text style={styles.completeSub}>{lesson.title}, done</Text>
           <View style={styles.stars}>
             {[0,1,2].map(i => <Text key={i} style={[styles.starIcon, i < stars && styles.starActive]}>★</Text>)}
           </View>
           <View style={styles.rewards}>
-            <View style={styles.reward}><Text style={styles.rewardIcon}>⭐</Text><Text style={styles.rewardVal}>+{lesson.xp} XP</Text><Text style={styles.rewardLabel}>XP earned</Text></View>
-            <View style={styles.reward}><Text style={styles.rewardIcon}>💎</Text><Text style={styles.rewardVal}>+{Math.floor(lesson.xp/10)}</Text><Text style={styles.rewardLabel}>Gems</Text></View>
-            <View style={styles.reward}><Text style={styles.rewardIcon}>✅</Text><Text style={styles.rewardVal}>{correct}/{totalQ}</Text><Text style={styles.rewardLabel}>Correct</Text></View>
+            <View style={styles.reward}><Text style={styles.rewardVal}>+{lesson.xp} XP</Text><Text style={styles.rewardLabel}>XP earned</Text></View>
+            <View style={styles.reward}><Text style={styles.rewardVal}>+{Math.floor(lesson.xp/10)}</Text><Text style={styles.rewardLabel}>Gems</Text></View>
+            <View style={styles.reward}><Text style={styles.rewardVal}>{correct}/{totalQ}</Text><Text style={styles.rewardLabel}>Correct</Text></View>
           </View>
           <TouchableOpacity onPress={() => router.back()} style={styles.doneBtn}>
-            <Text style={styles.doneBtnText}>keep going 🚀</Text>
+            <Text style={styles.doneBtnText}>keep going</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -187,7 +187,6 @@ export default function LessonPlayScreen() {
       {/* Explanation */}
       {showExp && (
         <View style={[styles.expBox, { borderColor: selected===q.answer?Colors.green:Colors.red }]}>
-          <Text style={styles.expIcon}>{selected===q.answer?'🎉':'❌'}</Text>
           <View style={{ flex:1 }}>
             <Text style={[styles.expTitle, { color: selected===q.answer?Colors.green:Colors.red }]}>
               {selected===q.answer?'yeah exactly — +'+q.xp+' XP':'not quite — here\'s why'}

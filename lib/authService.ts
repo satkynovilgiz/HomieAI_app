@@ -13,6 +13,7 @@ import { auth } from './firebaseConfig';
 import * as firestoreService from './firestoreService';
 import store from '../store';
 import { setUser, clearUser } from '../store/slices/userSlice';
+import { AVATAR_COLORS } from '../constants/theme';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -154,7 +155,7 @@ export async function signInWithGoogle(): Promise<{ user?: User; err?: string }>
       user = await firestoreService.createUser(cred.user.uid, defaultUserData({
         name: cred.user.displayName || 'Student',
         email: cred.user.email || '',
-        avatar: '🧑',
+        avatar: AVATAR_COLORS[0].bg,
         provider: 'google',
       }));
     } else {

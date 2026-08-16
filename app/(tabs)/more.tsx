@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TranslationKey } from '../../constants/translations';
 import {
@@ -60,6 +62,7 @@ export default function MoreScreen() {
         <Text style={styles.title}>{t('more_title')}</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
         {SECTIONS.map(section => (
           <View key={section.titleKey} style={styles.section}>
             <Text style={styles.sectionLabel}>{t(section.titleKey)}</Text>
@@ -85,6 +88,7 @@ export default function MoreScreen() {
           </View>
         ))}
         <View style={{ height: 24 }} />
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );
@@ -92,9 +96,9 @@ export default function MoreScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  header: { padding: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  title: { fontSize: 26, fontWeight: '900', color: Colors.text },
-  content: { padding: 16 },
+  header: { padding: responsive.padding, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  title: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.text },
+  content: { padding: responsive.padding },
   section: { marginBottom: 20 },
   sectionLabel: { fontSize: 11, fontWeight: '700', color: Colors.muted, letterSpacing: 2, marginBottom: 10, paddingHorizontal: 4 },
   sectionCard: { backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, overflow: 'hidden' },

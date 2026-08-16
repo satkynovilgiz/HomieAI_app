@@ -6,6 +6,8 @@ import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import { xpProgress } from '../../lib/utils';
 import { checkInToday } from '../../store/slices/streakSlice';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -88,7 +90,8 @@ const QUICK_ACTION_ICONS: Record<string, React.ComponentType<{ color: string; si
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_SIZE = (SCREEN_WIDTH - 16 * 2 - 10 * 2) / 3;
+const ACTION_COLS = responsive.columns.actions;
+const CARD_SIZE = (Math.min(SCREEN_WIDTH, responsive.maxWidth) - responsive.padding * 2 - 10 * (ACTION_COLS - 1)) / ACTION_COLS;
 
 export default function HomeTab() {
   const dispatch = useDispatch();
@@ -145,13 +148,14 @@ export default function HomeTab() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+       <ContentWrapper>
         {/* Hero / greeting */}
         <LinearGradient
           colors={['#0d0b22', '#12102a']}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={styles.hero}
         >
-          <HomieBot mood={mood} size={80} />
+          <HomieBot mood={mood} size={responsive.mascotSize.sm} />
           <View style={styles.heroText}>
             <Text style={styles.heroGreeting}>{t(greetingKey)}</Text>
             <Text style={styles.heroName}>{firstName}</Text>
@@ -264,6 +268,7 @@ export default function HomeTab() {
           </View>
           <ArrowRightIcon color={Colors.purple} size={20} />
         </TouchableOpacity>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );
@@ -272,7 +277,7 @@ export default function HomeTab() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
 
-  topbar: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16 },
+  topbar: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: responsive.padding },
   streakPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(249,115,22,0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: 'rgba(249,115,22,0.4)' },
   streakPillText: { fontSize: 12, fontWeight: '700', color: Colors.orange },
   topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -282,21 +287,21 @@ const styles = StyleSheet.create({
   notifBadge: { position: 'absolute', top: -4, right: -4, width: 14, height: 14, borderRadius: 7, backgroundColor: Colors.red, alignItems: 'center', justifyContent: 'center' },
   notifBadgeText: { fontSize: 8, fontWeight: '900', color: 'white' },
 
-  hero: { flexDirection: 'row', gap: 16, marginHorizontal: 16, padding: 20, borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)' },
+  hero: { flexDirection: 'row', gap: 16, marginHorizontal: responsive.padding, padding: 20, borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)' },
   heroText: { flex: 1, justifyContent: 'center' },
-  heroGreeting: { fontSize: 13, color: Colors.muted },
-  heroName: { fontSize: 22, fontWeight: '900', color: Colors.text, marginTop: 1 },
+  heroGreeting: { fontSize: responsive.fontSize.sm, color: Colors.muted },
+  heroName: { fontSize: responsive.fontSize.xxl, fontWeight: '900', color: Colors.text, marginTop: 1 },
   heroSub: { fontSize: 13, color: Colors.muted, marginTop: 2, marginBottom: 10 },
   heroXpTrack: { height: 6, borderRadius: 3, backgroundColor: Colors.bg4, overflow: 'hidden' },
   heroXpFill: { height: '100%', borderRadius: 3, backgroundColor: Colors.purple },
   heroXpLabel: { fontSize: 10, color: Colors.muted, marginTop: 5, alignSelf: 'flex-end' },
 
-  statsRow: { flexDirection: 'row', gap: 8, marginHorizontal: 16 },
+  statsRow: { flexDirection: 'row', gap: 8, marginHorizontal: responsive.padding },
   statCard: { flex: 1, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: Radius.md, padding: 12, alignItems: 'center' },
   statValue: { fontSize: 22, fontWeight: '900', marginBottom: 4 },
   statLabel: { fontSize: 9, color: Colors.muted, letterSpacing: 1.5 },
 
-  streakBanner: { marginHorizontal: 16, padding: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: 'rgba(249,115,22,0.06)', borderWidth: 1, borderColor: 'rgba(249,115,22,0.2)', borderLeftWidth: 3, borderLeftColor: Colors.orange },
+  streakBanner: { marginHorizontal: responsive.padding, padding: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: 'rgba(249,115,22,0.06)', borderWidth: 1, borderColor: 'rgba(249,115,22,0.2)', borderLeftWidth: 3, borderLeftColor: Colors.orange },
   streakBannerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   streakBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   streakBannerTitle: { fontSize: 15, fontWeight: '800', color: Colors.orange },
@@ -308,7 +313,7 @@ const styles = StyleSheet.create({
   dayDotToday: { borderColor: Colors.orange, borderWidth: 2, backgroundColor: 'transparent' },
   dayLabel: { fontSize: 9, color: Colors.muted, fontWeight: '700' },
 
-  questCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, padding: 14, paddingHorizontal: 16, backgroundColor: Colors.bg3, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)', borderLeftWidth: 3, borderLeftColor: Colors.purple, gap: 12 },
+  questCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: responsive.padding, padding: 14, paddingHorizontal: 16, backgroundColor: Colors.bg3, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(167,139,250,0.15)', borderLeftWidth: 3, borderLeftColor: Colors.purple, gap: 12 },
   questDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.purple },
   questTitle: { fontSize: 14, fontWeight: '800', color: Colors.text },
   questSub: { fontSize: 12, color: Colors.muted, marginTop: 2 },
@@ -316,12 +321,12 @@ const styles = StyleSheet.create({
   questBtnText: { color: Colors.white, fontWeight: '800', fontSize: 14 },
 
   sectionTitle: { fontSize: 11, fontWeight: '700', color: Colors.muted, marginLeft: 20, marginBottom: 12, letterSpacing: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 10 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: responsive.padding, gap: 10 },
   actionCard: { width: CARD_SIZE, height: CARD_SIZE, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: 'rgba(167,139,250,0.12)', borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 10 },
   actionIconWrap: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   actionLabel: { fontSize: 13, fontWeight: '700', color: Colors.white },
 
-  ctaBanner: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, backgroundColor: 'rgba(124,58,237,0.1)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', gap: 12 },
+  ctaBanner: { flexDirection: 'row', alignItems: 'center', margin: responsive.padding, padding: 16, backgroundColor: 'rgba(124,58,237,0.1)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', gap: 12 },
   ctaTitle: { fontSize: 16, fontWeight: '900', color: Colors.text },
   ctaSub: { fontSize: 13, color: Colors.muted, marginTop: 2 },
 });

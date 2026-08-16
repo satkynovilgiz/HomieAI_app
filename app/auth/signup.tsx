@@ -4,11 +4,12 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signUpWithEmail, signInWithGoogle, isGoogleSignInSupported } from '../../lib/authService';
 import { useTranslation } from '../../hooks/useTranslation';
-import { Colors, Radius } from '../../constants/theme';
-import { AVATARS } from '../../constants/subjects';
+import { Colors, Radius, AVATAR_COLORS } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 import { GoogleIcon } from '../../components/icons';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,7 +18,7 @@ const GOOGLE_AVAILABLE = isGoogleSignInSupported();
 export default function SignupScreen() {
   const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', email: '', pass: '', pass2: '' });
-  const [avatar, setAvatar] = useState('🧑');
+  const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0].bg);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,9 +61,9 @@ export default function SignupScreen() {
     try {
       const email = form.email.toLowerCase().trim();
       const name = form.name.trim();
-      const { user, err } = await signUpWithEmail(name, email, form.pass, avatar);
+      const { user, err } = await signUpWithEmail(name, email, form.pass, avatarColor);
       if (err) { setError(err); return; }
-      if (user) { router.push({ pathname: '/auth/verify', params: { email, name } }); }
+      if (user) { router.push({ pathname: '/auth/language', params: { email, name } }); }
     } catch (e: any) {
       setError('something broke — try again');
     } finally {
@@ -74,7 +75,7 @@ export default function SignupScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <HomieBot mood="wink" size={80} />
+          <HomieBot mood="wink" size={responsive.mascotSize.sm} />
           <Text style={styles.title}>{t('signup_title')}</Text>
           <Text style={styles.sub}>{t('signup_sub')}</Text>
         </View>
@@ -100,13 +101,22 @@ export default function SignupScreen() {
           <Input label={t('signup_password')} placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry />
           <Input label={t('signup_confirm')} placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry />
 
+          <View style={styles.avatarPreview}>
+            <AvatarCircle name={form.name || '?'} color={avatarColor} size={90} />
+          </View>
+
           <Text style={styles.avatarLabel}>{t('signup_avatar')}</Text>
-          <View style={styles.avatarGrid}>
-            {AVATARS.map(a => (
-              <TouchableOpacity key={a} onPress={() => setAvatar(a)}
-                style={[styles.avatarBtn, avatar === a && styles.avatarSelected]}>
-                <Text style={styles.avatarEmoji}>{a}</Text>
-              </TouchableOpacity>
+          <View style={styles.colorGrid}>
+            {AVATAR_COLORS.map(c => (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => setAvatarColor(c.bg)}
+                style={[
+                  styles.colorBtn,
+                  { backgroundColor: c.bg },
+                  avatarColor === c.bg && styles.colorSelected,
+                ]}
+              />
             ))}
           </View>
 
@@ -136,11 +146,11 @@ export default function SignupScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  content: { padding: 24, paddingTop: 60, alignItems: 'center' },
+  content: { padding: responsive.padding, paddingTop: 60, alignItems: 'center' },
   header: { alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 28, fontWeight: '900', color: Colors.text, marginTop: 16 },
-  sub: { fontSize: 14, color: Colors.muted, marginTop: 6 },
-  card: { width: '100%', backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
+  title: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.text, marginTop: 16 },
+  sub: { fontSize: responsive.fontSize.md, color: Colors.muted, marginTop: 6 },
+  card: { width: '100%', maxWidth: responsive.maxWidth, backgroundColor: Colors.bg2, borderRadius: Radius.xl, padding: 24, borderWidth: 1, borderColor: Colors.border },
   googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white', height: 52, borderRadius: 14, marginBottom: 20 },
   googleBtnDisabled: { opacity: 0.55, marginBottom: 8 },
   googleText: { fontSize: 15, fontWeight: '700', color: '#1a1a2e' },
@@ -149,11 +159,11 @@ const styles = StyleSheet.create({
   divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
   divText: { fontSize: 12, color: Colors.muted },
   error: { color: Colors.red, fontSize: 13, marginBottom: 12, textAlign: 'center' },
-  avatarLabel: { fontSize: 12, fontWeight: '600', color: Colors.text2, marginBottom: 10, marginTop: 4 },
-  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  avatarBtn: { width: 52, height: 52, borderRadius: 12, borderWidth: 2, borderColor: Colors.border, backgroundColor: Colors.bg3, alignItems: 'center', justifyContent: 'center' },
-  avatarSelected: { borderColor: Colors.purple, backgroundColor: 'rgba(124,58,237,0.15)' },
-  avatarEmoji: { fontSize: 24 },
+  avatarPreview: { alignItems: 'center', marginBottom: 20 },
+  avatarLabel: { fontSize: 12, fontWeight: '600', color: Colors.text2, marginBottom: 10, marginTop: 4, textAlign: 'center' },
+  colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 4 },
+  colorBtn: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: 'transparent' },
+  colorSelected: { borderColor: Colors.white, transform: [{ scale: 1.1 }] },
   submitBtn: { height: 52, borderRadius: 14, marginTop: 16 },
   loginLink: { alignItems: 'center', marginTop: 16 },
   loginText: { fontSize: 13, color: Colors.muted },

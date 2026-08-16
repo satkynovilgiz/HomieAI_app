@@ -15,7 +15,7 @@ export default function MessagesScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Messages 💬</Text>
+        <Text style={styles.title}>Messages</Text>
         {totalUnread > 0 && (
           <View style={styles.badge}><Text style={styles.badgeText}>{totalUnread}</Text></View>
         )}
@@ -23,7 +23,6 @@ export default function MessagesScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {conversations.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>💬</Text>
             <Text style={styles.emptyTitle}>nothing here yet</Text>
             <Text style={styles.emptySub}>add friends and say hi</Text>
           </View>

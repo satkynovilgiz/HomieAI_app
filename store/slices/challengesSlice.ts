@@ -10,8 +10,8 @@ export interface Challenge {
 }
 
 const demoChallenges: Challenge[] = [
-  { id:'c1', fromId:'u2', fromName:'Sarah K.', fromAvatar:'👩', type:'xp_race', target:500, myProgress:120, theirProgress:280, status:'active', expiresAt: Date.now()+86400000, xpReward:100 },
-  { id:'c2', fromId:'u3', fromName:'Marcus T.', fromAvatar:'🧑', type:'quiz_battle', target:10, myProgress:0, theirProgress:0, status:'pending', expiresAt: Date.now()+172800000, xpReward:150 },
+  { id:'c1', fromId:'u2', fromName:'Sarah K.', fromAvatar:'#ec4899', type:'xp_race', target:500, myProgress:120, theirProgress:280, status:'active', expiresAt: Date.now()+86400000, xpReward:100 },
+  { id:'c2', fromId:'u3', fromName:'Marcus T.', fromAvatar:'#3b82f6', type:'quiz_battle', target:10, myProgress:0, theirProgress:0, status:'pending', expiresAt: Date.now()+172800000, xpReward:150 },
 ];
 
 const challengesSlice = createSlice({

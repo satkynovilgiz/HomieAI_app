@@ -9,10 +9,10 @@ export interface Friend {
 }
 
 const DEMO_FRIENDS: Friend[] = [
-  { id:'u2', name:'Sarah K.', avatar:'👩', xp:1240, level:12, streak:15, status:'studying', isChallengeable:true },
-  { id:'u3', name:'Marcus T.', avatar:'🧑', xp:980, level:9, streak:7, status:'online', isChallengeable:true },
-  { id:'u4', name:'Priya R.', avatar:'👩‍💻', xp:720, level:7, streak:4, status:'offline', isChallengeable:false },
-  { id:'u5', name:'James L.', avatar:'🧑‍🎓', xp:430, level:4, streak:2, status:'online', isChallengeable:true },
+  { id:'u2', name:'Sarah K.', avatar:'#ec4899', xp:1240, level:12, streak:15, status:'studying', isChallengeable:true },
+  { id:'u3', name:'Marcus T.', avatar:'#3b82f6', xp:980, level:9, streak:7, status:'online', isChallengeable:true },
+  { id:'u4', name:'Priya R.', avatar:'#10b981', xp:720, level:7, streak:4, status:'offline', isChallengeable:false },
+  { id:'u5', name:'James L.', avatar:'#f97316', xp:430, level:4, streak:2, status:'online', isChallengeable:true },
 ];
 
 const friendsSlice = createSlice({

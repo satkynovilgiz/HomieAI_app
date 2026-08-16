@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 import { generateCode, storeCode, sendVerificationEmail, verifyCode, clearVerificationCode } from '../../lib/emailService';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import HomieBot from '../../components/mascot/HomieBot';
 
 const CODE_LENGTH = 6;
@@ -169,7 +170,7 @@ export default function VerifyScreen() {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <HomieBot mood={mood} size={90} />
+        <HomieBot mood={mood} size={responsive.mascotSize.sm} />
         <Text style={styles.title}>{getEmailProvider(email || '')}</Text>
         <Text style={styles.desc}>We sent a 6-digit code to</Text>
 
@@ -275,8 +276,8 @@ export default function VerifyScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
   backBtn: { position: 'absolute', top: 16, left: 16, zIndex: 1, padding: 4 },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
-  title: { fontSize: 28, fontWeight: '900', color: Colors.white, marginTop: 16, textAlign: 'center' },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
+  title: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.white, marginTop: 16, textAlign: 'center' },
   desc: { fontSize: 14, color: '#9090c0', textAlign: 'center', marginTop: 6 },
   emailCard: { backgroundColor: '#12102a', borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, marginVertical: 16, alignSelf: 'stretch' },
   emailText: { color: '#a78bfa', fontSize: 14, fontWeight: '700', textAlign: 'center' },

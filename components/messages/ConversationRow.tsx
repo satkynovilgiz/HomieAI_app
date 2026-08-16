@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Radius } from '../../constants/theme';
 import { Conversation } from '../../store/slices/messagesSlice';
 import { timeAgo } from '../../lib/utils';
+import AvatarCircle from '../ui/AvatarCircle';
 
 interface Props { conversation: Conversation; onPress: () => void; }
 
@@ -11,7 +12,7 @@ export default function ConversationRow({ conversation: c, onPress }: Props) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.row} activeOpacity={0.8}>
       <View style={styles.avatar}>
-        <Text style={styles.avatarEmoji}>{c.friendAvatar}</Text>
+        <AvatarCircle name={c.friendName} size={38} />
         <View style={styles.onlineDot}/>
       </View>
       <View style={styles.info}>

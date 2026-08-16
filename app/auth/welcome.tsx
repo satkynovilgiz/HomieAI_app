@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path } from 'react-native-svg';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import { addXP, setUser } from '../../store/slices/userSlice';
 import { unlock } from '../../store/slices/achievementsSlice';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -50,6 +51,50 @@ const FLOAT_STARS = [
   { size: 16, top: 100, left: '85%', delay: 150 },
   { size: 12, top: 60, left: '5%', delay: 450 },
 ] as const;
+
+const { height: SCREEN_H } = Dimensions.get('window');
+
+const CONFETTI_COLORS = [Colors.purple, Colors.blue, Colors.green, Colors.yellow, Colors.pink, Colors.orange];
+
+const CONFETTI_PIECES = Array.from({ length: 26 }).map((_, i) => ({
+  left: `${(i * 41) % 100}%`,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  delay: (i % 9) * 140,
+  size: 6 + (i % 3) * 3,
+  duration: 2600 + (i % 5) * 260,
+}));
+
+function ConfettiPiece({ color, left, delay, size, duration }: { color: string; left: string; delay: number; size: number; duration: number }) {
+  const translateY = useRef(new Animated.Value(-20)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(translateY, { toValue: SCREEN_H + 40, duration, delay, useNativeDriver: true }),
+      Animated.timing(rotate, { toValue: 1, duration, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const spin = rotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '540deg'] });
+
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute', top: 0, left: left as any,
+        width: size, height: size * 0.4, borderRadius: 2, backgroundColor: color,
+        transform: [{ translateY }, { rotate: spin }],
+      }}
+    />
+  );
+}
+
+function Confetti() {
+  return (
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+      {CONFETTI_PIECES.map((p, i) => <ConfettiPiece key={i} {...p} />)}
+    </View>
+  );
+}
 
 function TypingDots() {
   const anims = useRef([0, 1, 2].map(() => new Animated.Value(0))).current;
@@ -97,9 +142,10 @@ export default function WelcomeScreen() {
 
     setVisibleMsgs(1);
     setTyping(true);
-    const t1 = setTimeout(() => { setTyping(false); setVisibleMsgs(2); setTyping(true); }, 1500);
-    const t2 = setTimeout(() => { setTyping(false); setVisibleMsgs(3); }, 1500 + 2000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t1 = setTimeout(() => { setTyping(false); setVisibleMsgs(2); setTyping(true); }, 2000);
+    const t2 = setTimeout(() => { setTyping(false); setVisibleMsgs(3); setTyping(true); }, 4000);
+    const t3 = setTimeout(() => { setTyping(false); setVisibleMsgs(4); }, 6500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   if (!user) return null;
@@ -111,7 +157,8 @@ export default function WelcomeScreen() {
   const messages = [
     `${heyWord} ${firstName}! ${t('welcome_msg1')} 😤`,
     t('welcome_msg2'),
-    `${t('welcome_msg3')} 🔥`,
+    `${t('welcome_msg3')} 💪`,
+    `${t('welcome_msg4')} 🔥`,
   ];
 
   const goToHome = async () => {
@@ -122,12 +169,13 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <Confetti />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.hero}>
           {FLOAT_STARS.map((s, i) => (
             <FloatingStar key={i} size={s.size} delay={s.delay} style={{ position: 'absolute', top: s.top, left: s.left as any }} />
           ))}
-          <HomieBot mood="celebrating" size={120} />
+          <HomieBot mood="celebrating" size={responsive.mascotSize.lg} />
           <Text style={styles.title}>{t('welcome_title')}</Text>
           <Text style={styles.sub}>{heyCapitalized} {firstName}, {t('welcome_sub')}</Text>
 
@@ -169,11 +217,18 @@ export default function WelcomeScreen() {
                   <Text style={styles.bubbleText}>{messages[2]}</Text>
                 </View>
               )}
+              {visibleMsgs === 3 && typing && <TypingDots />}
+
+              {visibleMsgs >= 4 && (
+                <View style={styles.bubble}>
+                  <Text style={styles.bubbleText}>{messages[3]}</Text>
+                </View>
+              )}
             </View>
           </View>
         </View>
 
-        {visibleMsgs >= 3 && (
+        {visibleMsgs >= 4 && (
           <TouchableOpacity style={styles.goBtn} onPress={goToHome} activeOpacity={0.9}>
             <Text style={styles.goBtnText}>{t('welcome_btn')}</Text>
           </TouchableOpacity>
@@ -185,9 +240,9 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  content: { paddingBottom: 40, alignItems: 'center' },
+  content: { paddingBottom: 40, alignItems: 'center', width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
   hero: { alignItems: 'center', paddingTop: 24, paddingHorizontal: 24, width: '100%' },
-  title: { fontSize: 32, fontWeight: '900', color: Colors.white, marginTop: 16, textAlign: 'center' },
+  title: { fontSize: responsive.fontSize.title, fontWeight: '900', color: Colors.white, marginTop: 16, textAlign: 'center' },
   sub: { fontSize: 16, color: '#9090c0', marginTop: 6, textAlign: 'center' },
   pillRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   xpPill: { backgroundColor: 'rgba(251,191,36,0.15)', borderWidth: 1, borderColor: 'rgba(251,191,36,0.3)', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16 },

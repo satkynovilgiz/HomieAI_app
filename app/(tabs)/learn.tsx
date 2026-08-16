@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import { MATH_UNITS } from '../../constants/lessons/mathLessons';
 import { CODING_UNITS } from '../../constants/lessons/codingLessons';
 import { SCIENCE_UNITS } from '../../constants/lessons/scienceLessons';
@@ -38,6 +40,7 @@ export default function LearnTab() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <StreakBanner onPress={() => router.push('/streak')}/>
 
         {/* Daily Quest */}
@@ -66,6 +69,7 @@ export default function LearnTab() {
         </View>
 
         <View style={{ height: 24 }}/>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );
@@ -73,8 +77,8 @@ export default function LearnTab() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  logo: { fontSize: 20, fontWeight: '900', color: Colors.text },
+  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: responsive.padding, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  logo: { fontSize: responsive.fontSize.xxl, fontWeight: '900', color: Colors.text },
   topRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   questCard: { margin: 16, padding: 16, backgroundColor: 'rgba(124,58,237,0.08)', borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)' },
   questTitle: { fontSize: 15, fontWeight: '800', color: Colors.text, marginBottom: 4 },
@@ -83,6 +87,6 @@ const styles = StyleSheet.create({
   questTrack: { flex: 1, height: 8, backgroundColor: Colors.bg4, borderRadius: 4, overflow: 'hidden' },
   questFill: { height: '100%', backgroundColor: Colors.purple, borderRadius: 4 },
   questCount: { fontSize: 12, color: Colors.muted, fontWeight: '600' },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.muted, paddingHorizontal: 16, marginBottom: 12 },
-  units: { paddingHorizontal: 16, gap: 12 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.muted, paddingHorizontal: responsive.padding, marginBottom: 12 },
+  units: { paddingHorizontal: responsive.padding, gap: 12 },
 });

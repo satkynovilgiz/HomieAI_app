@@ -10,6 +10,7 @@ import ChallengeCard from '../../components/features/ChallengeCard';
 import { useChallenges } from '../../hooks/useChallenges';
 import { Friend } from '../../store/slices/friendsSlice';
 import { ensureConversation } from '../../store/slices/messagesSlice';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 export default function FriendsTab() {
   const dispatch = useDispatch();
@@ -99,8 +100,8 @@ export default function FriendsTab() {
             <Text style={styles.leaderboardSub}>Top studiers this week</Text>
             {leaderboard.map((f, i) => (
               <View key={f.id} style={[styles.rankRow, i === 0 && styles.rankRow1, i === 1 && styles.rankRow2, i === 2 && styles.rankRow3]}>
-                <Text style={styles.rankNum}>{['🥇','🥈','🥉'][i] || `#${i+1}`}</Text>
-                <Text style={styles.rankAvatar}>{f.avatar}</Text>
+                <Text style={styles.rankNum}>{`#${i+1}`}</Text>
+                <AvatarCircle name={f.name} color={f.avatar} size={28} />
                 <View style={styles.rankInfo}>
                   <Text style={styles.rankName}>{f.name}</Text>
                   <Text style={styles.rankStreak}>{f.streak} day streak</Text>

@@ -14,7 +14,10 @@ import { signOutUser } from '../../lib/authService';
 import { useDeleteAccount } from '../../hooks/useDeleteAccount';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 
 const LANGUAGES: { code: Language; flag: string; name: string; native: string }[] = [
   { code: 'en', flag: '🇺🇸', name: 'English', native: 'English' },
@@ -71,11 +74,12 @@ export default function SettingsScreen() {
         <Text style={styles.title}>{t('settings_title')}</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
 
         <Text style={styles.sectionLabel}>{t('settings_account')}</Text>
         <View style={styles.section}>
           <View style={styles.accountRow}>
-            <Text style={styles.avatar}>{user?.avatar || '🧑'}</Text>
+            <AvatarCircle name={user?.name || '?'} color={user?.avatar} size={40} />
             <View>
               <Text style={styles.accountName}>{user?.name}</Text>
               <Text style={styles.accountEmail}>{user?.email}</Text>
@@ -175,6 +179,7 @@ export default function SettingsScreen() {
           <Text style={styles.logoutText}>{t('settings_signout')}</Text>
         </TouchableOpacity>
         <View style={{ height:40 }}/>
+       </ContentWrapper>
       </ScrollView>
 
       <DeleteAccountModal
@@ -190,11 +195,11 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex:1, backgroundColor:Colors.bg },
-  header: { flexDirection:'row', alignItems:'center', padding:16, gap:12 },
+  header: { flexDirection:'row', alignItems:'center', padding:responsive.padding, gap:12 },
   back: { padding:4 },
   backArrow: { fontSize:24, color:Colors.text },
-  title: { fontSize:22, fontWeight:'900', color:Colors.text },
-  content: { padding:16 },
+  title: { fontSize:responsive.fontSize.xxl, fontWeight:'900', color:Colors.text },
+  content: { padding:responsive.padding },
   sectionLabel: { fontSize:10, fontWeight:'700', color:Colors.muted, letterSpacing:2, marginBottom:8, marginTop:16 },
   section: { backgroundColor:Colors.bg2, borderRadius:Radius.lg, borderWidth:1, borderColor:Colors.border, overflow:'hidden' },
   accountRow: { flexDirection:'row', alignItems:'center', gap:12, padding:16, borderBottomWidth:1, borderBottomColor:Colors.border },

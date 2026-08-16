@@ -55,9 +55,8 @@ export default function HistoryScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.statsRow}>
-          {[['📚', history.length, 'Sessions'],['⭐', history.reduce((a,h) => a + (h.xp_earned||0), 0), 'XP Earned'],['⏱️', `${Math.round((user?.studyHours||0)*10)/10}h`, 'Hours']].map(([icon,val,label]) => (
+          {[[history.length, 'Sessions'],[history.reduce((a,h) => a + (h.xp_earned||0), 0), 'XP Earned'],[`${Math.round((user?.studyHours||0)*10)/10}h`, 'Hours']].map(([val,label]) => (
             <View key={label as string} style={styles.statBox}>
-              <Text style={styles.statIcon}>{icon as string}</Text>
               <Text style={styles.statValue}>{String(val)}</Text>
               <Text style={styles.statLabel}>{label as string}</Text>
             </View>

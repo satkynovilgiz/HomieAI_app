@@ -15,7 +15,7 @@ export default function VideoCard({ video, onPress }: Props) {
         </View>
       </View>
       <View style={styles.info}>
-        <Text style={styles.badge}>📺 watch this bro</Text>
+        <Text style={styles.badge}>watch this bro</Text>
         <Text style={styles.title} numberOfLines={2}>{video.title}</Text>
         <Text style={styles.ch}>{video.ch}</Text>
       </View>

@@ -36,7 +36,7 @@ export default function EssayScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Essay Writer ✍️</Text>
+          <Text style={styles.title}>Essay Writer</Text>
         </View>
 
         <View style={{ alignItems: 'center', paddingVertical: 16 }}>
@@ -83,17 +83,17 @@ export default function EssayScreen() {
 
           <TouchableOpacity onPress={generate} disabled={loading || !topic.trim()}
             style={[styles.generateBtn, (loading || !topic.trim()) && styles.generateBtnDisabled]}>
-            <Text style={styles.generateBtnText}>{loading ? 'hold on...' : '✍️ generate essay'}</Text>
+            <Text style={styles.generateBtnText}>{loading ? 'hold on...' : 'generate essay'}</Text>
           </TouchableOpacity>
 
           {result !== '' && (
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>✅ your essay</Text>
+                <Text style={styles.resultTitle}>your essay</Text>
               </View>
               <Text style={styles.resultText}>{result}</Text>
               <View style={styles.warningBox}>
-                <Text style={styles.warningText}>💡 always edit AI essays — add your own voice bro</Text>
+                <Text style={styles.warningText}>always edit AI essays — add your own voice bro</Text>
               </View>
             </View>
           )}

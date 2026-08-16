@@ -5,6 +5,8 @@ import { router } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import { SUBJECTS } from '../../constants/subjects';
 
 interface GameDef {
@@ -52,7 +54,7 @@ export default function GamesScreen() {
       </View>
 
       <TouchableOpacity onPress={() => setShowSubjects(!showSubjects)} style={styles.subjectPickerBtn}>
-        <Text style={styles.subjectPickerText}>{SUBJECTS.find(s => s.s === subject)?.e} {subject}</Text>
+        <Text style={styles.subjectPickerText}>{subject}</Text>
         <Text style={styles.subjectPickerCaret}>{showSubjects ? '▴' : '▾'}</Text>
       </TouchableOpacity>
 
@@ -61,13 +63,15 @@ export default function GamesScreen() {
           {SUBJECTS.map(s => (
             <TouchableOpacity key={s.s} onPress={() => { setSubject(s.s); setShowSubjects(false); }}
               style={[styles.subjectChip, subject === s.s && styles.subjectChipActive]}>
-              <Text style={styles.subjectChipText}>{s.e} {s.s}</Text>
+              <Text style={styles.subjectChipText}>{s.s}</Text>
             </TouchableOpacity>
           ))}
         </View>
       )}
 
-      <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
+        <View style={styles.grid}>
         {visibleGames.map(g => (
           <View key={g.id} style={[styles.card, { borderColor: g.color + '44' }]}>
             <View style={[styles.iconDot, { backgroundColor: g.color + '22' }]}>
@@ -87,6 +91,8 @@ export default function GamesScreen() {
             </TouchableOpacity>
           </View>
         ))}
+        </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );
@@ -94,10 +100,10 @@ export default function GamesScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingBottom: 10, gap: 10 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: responsive.padding, paddingBottom: 10, gap: 10 },
   backBtn: { padding: 4 },
   backArrow: { fontSize: 24, color: Colors.text },
-  title: { fontSize: 22, fontWeight: '900', color: Colors.text, flex: 1 },
+  title: { fontSize: responsive.fontSize.xxl, fontWeight: '900', color: Colors.text, flex: 1 },
   bestStat: { alignItems: 'flex-end' },
   bestStatLabel: { fontSize: 10, color: Colors.muted, textTransform: 'uppercase' },
   bestStatValue: { fontSize: 16, fontWeight: '900', color: Colors.purpleL },
@@ -109,7 +115,7 @@ const styles = StyleSheet.create({
   subjectChipActive: { backgroundColor: 'rgba(124,58,237,0.2)', borderColor: Colors.purpleL },
   subjectChipText: { fontSize: 12, color: Colors.text },
   grid: { flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 12, paddingBottom: 40 },
-  card: { width: '46.5%', backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, padding: 14, gap: 6 },
+  card: { width: responsive.isTablet ? '31%' : '46.5%', backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, padding: 14, gap: 6 },
   iconDot: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   iconInner: { width: 16, height: 16, borderRadius: 5 },
   cardTitle: { fontSize: 14, fontWeight: '800', color: Colors.text },

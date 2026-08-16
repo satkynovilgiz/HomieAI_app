@@ -23,9 +23,11 @@ import { detectSearchIntent } from '../../lib/searchDetector';
 import { smartSearch, searchWeb, VideoResult, ArticleResult } from '../../lib/searchService';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import { SUBJECTS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import QuizCard from '../../components/ui/QuizCard';
+import AvatarCircle from '../../components/ui/AvatarCircle';
 import SearchVideoCard from '../../components/chat/VideoCard';
 import SearchArticleCard from '../../components/chat/ArticleCard';
 import ChatSidebar from '../../components/chat/ChatSidebar';
@@ -611,7 +613,7 @@ export default function ChatScreen() {
             />
           )}
         </View>
-        {isUser && <Text style={styles.avatar}>{user?.avatar || '🧑'}</Text>}
+        {isUser && <AvatarCircle name={user?.name || '?'} color={user?.avatar} size={28} />}
       </View>
     );
   };
@@ -636,10 +638,10 @@ export default function ChatScreen() {
         <HomieBot mood={mood as any} size={32}/>
         <View style={styles.topbarInfo}>
           <Text style={styles.topbarTitle}>{t('chat_title')}</Text>
-          <Text style={styles.topbarSub}>⭐{user?.xp} · Lv.{user?.level} · +{sessionXP}XP</Text>
+          <Text style={styles.topbarSub}>{user?.xp} XP · Lv.{user?.level} · +{sessionXP}XP</Text>
         </View>
         <TouchableOpacity onPress={() => setShowSubjects(!showSubjects)} style={styles.subjBtn}>
-          <Text style={styles.subjBtnText}>{SUBJECTS.find(s => s.s === subject)?.e} {subject} ▾</Text>
+          <Text style={styles.subjBtnText}>{subject} ▾</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNewChat} style={styles.iconBtnSm}>
           <PlusIcon color={Colors.muted} size={18} />
@@ -655,7 +657,7 @@ export default function ChatScreen() {
           {SUBJECTS.map(s => (
             <TouchableOpacity key={s.s} onPress={() => { dispatch(setSubject(s.s)); dispatch(setActiveChat(null)); setShowSubjects(false); }}
               style={[styles.subjectChip, subject === s.s && styles.subjectChipActive]}>
-              <Text style={styles.subjectChipText}>{s.e} {s.s}</Text>
+              <Text style={styles.subjectChipText}>{s.s}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -665,7 +667,7 @@ export default function ChatScreen() {
         {/* Messages */}
         {messages.length === 0 ? (
           <View style={styles.welcome}>
-            <HomieBot mood="happy" size={100}/>
+            <HomieBot mood="happy" size={responsive.mascotSize.md}/>
             <Text style={styles.welcomeTitle}>{t('chat_yo')} {user?.name?.split(' ')[0]}! {t('chat_studying_q')}</Text>
             <Text style={styles.welcomeSub}>{t('chat_welcome_sub')}</Text>
             <View style={styles.prompts}>
@@ -682,6 +684,7 @@ export default function ChatScreen() {
           </View>
         ) : (
           <FlatList
+            style={responsive.isTablet ? { width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' } : undefined}
             ref={listRef} data={messages} renderItem={renderMsg} keyExtractor={m => m.id}
             contentContainerStyle={styles.msgList} showsVerticalScrollIndicator={false}
             ListFooterComponent={loading ? (
@@ -699,7 +702,7 @@ export default function ChatScreen() {
         {imgPreview && (
           <View style={styles.imgPreview}>
             <Image source={{ uri: imgPreview }} style={styles.imgPreviewImg}/>
-            <Text style={styles.imgPreviewText}>📸 {t('chat_photo_in')}</Text>
+            <Text style={styles.imgPreviewText}>{t('chat_photo_in')}</Text>
             <TouchableOpacity onPress={() => { setImgPreview(null); setImgB64(null); }}>
               <Text style={styles.imgPreviewClose}>✕</Text>
             </TouchableOpacity>
@@ -748,9 +751,9 @@ const styles = StyleSheet.create({
   subjectChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 50, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border },
   subjectChipActive: { backgroundColor: 'rgba(124,58,237,0.2)', borderColor: Colors.purpleL },
   subjectChipText: { fontSize: 12, color: Colors.text },
-  welcome: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  welcomeTitle: { fontSize: 18, fontWeight: '800', color: Colors.text, marginTop: 16, textAlign: 'center' },
-  welcomeSub: { fontSize: 13, color: Colors.muted, marginTop: 6, textAlign: 'center' },
+  welcome: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
+  welcomeTitle: { fontSize: responsive.fontSize.xl, fontWeight: '800', color: Colors.text, marginTop: 16, textAlign: 'center' },
+  welcomeSub: { fontSize: responsive.fontSize.md, color: Colors.muted, marginTop: 6, textAlign: 'center' },
   prompts: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 },
   promptBtn: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: Colors.bg3, borderRadius: 50, borderWidth: 1, borderColor: Colors.border2 },
   promptText: { fontSize: 13, color: Colors.purpleL, fontWeight: '600' },
