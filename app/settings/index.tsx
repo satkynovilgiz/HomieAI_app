@@ -18,6 +18,7 @@ import { responsive } from '../../constants/responsive';
 import ContentWrapper from '../../components/ui/ContentWrapper';
 import DeleteAccountModal from '../../components/auth/DeleteAccountModal';
 import AvatarCircle from '../../components/ui/AvatarCircle';
+import { UserIcon, LockIcon, MailIcon, ChevronRightIcon } from '../../components/icons';
 
 const LANGUAGES: { code: Language; flag: string; name: string; native: string }[] = [
   { code: 'en', flag: '🇺🇸', name: 'English', native: 'English' },
@@ -86,8 +87,25 @@ export default function SettingsScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.row} onPress={() => router.push('/profile')}>
-            <Text style={styles.rowLabel}>{t('settings_edit_profile')}</Text>
-            <Text style={styles.rowArrow}>→</Text>
+            <View style={styles.rowLeft}>
+              <UserIcon color={Colors.muted} size={18} />
+              <Text style={styles.rowLabel}>{t('settings_edit_profile')}</Text>
+            </View>
+            <ChevronRightIcon color={Colors.muted} size={18} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.row} onPress={() => router.push('/settings/change-password')}>
+            <View style={styles.rowLeft}>
+              <LockIcon color={Colors.muted} size={18} />
+              <Text style={styles.rowLabel}>Change Password</Text>
+            </View>
+            <ChevronRightIcon color={Colors.muted} size={18} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.row} onPress={() => router.push('/settings/change-email')}>
+            <View style={styles.rowLeft}>
+              <MailIcon color={Colors.muted} size={18} />
+              <Text style={styles.rowLabel}>Change Email</Text>
+            </View>
+            <ChevronRightIcon color={Colors.muted} size={18} />
           </TouchableOpacity>
         </View>
 
@@ -207,6 +225,7 @@ const styles = StyleSheet.create({
   accountName: { fontSize:16, fontWeight:'800', color:Colors.text },
   accountEmail: { fontSize:12, color:Colors.muted, marginTop:2 },
   row: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', padding:16, borderTopWidth:1, borderTopColor:Colors.border },
+  rowLeft: { flexDirection:'row', alignItems:'center', gap:12 },
   rowLabel: { fontSize:14, color:Colors.text },
   rowArrow: { fontSize:16, color:Colors.muted },
   rowValue: { fontSize:13, color:Colors.muted },

@@ -50,6 +50,7 @@ export default function RootLayout() {
           <Stack.Screen name="auth/login" />
           <Stack.Screen name="auth/signup" />
           <Stack.Screen name="auth/language" />
+          <Stack.Screen name="auth/forgot" />
           <Stack.Screen name="auth/verify" />
           <Stack.Screen name="auth/welcome" />
           <Stack.Screen name="(tabs)" />
@@ -86,6 +87,8 @@ export default function RootLayout() {
           <Stack.Screen name="shop/index" />
           <Stack.Screen name="notifications/index" />
           <Stack.Screen name="settings/index" />
+          <Stack.Screen name="settings/change-password" />
+          <Stack.Screen name="settings/change-email" />
           <Stack.Screen name="friends/add" />
           <Stack.Screen name="legal/privacy" />
           <Stack.Screen name="legal/terms" />

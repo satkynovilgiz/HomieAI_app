@@ -286,3 +286,50 @@ export function ChatBubbleIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) 
     </Svg>
   );
 }
+
+export function UserIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="8" r="4" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Path d="M4 21C4 18 7.6 15.5 12 15.5C16.4 15.5 20 18 20 21" stroke={color} strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+    </Svg>
+  );
+}
+
+export function LockIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="5" y="11" width="14" height="9" rx="2" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Path d="M8 11V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V11" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Circle cx="12" cy="15.5" r="1.5" fill={color}/>
+    </Svg>
+  );
+}
+
+export function MailIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="5" width="18" height="14" rx="2" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Path d="M3 7L12 13L21 7" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </Svg>
+  );
+}
+
+export function EyeIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+      <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="1.8" fill="none"/>
+    </Svg>
+  );
+}
+
+export function EyeOffIcon({ color = DEFAULT_COLOR, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+      <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="1.8" fill="none"/>
+      <Line x1="3" y1="21" x2="21" y2="3" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+    </Svg>
+  );
+}

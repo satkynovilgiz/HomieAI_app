@@ -8,6 +8,8 @@ import {
   signInWithCredential, GoogleAuthProvider, onAuthStateChanged,
   signOut as firebaseSignOut, updateProfile,
   deleteUser as deleteFirebaseUser,
+  sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential,
+  updatePassword, verifyBeforeUpdateEmail,
 } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import * as firestoreService from './firestoreService';
@@ -190,6 +192,56 @@ export async function deleteAccount(): Promise<{ err?: string }> {
     if (e?.code === 'auth/requires-recent-login') {
       return { err: 'For security, sign out and log back in, then try deleting your account again.' };
     }
+    return { err: mapFirebaseError(e) };
+  }
+}
+
+// Real Firebase reset — sends an email with a Firebase-hosted reset link.
+// There's no local password store this app could reset directly (Firebase
+// owns the credential), so this is the only implementation that actually works.
+export async function sendPasswordReset(email: string): Promise<{ err?: string }> {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return {};
+  } catch (e: any) {
+    return { err: mapFirebaseError(e) };
+  }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ err?: string }> {
+  const current = auth.currentUser;
+  if (!current || !current.email) return { err: 'not signed in' };
+  try {
+    const credential = EmailAuthProvider.credential(current.email, currentPassword);
+    await reauthenticateWithCredential(current, credential);
+  } catch {
+    return { err: 'current password is wrong' };
+  }
+  try {
+    await updatePassword(current, newPassword);
+    return {};
+  } catch (e: any) {
+    return { err: mapFirebaseError(e) };
+  }
+}
+
+// Firebase only lets a signed-in user change their email via a confirmation
+// link sent to the NEW address (verifyBeforeUpdateEmail) — the email on the
+// account doesn't actually change until that link is clicked, so there's no
+// synchronous "done" here the way a local password-store fake would have.
+export async function changeEmail(currentPassword: string, newEmail: string): Promise<{ err?: string }> {
+  const current = auth.currentUser;
+  if (!current || !current.email) return { err: 'not signed in' };
+  try {
+    const credential = EmailAuthProvider.credential(current.email, currentPassword);
+    await reauthenticateWithCredential(current, credential);
+  } catch {
+    return { err: 'wrong password' };
+  }
+  try {
+    await verifyBeforeUpdateEmail(current, newEmail);
+    return {};
+  } catch (e: any) {
     return { err: mapFirebaseError(e) };
   }
 }

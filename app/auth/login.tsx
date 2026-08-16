@@ -103,6 +103,10 @@ export default function LoginScreen() {
           <Input label={t('login_password')} placeholder="your password" value={pass}
             onChangeText={setPass} secureTextEntry />
 
+          <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/auth/forgot')}>
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </TouchableOpacity>
+
           <Button title={t('login_btn')} onPress={login} loading={loading} size="lg" style={styles.submitBtn} />
 
           <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/auth/signup')}>
@@ -134,6 +138,8 @@ const styles = StyleSheet.create({
   divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
   divText: { fontSize: 12, color: Colors.muted },
   error: { color: Colors.red, fontSize: 13, marginBottom: 12, textAlign: 'center' },
+  forgotLink: { alignItems: 'flex-end', marginBottom: 4 },
+  forgotText: { fontSize: 13, color: Colors.purpleL, fontWeight: '600' },
   submitBtn: { height: 52, borderRadius: 14, marginTop: 8 },
   signupLink: { alignItems: 'center', marginTop: 16 },
   signupText: { fontSize: 14, color: Colors.muted },
