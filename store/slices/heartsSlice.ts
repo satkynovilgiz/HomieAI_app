@@ -1,5 +1,5 @@
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface HeartsState { count: number; max: number; lastRefill: string | null; }
 
@@ -14,8 +14,9 @@ const heartsSlice = createSlice({
     refillHearts(state) { state.count = state.max; state.lastRefill = new Date().toISOString(); },
     setMax(state, { payload }) { state.max = payload; state.count = payload; },
     clearHearts() { return initialState; },
+    hydrateHearts(state, { payload }: PayloadAction<number>) { state.count = payload; },
   },
 });
 
-export const { loseHeart, gainHeart, refillHearts, setMax, clearHearts } = heartsSlice.actions;
+export const { loseHeart, gainHeart, refillHearts, setMax, clearHearts, hydrateHearts } = heartsSlice.actions;
 export default heartsSlice.reducer;

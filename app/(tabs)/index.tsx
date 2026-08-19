@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { Colors, Radius } from '../../constants/theme';
@@ -97,17 +97,18 @@ export default function HomeTab() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
+  const authChecked = useSelector((s: RootState) => s.user.authChecked);
   const streak = useSelector((s: RootState) => s.streak);
   const gems = useSelector((s: RootState) => s.gems.count);
   const notifUnread = useSelector((s: RootState) => s.notifications.unread);
   const { newlyEarned, dismissNew } = useAchievements();
 
   useEffect(() => {
-    if (!user) { router.replace('/auth/login'); return; }
-    dispatch(checkInToday());
-  }, []);
+    if (user) dispatch(checkInToday());
+  }, [user]);
 
-  if (!user) return null;
+  if (!authChecked) return null;
+  if (!user) return <Redirect href="/auth/login" />;
 
   const { greetingKey, mood } = getTimeContext();
   const todayIdx = new Date().getDay();

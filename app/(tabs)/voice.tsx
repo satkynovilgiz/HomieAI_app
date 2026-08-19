@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Speech from 'expo-speech';
 import { requireOptionalNativeModule } from 'expo-modules-core';
@@ -79,6 +79,7 @@ const PREFERRED_VOICE_IDS = [
 
 export default function VoiceScreen() {
   const user = useSelector((s: RootState) => s.user.current);
+  const authChecked = useSelector((s: RootState) => s.user.authChecked);
   const { language } = useTranslation();
   const [state, setState] = useState<VoiceState>('idle');
   const [subject, setSubject] = useState('General');
@@ -91,7 +92,6 @@ export default function VoiceScreen() {
   const transcriptRef = useRef('');
   const bgAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => () => { Speech.stop(); ExpoSpeechRecognitionModule?.stop(); }, []);
 
   useEffect(() => {
@@ -216,6 +216,9 @@ export default function VoiceScreen() {
     if (state === 'speaking') return 'celebrating';
     return 'happy';
   };
+
+  if (!authChecked) return null;
+  if (!user) return <Redirect href="/auth/login" />;
 
   return (
     <SafeAreaView style={styles.safe}>

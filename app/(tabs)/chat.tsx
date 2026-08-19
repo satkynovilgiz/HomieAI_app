@@ -3,7 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
-import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect, Redirect } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
@@ -216,6 +216,7 @@ export default function ChatScreen() {
   const { messages, loading, subject, mood, sessionXP } = useSelector((s: RootState) => s.chat);
   const { sessions: chatSessions, activeChatId, loaded: chatHistoryLoaded } = useSelector((s: RootState) => s.chatHistory);
   const user = useSelector((s: RootState) => s.user.current);
+  const authChecked = useSelector((s: RootState) => s.user.authChecked);
   const savedItems = useSelector((s: RootState) => s.videos.items);
   const { chatId: chatIdParam, prefill: prefillParam, subject: prefillSubjectParam } = useLocalSearchParams<{ chatId?: string; prefill?: string; subject?: string }>();
   const [input, setInput] = useState('');
@@ -232,7 +233,6 @@ export default function ChatScreen() {
   const prefillHandledRef = useRef(false);
   const [pendingPrefill, setPendingPrefill] = useState<string | null>(null);
 
-  useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
   useEffect(() => { latestRef.current = { sessionXP, subject, messages, user }; });
   useEffect(() => { loadSavedItemsFromStorage().then(items => dispatch(loadItems(items))); }, []);
 
@@ -617,6 +617,9 @@ export default function ChatScreen() {
       </View>
     );
   };
+
+  if (!authChecked) return null;
+  if (!user) return <Redirect href="/auth/login" />;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../../lib/authService';
 
-interface UserState { current: User | null; }
-const initialState: UserState = { current: null };
+interface UserState { current: User | null; authChecked: boolean; }
+const initialState: UserState = { current: null, authChecked: false };
 
 const userSlice = createSlice({
   name: 'user',
@@ -10,6 +10,7 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, { payload }: PayloadAction<User>) => { state.current = payload; },
     clearUser: (state) => { state.current = null; },
+    setAuthChecked: (state, { payload }: PayloadAction<boolean>) => { state.authChecked = payload; },
     addXP: (state, { payload }: PayloadAction<number>) => {
       if (!state.current) return;
       state.current.xp += payload;
@@ -29,5 +30,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, clearUser, addXP, addCorrect, updateUser, addHistory } = userSlice.actions;
+export const { setUser, clearUser, setAuthChecked, addXP, addCorrect, updateUser, addHistory } = userSlice.actions;
 export default userSlice.reducer;

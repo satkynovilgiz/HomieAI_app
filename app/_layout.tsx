@@ -6,12 +6,43 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import store from '../store';
 import { useStreakSync } from '../hooks/useStreakSync';
+import { useHeartsGemsSync } from '../hooks/useHeartsGemsSync';
+import { useUserStatsSync } from '../hooks/useUserStatsSync';
 import { loadSessions, loadChatHistoryFromStorage } from '../store/slices/chatHistorySlice';
 import { setLanguage } from '../store/slices/languageSlice';
+import { setUser, setAuthChecked } from '../store/slices/userSlice';
+import { getSession } from '../lib/authService';
 import { Language } from '../constants/translations';
 
 function StreakSync() {
   useStreakSync();
+  return null;
+}
+
+function HeartsGemsSync() {
+  useHeartsGemsSync();
+  return null;
+}
+
+function UserStatsSync() {
+  useUserStatsSync();
+  return null;
+}
+
+// Rehydrates the logged-in session on every app boot, regardless of which
+// route is entered first. Without this, a direct/deep navigation into a
+// protected (tabs) screen (refresh, deep link, restored session) sees
+// Redux's user as null even though a valid Firebase session exists in
+// storage -- the splash screen (app/index.tsx) only runs this same check
+// when the app boots at "/", not when it boots straight into a nested route.
+function AuthSync() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    getSession().then(session => {
+      if (session) dispatch(setUser(session));
+      dispatch(setAuthChecked(true));
+    });
+  }, []);
   return null;
 }
 
@@ -40,7 +71,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
+        <AuthSync />
         <StreakSync />
+        <HeartsGemsSync />
+        <UserStatsSync />
         <ChatHistorySync />
         <LanguageSync />
         <StatusBar style="light" backgroundColor="#07070f" />

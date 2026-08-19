@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { updateUser } from '../../store/slices/userSlice';
@@ -71,6 +71,7 @@ export default function ProfileScreen() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const user = useSelector((s: RootState) => s.user.current);
+  const authChecked = useSelector((s: RootState) => s.user.authChecked);
   const streak = useSelector((s: RootState) => s.streak);
   const gems = useSelector((s: RootState) => s.gems.count);
   const [tab, setTab] = useState<'stats' | 'avatar'>('stats');
@@ -79,8 +80,8 @@ export default function ProfileScreen() {
   const [name, setName] = useState(user?.name || '');
   const { modalVisible, openModal, closeModal, confirmDelete, deleting } = useDeleteAccount();
 
-  useEffect(() => { if (!user) router.replace('/auth/login'); }, [user]);
-  if (!user) return null;
+  if (!authChecked) return null;
+  if (!user) return <Redirect href="/auth/login" />;
 
   const logout = () => {
     Alert.alert('sign out?', 'see you soon', [
