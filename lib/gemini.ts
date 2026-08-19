@@ -35,22 +35,38 @@ export async function callGemini(messages: any[], systemPrompt: string, maxOutpu
     return { role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(msg.content) }] };
   });
 
-  const res = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      // gemma-4-26b-a4b-it spends a chunk of the token budget on an internal
-      // "thought" part before its real answer (see below) — this needs enough
-      // headroom for both, especially for longer outputs like the study plan.
-      generationConfig: { maxOutputTokens, temperature: 0.85 },
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-      ],
-    }),
-  });
+  // gemma-4-26b-a4b-it is slow (measured 30-45s+ for a multi-item JSON
+  // request) since it burns a chunk of its token budget "thinking" before the
+  // real answer — but callers with no client-side timeout at all would hang
+  // on their loading state indefinitely if a request ever genuinely stalls
+  // (dropped connection, API outage). This bounds the wait so callers'
+  // existing try/catch-and-fall-back logic actually gets a chance to run.
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => ctrl.abort(), 45000);
+  let res: Response;
+  try {
+    res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        // gemma-4-26b-a4b-it spends a chunk of the token budget on an internal
+        // "thought" part before its real answer (see below) — this needs enough
+        // headroom for both, especially for longer outputs like the study plan.
+        generationConfig: { maxOutputTokens, temperature: 0.85 },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+        ],
+      }),
+      signal: ctrl.signal,
+    });
+  } catch (e: any) {
+    throw e?.name === 'AbortError' ? new Error('Gemini request timed out') : e;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

@@ -87,6 +87,7 @@ export default function EssayScreen() {
             style={[styles.generateBtn, (loading || !topic.trim()) && styles.generateBtnDisabled]}>
             <Text style={styles.generateBtnText}>{loading ? 'hold on...' : 'generate essay'}</Text>
           </TouchableOpacity>
+          {loading && <Text style={styles.loadingHint}>this can take up to a minute</Text>}
 
           {result !== '' && (
             <View style={styles.resultCard}>
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
   generateBtn: { backgroundColor: Colors.purple, paddingVertical: 15, borderRadius: Radius.md, alignItems: 'center' },
   generateBtnDisabled: { opacity: 0.5 },
   generateBtnText: { color: Colors.white, fontWeight: '800', fontSize: 16 },
+  loadingHint: { color: Colors.muted, fontSize: 12, textAlign: 'center', marginTop: 8 },
   resultCard: { padding: 18, backgroundColor: Colors.bg3, borderRadius: Radius.lg, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' },
   resultHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
   resultTitle: { fontSize: 17, fontWeight: '800', color: Colors.text },

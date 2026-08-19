@@ -122,6 +122,7 @@ export default function DetectorScreen() {
           <TouchableOpacity onPress={analyze} disabled={!canAnalyze || loading} style={[styles.analyzeBtn, (!canAnalyze || loading) && styles.btnDisabled]}>
             <Text style={styles.analyzeBtnText}>{loading ? 'analyzing...' : 'Check Text'}</Text>
           </TouchableOpacity>
+          {loading && <Text style={styles.loadingHint}>this can take up to a minute</Text>}
 
           {!!error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -196,6 +197,7 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.5 },
   analyzeBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
   errorText: { color: Colors.red, fontSize: 13, marginTop: 10, textAlign: 'center' },
+  loadingHint: { color: Colors.muted, fontSize: 12, textAlign: 'center', marginTop: 8 },
   resultWrap: { alignItems: 'center', marginTop: 24, marginBottom: 30, gap: 12 },
   scoreCircle: { width: 130, height: 130, borderRadius: 65, borderWidth: 6, backgroundColor: Colors.bg3, alignItems: 'center', justifyContent: 'center' },
   scoreNumber: { fontSize: 40, fontWeight: '900' },

@@ -123,6 +123,7 @@ export default function WordScrambleGame() {
         <View style={styles.loadingWrap}>
           <HomieBot mood="thinking" size={100} />
           <Text style={styles.loadingText}>scrambling up {subj} words...</Text>
+          <Text style={styles.loadingHint}>this can take up to a minute</Text>
         </View>
       </SafeAreaView>
     );
@@ -179,6 +180,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
   loadingText: { color: Colors.muted, fontSize: 14 },
+  loadingHint: { color: Colors.muted, fontSize: 12, opacity: 0.7 },
   body: { flex: 1, alignItems: 'center', padding: 24, gap: 20 },
   timer: { fontSize: 32, fontWeight: '900', color: Colors.purpleL, marginTop: 10 },
   hint: { fontSize: 15, color: Colors.text2, textAlign: 'center', paddingHorizontal: 10 },
