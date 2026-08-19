@@ -9,6 +9,7 @@ import { Colors, Radius } from '../../constants/theme';
 import ShopItemCard from '../../components/shop/ShopItem';
 import GemsCounter from '../../components/ui/GemsCounter';
 import HomieBot from '../../components/mascot/HomieBot';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const CATS = ['All','powerup','boost','freeze','cosmetic'] as const;
 
@@ -60,6 +61,7 @@ export default function ShopScreen() {
       </ScrollView>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         {filtered.map(item => (
           <ShopItemCard
             key={item.id} item={item}
@@ -69,6 +71,7 @@ export default function ShopScreen() {
           />
         ))}
         <View style={{ height:24 }}/>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

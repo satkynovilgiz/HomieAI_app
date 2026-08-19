@@ -18,6 +18,7 @@ import { Colors, Radius } from '../../constants/theme';
 import { SUBJECTS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
 import WaveAnimation from '../../components/recorder/WaveAnimation';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 import TranscriptBubble, { TranscriptLine } from '../../components/recorder/TranscriptBubble';
 import { useAchievements } from '../../hooks/useAchievements';
 
@@ -293,6 +294,7 @@ export default function RecorderScreen() {
 
       {screenState === 'idle' && (
         <ScrollView contentContainerStyle={styles.idleContent} showsVerticalScrollIndicator={false}>
+         <ContentWrapper>
           <HomieBot mood="thinking" size={100} />
           <Text style={styles.idleTitle}>Ready to record your lecture</Text>
           <Text style={styles.idleSub}>Make sure your volume is up</Text>
@@ -338,6 +340,7 @@ export default function RecorderScreen() {
               ))}
             </View>
           )}
+         </ContentWrapper>
         </ScrollView>
       )}
 

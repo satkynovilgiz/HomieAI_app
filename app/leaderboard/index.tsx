@@ -9,6 +9,7 @@ import { getLeaderboard } from '../../lib/firestoreService';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import AvatarCircle from '../../components/ui/AvatarCircle';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 export default function LeaderboardScreen() {
   const user = useSelector((s: RootState) => s.user.current);
@@ -27,6 +28,7 @@ export default function LeaderboardScreen() {
         <Text style={styles.title}>Leaderboard</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={{ alignItems: 'center', padding: 20, paddingBottom: 10 }}>
           <HomieBot mood="celebrating" size={90}/>
           <Text style={styles.sub}>Top students by XP. Study more, climb higher!</Text>
@@ -63,6 +65,7 @@ export default function LeaderboardScreen() {
         <View style={styles.tipBox}>
           <Text style={styles.tipText}>Earn XP by chatting, answering quizzes, and completing Pomodoro sessions!</Text>
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

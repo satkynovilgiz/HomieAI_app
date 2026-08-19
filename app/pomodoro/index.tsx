@@ -10,6 +10,7 @@ import { RootState } from '../../store';
 import { addXP } from '../../store/slices/userSlice';
 import { Colors, Radius } from '../../constants/theme';
 import { formatTime } from '../../lib/utils';
+import { responsive } from '../../constants/responsive';
 import HomieBot from '../../components/mascot/HomieBot';
 
 const MODES = [
@@ -150,7 +151,7 @@ export default function PomodoroScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
-  container: { padding: 20, alignItems: 'center' },
+  container: { padding: 20, alignItems: 'center', width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 24, gap: 12 },
   backBtn: { padding: 4 },
   backArrow: { fontSize: 24, color: Colors.text },

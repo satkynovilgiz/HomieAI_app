@@ -9,6 +9,7 @@ import { CODING_UNITS } from '../../constants/lessons/codingLessons';
 import { SCIENCE_UNITS } from '../../constants/lessons/scienceLessons';
 import LessonNode from '../../components/lessons/LessonNode';
 import UnitCard from '../../components/lessons/UnitCard';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const ALL_UNITS = [...MATH_UNITS, ...CODING_UNITS, ...SCIENCE_UNITS];
 
@@ -46,6 +47,7 @@ export default function LessonsScreen() {
           </View>
         </View>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+         <ContentWrapper>
           <View style={[styles.progressHeader, { backgroundColor: unit.color + '11', borderColor: unit.color + '33' }]}>
             <Text style={[styles.progressTitle, { color: unit.color }]}>{unit.title}</Text>
             <Text style={styles.progressSub}>{unitProgress?.lessons.filter(l => l.completed).length || 0}/{unit.lessons.length} lessons complete</Text>
@@ -74,6 +76,7 @@ export default function LessonsScreen() {
             </View>
           )}
           <View style={{ height: 40 }}/>
+         </ContentWrapper>
         </ScrollView>
       </SafeAreaView>
     );
@@ -89,6 +92,7 @@ export default function LessonsScreen() {
         <Text style={styles.pageTitle}>Lessons</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
         <Text style={styles.sectionLabel}>choose a subject</Text>
         {ALL_UNITS.map(unit => (
           <UnitCard
@@ -99,6 +103,7 @@ export default function LessonsScreen() {
           />
         ))}
         <View style={{ height: 24 }}/>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

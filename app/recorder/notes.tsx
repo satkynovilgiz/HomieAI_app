@@ -11,6 +11,7 @@ import { addXP } from '../../store/slices/userSlice';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import NoteCard from '../../components/recorder/NoteCard';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const PLANNER_STORAGE_KEY = 'hm_study_plan';
 
@@ -157,6 +158,7 @@ export default function LectureNotesScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         {!notes ? (
           <View style={styles.noNotesBox}>
             <Text style={styles.noNotesText}>Notes couldn't be generated for this lecture — here's the raw transcript instead.</Text>
@@ -226,6 +228,7 @@ export default function LectureNotesScreen() {
             <Text style={styles.bottomBtnSecondaryText}>Add to Planner</Text>
           </TouchableOpacity>
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

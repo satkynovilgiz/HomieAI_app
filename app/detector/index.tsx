@@ -8,6 +8,7 @@ import { addXP } from '../../store/slices/userSlice';
 import { Colors, Radius } from '../../constants/theme';
 import { detectAIText, humanizeText, AIDetectionResult } from '../../lib/gemini';
 import HomieBot from '../../components/mascot/HomieBot';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const MIN_CHARS = 200;
 
@@ -99,6 +100,7 @@ export default function DetectorScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
             <Text style={styles.backArrow}>←</Text>
@@ -175,6 +177,7 @@ export default function DetectorScreen() {
             </View>
           )}
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

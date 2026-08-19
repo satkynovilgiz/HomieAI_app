@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useNotifications } from '../../hooks/useNotifications';
 import { Colors, Radius } from '../../constants/theme';
 import { timeAgo } from '../../lib/utils';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 export default function NotificationsScreen() {
   const { notifications, markAll, mark, unread } = useNotifications();
@@ -23,6 +24,7 @@ export default function NotificationsScreen() {
         )}
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
         {notifications.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>no notifications</Text>
@@ -38,6 +40,7 @@ export default function NotificationsScreen() {
             {!n.read && <View style={styles.unreadDot}/>}
           </TouchableOpacity>
         ))}
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

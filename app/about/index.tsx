@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import AvatarCircle from '../../components/ui/AvatarCircle';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const VALUES = [
   { title: 'The Mission', text: 'Make high-quality AI tutoring free for every student. Education is a right.' },
@@ -17,6 +18,7 @@ export default function AboutScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
             <Text style={styles.backArrow}>←</Text>
@@ -77,6 +79,7 @@ export default function AboutScreen() {
             <Text style={styles.legalBtnText}>Terms of Service</Text>
           </TouchableOpacity>
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

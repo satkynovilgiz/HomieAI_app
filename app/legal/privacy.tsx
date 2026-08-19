@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 import Card from '../../components/ui/Card';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 function LinkText({ url, children }: { url: string; children: string }) {
   return (
@@ -28,6 +29,7 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
         <Text style={styles.metaLine}>App name: Homie AI</Text>
         <Text style={styles.metaLine}>Developer: Ilgiz Satkynov</Text>
         <Text style={styles.metaLine}>Contact: satkynovilgiz2008@gmail.com</Text>
@@ -194,6 +196,7 @@ export default function PrivacyPolicyScreen() {
           </Text>
           <Text style={styles.body}>Address: 1243 Vicente Dr APT 76, Sunnyvale, CA 94086</Text>
         </Card>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

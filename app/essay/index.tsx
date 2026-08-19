@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { Colors, Radius } from '../../constants/theme';
 import { callGemini } from '../../lib/gemini';
 import HomieBot from '../../components/mascot/HomieBot';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const ESSAY_TYPES = ['Persuasive Essay','Argumentative Essay','Expository Essay','Narrative Essay','Research Paper Outline','Essay Introduction','Essay Conclusion'];
 const LENGTHS = [['Short','~250 words'],['Medium','~500 words'],['Long','~750 words'],['Extended','~1000 words']];
@@ -32,6 +33,7 @@ export default function EssayScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
             <Text style={styles.backArrow}>←</Text>
@@ -98,6 +100,7 @@ export default function EssayScreen() {
             </View>
           )}
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

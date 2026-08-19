@@ -10,6 +10,7 @@ import { Colors, Radius } from '../../constants/theme';
 import { useTranslation } from '../../hooks/useTranslation';
 import StreakFreeze from '../../components/streak/StreakFreeze';
 import { TrophyIcon } from '../../components/icons';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['S','M','T','W','T','F','S'];
@@ -48,6 +49,7 @@ export default function StreakScreen() {
         <Text style={styles.title}>{t('streak_title')}</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         {/* Hero */}
         <View style={styles.hero}>
           <Text style={styles.streakNum}>{streak.current}</Text>
@@ -160,6 +162,7 @@ export default function StreakScreen() {
           })}
         </View>
         <View style={{ height:30 }}/>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

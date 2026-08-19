@@ -7,6 +7,7 @@ import { useFriends } from '../../hooks/useFriends';
 import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import AvatarCircle from '../../components/ui/AvatarCircle';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const SUGGESTIONS = [
   { id:'s1', name:'Alex P.', xp:840, level:8, streak:5 },
@@ -34,6 +35,7 @@ export default function AddFriendsScreen() {
         <Text style={styles.title}>Add Friends</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <TextInput
           value={search} onChangeText={setSearch}
           placeholder="search by username..."
@@ -63,6 +65,7 @@ export default function AddFriendsScreen() {
             <Text style={styles.shareBtnText}>Share HOMIE AI</Text>
           </TouchableOpacity>
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

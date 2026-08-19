@@ -10,6 +10,7 @@ import { Colors, Radius } from '../../constants/theme';
 import { generateInviteLink, generateInviteMessage } from '../../lib/inviteService';
 import HomieBot from '../../components/mascot/HomieBot';
 import { ShareIcon } from '../../components/icons';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 function BackArrowIcon() {
   return (
@@ -110,6 +111,7 @@ export default function InviteScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+       <ContentWrapper>
         <View style={styles.hero}>
           <HomieBot mood="celebrating" size={100} />
           <Text style={styles.title}>Invite your friends</Text>
@@ -149,6 +151,7 @@ export default function InviteScreen() {
           <Text style={styles.statsRow}>Friends invited: {user.friendsInvited || 0}</Text>
           <Text style={styles.statsRow}>XP earned from invites: {user.inviteXP || 0}</Text>
         </View>
+       </ContentWrapper>
       </ScrollView>
 
       {toast ? (

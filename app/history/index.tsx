@@ -10,6 +10,7 @@ import { Colors, Radius } from '../../constants/theme';
 import HomieBot from '../../components/mascot/HomieBot';
 import { getSubjectColor, groupLabel, formatTime, GROUP_ORDER } from '../../components/chat/ChatSidebar';
 import { ChatSession } from '../../store/slices/chatHistorySlice';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 function SearchIcon() {
   return (
@@ -54,6 +55,7 @@ export default function HistoryScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.statsRow}>
           {[[history.length, 'Sessions'],[history.reduce((a,h) => a + (h.xp_earned||0), 0), 'XP Earned'],[`${Math.round((user?.studyHours||0)*10)/10}h`, 'Hours']].map(([val,label]) => (
             <View key={label as string} style={styles.statBox}>
@@ -120,6 +122,7 @@ export default function HistoryScreen() {
             </View>
           ))}
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

@@ -11,6 +11,7 @@ import { useChallenges } from '../../hooks/useChallenges';
 import { Friend } from '../../store/slices/friendsSlice';
 import { ensureConversation } from '../../store/slices/messagesSlice';
 import AvatarCircle from '../../components/ui/AvatarCircle';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 export default function FriendsTab() {
   const dispatch = useDispatch();
@@ -43,6 +44,7 @@ export default function FriendsTab() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+       <ContentWrapper>
         {tab === 'friends' && (
           <>
             <TextInput
@@ -111,6 +113,7 @@ export default function FriendsTab() {
             ))}
           </>
         )}
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

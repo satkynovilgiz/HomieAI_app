@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useAchievements } from '../../hooks/useAchievements';
 import { Colors, Radius } from '../../constants/theme';
 import AchievementCard from '../../components/achievements/AchievementCard';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 export default function AchievementsScreen() {
   const { achievements, earned } = useAchievements();
@@ -19,6 +20,7 @@ export default function AchievementsScreen() {
         <Text style={styles.title}>Achievements</Text>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.progress}>
           <Text style={styles.progressLabel}>{earned.length}/{achievements.length} unlocked</Text>
           <View style={styles.progressTrack}>
@@ -32,6 +34,7 @@ export default function AchievementsScreen() {
           <Text style={[styles.sectionLabel, { marginTop:16 }]}>LOCKED ({achievements.length - earned.length})</Text>
           {achievements.filter(a => !a.earned).map(a => <AchievementCard key={a.id} achievement={a}/>)}
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

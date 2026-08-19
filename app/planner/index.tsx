@@ -8,6 +8,7 @@ import { Colors, Radius } from '../../constants/theme';
 import { addXP } from '../../store/slices/userSlice';
 import { generateStudyPlan, StudyPlan } from '../../lib/gemini';
 import HomieBot from '../../components/mascot/HomieBot';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const STORAGE_KEY = 'hm_study_plan';
 const SUBJECTS = ['Math', 'Coding', 'Science', 'History', 'English', 'Physics', 'Chemistry', 'Biology'];
@@ -144,8 +145,9 @@ export default function PlannerScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView showsVerticalScrollIndicator={false}>
+         <ContentWrapper>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => (showForm ? setShowForm(false) : router.back())} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => (showForm ? setShowForm(false) : router.back())} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
               <Text style={styles.backArrow}>←</Text>
             </TouchableOpacity>
             <Text style={styles.title}>Generate Study Plan</Text>
@@ -202,6 +204,7 @@ export default function PlannerScreen() {
               <Text style={styles.generateBtnText}>{generating ? 'building your plan...' : 'Generate My Plan'}</Text>
             </TouchableOpacity>
           </View>
+         </ContentWrapper>
         </ScrollView>
       </SafeAreaView>
     );
@@ -216,6 +219,7 @@ export default function PlannerScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
             <Text style={styles.backArrow}>←</Text>
@@ -319,6 +323,7 @@ export default function PlannerScreen() {
             </View>
           )}
         </View>
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );

@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import { callGemini, getSystemPrompt } from '../../lib/gemini';
 import { useTranslation } from '../../hooks/useTranslation';
 import HomieBot from '../../components/mascot/HomieBot';
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   backArrow: { fontSize: 24, color: Colors.text },
   headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  content: { alignItems: 'center', padding: 20 },
+  content: { alignItems: 'center', padding: 20, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
   title: { fontSize: 22, fontWeight: '900', color: Colors.text, marginTop: 12, textAlign: 'center' },
   sub: { fontSize: 14, color: Colors.muted, marginTop: 6, marginBottom: 20, textAlign: 'center' },
   preview: {

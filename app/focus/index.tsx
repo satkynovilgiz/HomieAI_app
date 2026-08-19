@@ -13,8 +13,10 @@ import {
 import { addXP, updateUser } from '../../store/slices/userSlice';
 import { updateUser as updateUserRemote } from '../../lib/authService';
 import { Colors, Radius } from '../../constants/theme';
+import { responsive } from '../../constants/responsive';
 import { SUBJECTS } from '../../constants/subjects';
 import HomieBot from '../../components/mascot/HomieBot';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 const DURATIONS: { mins: number; label: string }[] = [
   { mins: 25, label: 'Pomodoro' },
@@ -226,6 +228,7 @@ export default function FocusScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+         <ContentWrapper>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
               <BackArrowIcon />
@@ -288,6 +291,7 @@ export default function FocusScreen() {
             <Text style={styles.statsFooterText}>Your best session: {user.bestFocusSessionMins || 0} mins</Text>
             <Text style={styles.statsFooterText}>Total focus time today: {formatHoursMins(todayFocusMins)}</Text>
           </View>
+         </ContentWrapper>
         </ScrollView>
       </SafeAreaView>
     );
@@ -521,8 +525,8 @@ const styles = StyleSheet.create({
   statsFooter: { alignItems: 'center', marginTop: 24, gap: 4 },
   statsFooterText: { fontSize: 12, color: Colors.muted },
 
-  centerFill: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  centerFillScroll: { flexGrow: 1, alignItems: 'center', padding: 24, paddingTop: 40 },
+  centerFill: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
+  centerFillScroll: { flexGrow: 1, alignItems: 'center', padding: 24, paddingTop: 40, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
 
   quitBtn: { position: 'absolute', top: 16, right: 16, zIndex: 1, paddingHorizontal: 12, paddingVertical: 6 },
   quitBtnText: { fontSize: 13, color: Colors.muted, fontWeight: '600' },

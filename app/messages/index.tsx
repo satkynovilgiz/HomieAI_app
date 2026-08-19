@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useMessages } from '../../hooks/useMessages';
 import { Colors, Radius } from '../../constants/theme';
 import ConversationRow from '../../components/messages/ConversationRow';
+import ContentWrapper from '../../components/ui/ContentWrapper';
 
 export default function MessagesScreen() {
   const { conversations, totalUnread } = useMessages();
@@ -21,6 +22,7 @@ export default function MessagesScreen() {
         )}
       </View>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+       <ContentWrapper>
         {conversations.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>nothing here yet</Text>
@@ -32,6 +34,7 @@ export default function MessagesScreen() {
             onPress={() => router.push({ pathname:'/messages/conversation', params:{ id: conv.id } })}
           />
         ))}
+       </ContentWrapper>
       </ScrollView>
     </SafeAreaView>
   );
