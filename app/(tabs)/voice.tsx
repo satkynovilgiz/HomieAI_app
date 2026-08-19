@@ -253,14 +253,20 @@ export default function VoiceScreen() {
           </View>
         ) : null}
 
-        <TouchableOpacity onPress={handleTapHomie} activeOpacity={0.9} style={styles.mascotWrap}>
-          <HomieTalking
-            isTalking={state === 'speaking'}
-            isListening={state === 'listening'}
-            size={200}
-            mood={getMascotMood()}
-          />
-        </TouchableOpacity>
+        {/* Hidden while the dropdown is open: the mascot's breathing
+            animation applies a transform, which creates its own CSS
+            stacking context on web -- its glow decoration escapes the
+            dropdown's zIndex and bleeds through on top of it otherwise. */}
+        {!showSubjects && (
+          <TouchableOpacity onPress={handleTapHomie} activeOpacity={0.9} style={styles.mascotWrap}>
+            <HomieTalking
+              isTalking={state === 'speaking'}
+              isListening={state === 'listening'}
+              size={200}
+              mood={getMascotMood()}
+            />
+          </TouchableOpacity>
+        )}
 
         {(state === 'speaking' || state === 'listening') && (
           <View style={styles.waveWrap}>
@@ -271,23 +277,27 @@ export default function VoiceScreen() {
           </View>
         )}
 
-        {homieText ? (
+        {!showSubjects && homieText ? (
           <View style={styles.homieBubble}>
             <Text style={styles.homieBubbleText} numberOfLines={4}>{homieText}</Text>
           </View>
         ) : null}
 
-        <Text style={[
-          styles.statusText,
-          state === 'listening' && { color: Colors.green },
-          state === 'speaking' && { color: Colors.purpleL },
-        ]}>
-          {state === 'idle' ? idleMsg : STATUS_TEXT[state]}
-        </Text>
+        {!showSubjects && (
+          <>
+            <Text style={[
+              styles.statusText,
+              state === 'listening' && { color: Colors.green },
+              state === 'speaking' && { color: Colors.purpleL },
+            ]}>
+              {state === 'idle' ? idleMsg : STATUS_TEXT[state]}
+            </Text>
 
-        {state === 'idle' && <Text style={styles.hintText}>tap Homie to speak</Text>}
-        {state === 'speaking' && <Text style={styles.hintText}>tap to stop</Text>}
-        {state === 'listening' && <Text style={styles.hintText}>tap to stop listening</Text>}
+            {state === 'idle' && <Text style={styles.hintText}>tap Homie to speak</Text>}
+            {state === 'speaking' && <Text style={styles.hintText}>tap to stop</Text>}
+            {state === 'listening' && <Text style={styles.hintText}>tap to stop listening</Text>}
+          </>
+        )}
       </Animated.View>
     </SafeAreaView>
   );
