@@ -42,7 +42,7 @@ export default function EssayScreen() {
         </View>
 
         <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-          <HomieBot mood="thinking" size={80}/>
+          <HomieBot mood="happy" size={80}/>
           <Text style={styles.sub}>get a full essay draft in seconds — edit it and make it yours</Text>
         </View>
 

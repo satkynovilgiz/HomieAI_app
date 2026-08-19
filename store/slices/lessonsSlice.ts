@@ -16,8 +16,6 @@ const initialUnits: UnitProgress[] = [
     { id:'l1', completed:true, stars:3, score:100, attempts:1 },
     { id:'l2', completed:true, stars:2, score:80, attempts:2 },
     { id:'l3', completed:false, stars:0, score:0, attempts:0 },
-    { id:'l4', completed:false, stars:0, score:0, attempts:0 },
-    { id:'l5', completed:false, stars:0, score:0, attempts:0 },
   ]},
   { unitId:'algebra', unlocked:false, completed:false, lessons:[
     { id:'l6', completed:false, stars:0, score:0, attempts:0 },

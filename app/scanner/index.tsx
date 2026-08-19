@@ -30,7 +30,7 @@ export default function ScannerScreen() {
   const [imgB64, setImgB64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState('');
-  const [mood, setMood] = useState<Mood>('thinking');
+  const [mood, setMood] = useState<Mood>('happy');
 
   const takePhoto = async () => {
     try {

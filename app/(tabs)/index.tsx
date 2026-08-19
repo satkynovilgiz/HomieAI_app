@@ -53,7 +53,7 @@ function getTimeContext(): { greetingKey: TranslationKey; mood: HomieMood } {
   const hour = new Date().getHours();
   if (hour >= 6 && hour < 12) return { greetingKey: 'home_greeting_morning', mood: 'happy' };
   if (hour >= 12 && hour < 18) return { greetingKey: 'home_greeting_afternoon', mood: 'cool' };
-  if (hour >= 18 && hour < 22) return { greetingKey: 'home_greeting_evening', mood: 'thinking' };
+  if (hour >= 18 && hour < 22) return { greetingKey: 'home_greeting_evening', mood: 'happy' };
   return { greetingKey: 'home_greeting_night', mood: 'sleepy' };
 }
 

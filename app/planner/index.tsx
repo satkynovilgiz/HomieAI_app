@@ -154,7 +154,7 @@ export default function PlannerScreen() {
           </View>
 
           <View style={styles.form}>
-            <HomieBot mood="thinking" size={70} />
+            <HomieBot mood="happy" size={70} />
 
             <Text style={styles.label}>What subject?</Text>
             <View style={styles.chipRow}>

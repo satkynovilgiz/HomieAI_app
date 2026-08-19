@@ -18,7 +18,7 @@ const SECTIONS: { titleKey: TranslationKey; items: { labelKey: TranslationKey; d
     titleKey: 'more_study_tools',
     items: [
       { labelKey: 'more_pomodoro', desc: '25 min focus timer', route: '/pomodoro', color: '#ef4444', Icon: TimerIcon },
-      { labelKey: 'more_planner',  desc: 'Weekly schedule',     route: '/planner', color: '#8b5cf6', Icon: CalendarIcon },
+      { labelKey: 'more_planner',  desc: 'Generate a study plan', route: '/planner', color: '#8b5cf6', Icon: CalendarIcon },
       { labelKey: 'more_games',    desc: 'Study games',          route: '/games',   color: '#10b981', Icon: GameIcon },
       { labelKey: 'more_videos',   desc: 'Watch & learn',        route: '/videos',  color: '#f97316', Icon: VideoIcon },
       { labelKey: 'more_scan',     desc: 'Scan homework',        route: '/scanner', color: '#f43f5e', Icon: CameraIcon },
