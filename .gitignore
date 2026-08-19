@@ -7,3 +7,7 @@ expo-env.d.ts
 
 # EAS Update export output (regenerated on every `eas update`)
 dist/
+node_modules
+
+# Local Expo state (machine-specific device history and dev server settings)
+.expo/

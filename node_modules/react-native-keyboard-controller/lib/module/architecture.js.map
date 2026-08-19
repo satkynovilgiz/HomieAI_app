@@ -1,1 +1,0 @@
-{"version":3,"names":["IS_FABRIC","global"],"sources":["architecture.ts"],"sourcesContent":["export const IS_FABRIC = \"nativeFabricUIManager\" in global;\n"],"mappings":"AAAA,OAAO,MAAMA,SAAS,GAAG,uBAAuB,IAAIC,MAAM","ignoreList":[]}
