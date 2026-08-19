@@ -113,9 +113,9 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   voiceBadge: {
-    width: ICON + 18,
-    height: ICON + 18,
-    borderRadius: (ICON + 18) / 2,
+    width: ICON + 8,
+    height: ICON + 8,
+    borderRadius: (ICON + 8) / 2,
     backgroundColor: C.bg,
     borderWidth: 1.5,
     borderColor: C.border,
