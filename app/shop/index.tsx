@@ -52,7 +52,7 @@ export default function ShopScreen() {
         </View>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cats}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cats} contentContainerStyle={styles.catsContent}>
         {CATS.map(c => (
           <TouchableOpacity key={c} onPress={() => setCat(c)} style={[styles.catChip, cat===c && styles.catChipActive]}>
             <Text style={[styles.catText, cat===c && styles.catTextActive]}>{catLabels[c]}</Text>
@@ -87,7 +87,8 @@ const styles = StyleSheet.create({
   heroText: {},
   heroTitle: { fontSize:20, fontWeight:'900', color:Colors.text },
   heroSub: { fontSize:13, color:Colors.muted, marginTop:2 },
-  cats: { paddingHorizontal:16, marginBottom:8 },
+  cats: { flexGrow: 0, flexShrink: 0, height: 44, marginBottom: 8 },
+  catsContent: { paddingHorizontal: 16, alignItems: 'center' },
   catChip: { paddingHorizontal:16, paddingVertical:8, borderRadius:50, backgroundColor:Colors.bg3, borderWidth:1, borderColor:Colors.border, marginRight:8 },
   catChipActive: { backgroundColor:'rgba(59,130,246,0.15)', borderColor:'rgba(59,130,246,0.4)' },
   catText: { fontSize:13, fontWeight:'600', color:Colors.muted },

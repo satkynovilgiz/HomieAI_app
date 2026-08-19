@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Notifications from 'expo-notifications';
-import { useKeepAwake } from 'expo-keep-awake';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import Svg, { Path } from 'react-native-svg';
 import { RootState } from '../../store';
 import {
@@ -100,8 +100,20 @@ function BackArrowIcon() {
   );
 }
 
+const KEEP_AWAKE_TAG = 'homie-focus';
+
 export default function FocusScreen() {
-  useKeepAwake();
+  // Not using the bare useKeepAwake() hook: its web implementation calls
+  // activateKeepAwakeAsync().then(...) with no .catch(), and the browser's
+  // WakeLock API legitimately rejects when the page isn't foregrounded at
+  // that exact instant -- that unhandled rejection crashes this whole
+  // screen. Keep-awake failing isn't critical (worst case the screen just
+  // times out normally), so swallow the error instead of letting it throw.
+  useEffect(() => {
+    activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
+    return () => { deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => {}); };
+  }, []);
+
   const dispatch = useDispatch();
   const focus = useSelector((s: RootState) => s.focus);
   const user = useSelector((s: RootState) => s.user.current);

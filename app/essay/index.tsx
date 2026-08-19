@@ -49,8 +49,8 @@ export default function EssayScreen() {
         <View style={{ padding: 16, gap: 14 }}>
           <View>
             <Text style={styles.label}>Essay Type</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeScroll}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                 {ESSAY_TYPES.map(t => (
                   <TouchableOpacity key={t} onPress={() => setType(t)}
                     style={[styles.chip, type === t && styles.chipActive]}>
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '900', color: Colors.text },
   sub: { fontSize: 13, color: Colors.muted, textAlign: 'center', paddingHorizontal: 30, marginTop: 8 },
   label: { fontSize: 12, fontWeight: '600', color: Colors.text2, marginBottom: 9 },
+  typeScroll: { flexGrow: 0, flexShrink: 0, height: 42 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border },
   chipActive: { backgroundColor: 'rgba(124,58,237,0.2)', borderColor: Colors.purpleL },
   chipText: { fontSize: 12, color: Colors.muted },
