@@ -8,6 +8,8 @@ import store from '../store';
 import { useStreakSync } from '../hooks/useStreakSync';
 import { useHeartsGemsSync } from '../hooks/useHeartsGemsSync';
 import { useUserStatsSync } from '../hooks/useUserStatsSync';
+import { useAchievementsSync } from '../hooks/useAchievementsSync';
+import { useAchievementAutoUnlock } from '../hooks/useAchievementAutoUnlock';
 import { loadSessions, loadChatHistoryFromStorage } from '../store/slices/chatHistorySlice';
 import { setLanguage } from '../store/slices/languageSlice';
 import { setUser, setAuthChecked } from '../store/slices/userSlice';
@@ -26,6 +28,12 @@ function HeartsGemsSync() {
 
 function UserStatsSync() {
   useUserStatsSync();
+  return null;
+}
+
+function AchievementsSync() {
+  useAchievementsSync();
+  useAchievementAutoUnlock();
   return null;
 }
 
@@ -75,6 +83,7 @@ export default function RootLayout() {
         <StreakSync />
         <HeartsGemsSync />
         <UserStatsSync />
+        <AchievementsSync />
         <ChatHistorySync />
         <LanguageSync />
         <StatusBar style="light" backgroundColor="#07070f" />

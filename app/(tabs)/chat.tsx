@@ -22,6 +22,7 @@ import { parseQuiz } from '../../lib/utils';
 import { detectSearchIntent } from '../../lib/searchDetector';
 import { smartSearch, searchWeb, VideoResult, ArticleResult } from '../../lib/searchService';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useAchievements } from '../../hooks/useAchievements';
 import { Colors, Radius } from '../../constants/theme';
 import { responsive } from '../../constants/responsive';
 import { SUBJECTS } from '../../constants/subjects';
@@ -218,6 +219,7 @@ export default function ChatScreen() {
   const user = useSelector((s: RootState) => s.user.current);
   const authChecked = useSelector((s: RootState) => s.user.authChecked);
   const savedItems = useSelector((s: RootState) => s.videos.items);
+  const { tryUnlock } = useAchievements();
   const { chatId: chatIdParam, prefill: prefillParam, subject: prefillSubjectParam } = useLocalSearchParams<{ chatId?: string; prefill?: string; subject?: string }>();
   const [input, setInput] = useState('');
   const [imgB64, setImgB64] = useState<string | null>(null);
@@ -376,6 +378,7 @@ export default function ChatScreen() {
 
     const userMsg = { id: Date.now().toString(), role: 'user' as const, content, timestamp: Date.now() };
     dispatch(addMsg(userMsg));
+    tryUnlock('first_chat');
     dispatch(setLoading(true));
     dispatch(setMood('thinking'));
 
