@@ -211,9 +211,9 @@ export default function VoiceScreen() {
     }
   };
 
-  const getMascotMood = (): 'happy' | 'thinking' | 'cool' => {
+  const getMascotMood = (): 'happy' | 'thinking' | 'celebrating' => {
     if (state === 'thinking') return 'thinking';
-    if (state === 'speaking') return 'cool';
+    if (state === 'speaking') return 'celebrating';
     return 'happy';
   };
 
@@ -259,12 +259,14 @@ export default function VoiceScreen() {
           />
         </TouchableOpacity>
 
-        <View style={styles.waveWrap}>
-          <SoundWave
-            isActive={state === 'speaking' || state === 'listening'}
-            color={state === 'listening' ? Colors.green : Colors.purpleL}
-          />
-        </View>
+        {(state === 'speaking' || state === 'listening') && (
+          <View style={styles.waveWrap}>
+            <SoundWave
+              isActive
+              color={state === 'listening' ? Colors.green : Colors.purpleL}
+            />
+          </View>
+        )}
 
         {homieText ? (
           <View style={styles.homieBubble}>
