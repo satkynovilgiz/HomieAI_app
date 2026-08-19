@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { router, useLocalSearchParams, useFocusEffect, Redirect } from 'expo-router';
@@ -669,7 +669,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Messages */}
         {messages.length === 0 ? (
-          <View style={styles.welcome}>
+          <ScrollView contentContainerStyle={styles.welcome} showsVerticalScrollIndicator={false}>
             <HomieBot mood="happy" size={responsive.mascotSize.md}/>
             <Text style={styles.welcomeTitle}>{t('chat_yo')} {user?.name?.split(' ')[0]}! {t('chat_studying_q')}</Text>
             <Text style={styles.welcomeSub}>{t('chat_welcome_sub')}</Text>
@@ -684,7 +684,7 @@ export default function ChatScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             style={responsive.isTablet ? { width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' } : undefined}
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   subjectChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 50, backgroundColor: Colors.bg3, borderWidth: 1, borderColor: Colors.border },
   subjectChipActive: { backgroundColor: 'rgba(124,58,237,0.2)', borderColor: Colors.purpleL },
   subjectChipText: { fontSize: 12, color: Colors.text },
-  welcome: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
+  welcome: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24, width: '100%', maxWidth: responsive.maxWidth, alignSelf: 'center' },
   welcomeTitle: { fontSize: responsive.fontSize.xl, fontWeight: '800', color: Colors.text, marginTop: 16, textAlign: 'center' },
   welcomeSub: { fontSize: responsive.fontSize.md, color: Colors.muted, marginTop: 6, textAlign: 'center' },
   prompts: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 },
