@@ -46,7 +46,7 @@ export default function ChangeEmailScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.back} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Change Email</Text>
@@ -63,10 +63,12 @@ export default function ChangeEmailScreen() {
         <Input
           label="New Email" placeholder="new@email.com" value={newEmail}
           onChangeText={setNewEmail} keyboardType="email-address" autoCapitalize="none"
+          autoComplete="email" textContentType="emailAddress" spellCheck={false}
         />
         <Input
           label="Confirm Password" placeholder="Enter password to confirm" value={password}
           onChangeText={setPassword} secureTextEntry
+          autoComplete="current-password" textContentType="password" spellCheck={false}
         />
 
         <Button title="Update Email" onPress={save} loading={loading} size="lg" style={styles.submitBtn} />

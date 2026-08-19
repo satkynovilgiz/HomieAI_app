@@ -227,7 +227,7 @@ export default function FocusScreen() {
       <SafeAreaView style={styles.safe}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
               <BackArrowIcon />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Deep Study Mode</Text>

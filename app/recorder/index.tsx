@@ -262,7 +262,7 @@ export default function RecorderScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={goBack} style={styles.backBtn}>
+        <TouchableOpacity onPress={goBack} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Lecture Recorder</Text>

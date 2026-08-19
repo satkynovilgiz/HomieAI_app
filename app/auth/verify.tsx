@@ -165,7 +165,7 @@ export default function VerifyScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
         <BackArrowIcon />
       </TouchableOpacity>
 

@@ -10,7 +10,7 @@ import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import AvatarCircle from '../../components/ui/AvatarCircle';
-import { GoogleIcon } from '../../components/icons';
+import { GoogleIcon, EyeIcon, EyeOffIcon } from '../../components/icons';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GOOGLE_AVAILABLE = isGoogleSignInSupported();
@@ -22,6 +22,8 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [showPass2, setShowPass2] = useState(false);
   const f = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
 
   const googleSignUp = async () => {
@@ -83,7 +85,7 @@ export default function SignupScreen() {
         <View style={styles.card}>
           <TouchableOpacity onPress={googleSignUp} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? '...' : t('signup_google')}</Text>
+            <Text style={styles.googleText}>{googleLoading ? '…' : t('signup_google')}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -96,10 +98,24 @@ export default function SignupScreen() {
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Input label={t('signup_name')} placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)} />
-          <Input label={t('signup_email')} placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none" />
-          <Input label={t('signup_password')} placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry />
-          <Input label={t('signup_confirm')} placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry />
+          <Input label={t('signup_name')} placeholder="Ilgiz" value={form.name} onChangeText={v => f('name', v)}
+            autoComplete="name" textContentType="name" />
+          <Input label={t('signup_email')} placeholder="your@email.com" value={form.email} onChangeText={v => f('email', v)} keyboardType="email-address" autoCapitalize="none"
+            autoComplete="email" textContentType="emailAddress" spellCheck={false} />
+          <Input label={t('signup_password')} placeholder="6+ characters" value={form.pass} onChangeText={v => f('pass', v)} secureTextEntry={!showPass}
+            autoComplete="new-password" textContentType="newPassword" spellCheck={false}
+            rightIcon={
+              <TouchableOpacity onPress={() => setShowPass(v => !v)} hitSlop={10} accessibilityLabel={showPass ? 'Hide password' : 'Show password'} accessibilityRole="button">
+                {showPass ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+              </TouchableOpacity>
+            } />
+          <Input label={t('signup_confirm')} placeholder="same as above" value={form.pass2} onChangeText={v => f('pass2', v)} secureTextEntry={!showPass2}
+            autoComplete="new-password" textContentType="newPassword" spellCheck={false}
+            rightIcon={
+              <TouchableOpacity onPress={() => setShowPass2(v => !v)} hitSlop={10} accessibilityLabel={showPass2 ? 'Hide password' : 'Show password'} accessibilityRole="button">
+                {showPass2 ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+              </TouchableOpacity>
+            } />
 
           <View style={styles.avatarPreview}>
             <AvatarCircle name={form.name || '?'} color={avatarColor} size={90} />

@@ -42,7 +42,7 @@ export default function ConversationScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.back} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <AvatarCircle name={conv.friendName} size={34} />

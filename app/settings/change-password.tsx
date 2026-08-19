@@ -57,7 +57,7 @@ export default function ChangePasswordScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.back} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Change Password</Text>
@@ -69,8 +69,9 @@ export default function ChangePasswordScreen() {
         <Input
           label="Current Password" placeholder="••••••••" value={currentPw}
           onChangeText={setCurrentPw} secureTextEntry={!showCurrent}
+          autoComplete="current-password" textContentType="password" spellCheck={false}
           rightIcon={
-            <TouchableOpacity onPress={() => setShowCurrent(v => !v)} hitSlop={10}>
+            <TouchableOpacity onPress={() => setShowCurrent(v => !v)} hitSlop={10} accessibilityLabel={showCurrent ? 'Hide password' : 'Show password'} accessibilityRole="button">
               {showCurrent ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
             </TouchableOpacity>
           }
@@ -79,8 +80,9 @@ export default function ChangePasswordScreen() {
         <Input
           label="New Password" placeholder="••••••••" value={newPw}
           onChangeText={setNewPw} secureTextEntry={!showNew}
+          autoComplete="new-password" textContentType="newPassword" spellCheck={false}
           rightIcon={
-            <TouchableOpacity onPress={() => setShowNew(v => !v)} hitSlop={10}>
+            <TouchableOpacity onPress={() => setShowNew(v => !v)} hitSlop={10} accessibilityLabel={showNew ? 'Hide password' : 'Show password'} accessibilityRole="button">
               {showNew ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
             </TouchableOpacity>
           }
@@ -97,8 +99,9 @@ export default function ChangePasswordScreen() {
         <Input
           label="Confirm New Password" placeholder="••••••••" value={confirmPw}
           onChangeText={setConfirmPw} secureTextEntry={!showConfirm}
+          autoComplete="new-password" textContentType="newPassword" spellCheck={false}
           rightIcon={
-            <TouchableOpacity onPress={() => setShowConfirm(v => !v)} hitSlop={10}>
+            <TouchableOpacity onPress={() => setShowConfirm(v => !v)} hitSlop={10} accessibilityLabel={showConfirm ? 'Hide password' : 'Show password'} accessibilityRole="button">
               {showConfirm ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
             </TouchableOpacity>
           }

@@ -632,7 +632,7 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => setShowSidebar(true)} style={styles.iconBtnSm}>
           <MenuIcon color={Colors.muted} size={20} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <HomieBot mood={mood as any} size={32}/>

@@ -9,7 +9,7 @@ import { responsive } from '../../constants/responsive';
 import HomieBot from '../../components/mascot/HomieBot';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import { GoogleIcon } from '../../components/icons';
+import { GoogleIcon, EyeIcon, EyeOffIcon } from '../../components/icons';
 
 const GOOGLE_AVAILABLE = isGoogleSignInSupported();
 
@@ -21,6 +21,7 @@ export default function LoginScreen() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [mood, setMood] = useState<'happy' | 'sad' | 'celebrating'>('happy');
+  const [showPass, setShowPass] = useState(false);
 
   // Welcome screen shows exactly once ever, gated on this flag — not tied to
   // signup specifically, so a returning user's very first successful login
@@ -84,7 +85,7 @@ export default function LoginScreen() {
         <View style={styles.card}>
           <TouchableOpacity onPress={googleSignIn} disabled={googleLoading} style={[styles.googleBtn, !GOOGLE_AVAILABLE && styles.googleBtnDisabled]} activeOpacity={0.85}>
             <GoogleIcon size={20} />
-            <Text style={styles.googleText}>{googleLoading ? '...' : t('login_google')}</Text>
+            <Text style={styles.googleText}>{googleLoading ? '…' : t('login_google')}</Text>
           </TouchableOpacity>
           {!GOOGLE_AVAILABLE && (
             <Text style={styles.googleNote}>needs the full app, not Expo Go — use email for now</Text>
@@ -99,9 +100,16 @@ export default function LoginScreen() {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Input label={t('login_email')} placeholder="your@email.com" value={email}
-            onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"
+            autoComplete="email" textContentType="emailAddress" spellCheck={false} />
           <Input label={t('login_password')} placeholder="your password" value={pass}
-            onChangeText={setPass} secureTextEntry />
+            onChangeText={setPass} secureTextEntry={!showPass}
+            autoComplete="current-password" textContentType="password" spellCheck={false}
+            rightIcon={
+              <TouchableOpacity onPress={() => setShowPass(v => !v)} hitSlop={10} accessibilityLabel={showPass ? 'Hide password' : 'Show password'} accessibilityRole="button">
+                {showPass ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+              </TouchableOpacity>
+            } />
 
           <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/auth/forgot')}>
             <Text style={styles.forgotText}>Forgot password?</Text>

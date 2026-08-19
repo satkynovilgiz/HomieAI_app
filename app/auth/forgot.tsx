@@ -52,7 +52,7 @@ export default function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
           <BackArrowIcon />
         </TouchableOpacity>
 
@@ -90,6 +90,7 @@ export default function ForgotPasswordScreen() {
               <Input
                 label="Email" placeholder="your@email.com" value={email}
                 onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"
+                autoComplete="email" textContentType="emailAddress" spellCheck={false}
               />
               <Button title="Send Reset Code" onPress={send} loading={loading} size="lg" style={styles.submitBtn} />
               <TouchableOpacity style={styles.backLink} onPress={() => router.back()}>
