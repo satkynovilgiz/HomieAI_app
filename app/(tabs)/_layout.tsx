@@ -76,7 +76,7 @@ function ProfileIcon({ color }: { color: string }) {
 function VoiceTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={[styles.voiceBadge, focused && styles.voiceBadgeActive]}>
-      <VoiceIcon color={focused ? '#ffffff' : C.purpleL} />
+      <VoiceIcon color={focused ? '#ffffff' : C.muted} />
     </View>
   );
 }
