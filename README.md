@@ -253,4 +253,4 @@ eas build --platform android
 
 ## Built by
 
-**Ilgiz Satkynov** — 18 y/o · De Anza College, Silicon Valley · SWE Intern @ 
+**Ilgiz Satkynov** — 18 y/o · De Anza College, Silicon Valley 
