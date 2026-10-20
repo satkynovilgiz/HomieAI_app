@@ -251,4 +251,4 @@ eas build --platform android
 
 ---
 
-## Built by
+## Built
