@@ -248,7 +248,3 @@ eas build --platform ios
 # Android (requires Google Play account - $25 one-time)
 eas build --platform android
 ```
-
----
-
-## Built
