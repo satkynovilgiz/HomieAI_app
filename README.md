@@ -252,5 +252,3 @@ eas build --platform android
 ---
 
 ## Built by
-
-**Ilgiz Satkynov** 
