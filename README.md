@@ -1,6 +1,6 @@
 # Homie — AI Study Buddy
 
-Free AI study
+Free AI 
 ---
 
 ## Stack
