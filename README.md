@@ -1,7 +1,6 @@
 # Homie — AI Study Buddy
 
-Free AI study app built with Expo React Native. Chat with an AI tutor, take structured lessons, earn XP, maintain streaks, and challenge friends.
-
+Free AI study app built with Expo React Native. Chat with an AI tutor, take structured lessons, earn XP.
 ---
 
 ## Stack
