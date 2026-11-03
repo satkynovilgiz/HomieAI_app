@@ -1,6 +1,6 @@
 # Homie — AI Study Buddy
 
-Free AI study app built with 
+Free AI study
 ---
 
 ## Stack
