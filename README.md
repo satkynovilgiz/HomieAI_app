@@ -1,4 +1,4 @@
-# Homie — AI Study Buddy
+# Homie — AI Study Buddy!
 
 ---
 
